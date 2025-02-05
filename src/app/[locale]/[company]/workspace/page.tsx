@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/database/supabase";
 import { createClient } from '@supabase/supabase-js'
 
 export default async function WorkspacePage({ params: { company } }: { params: { company: string } }) {

@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/database/supabase";
 export default function FormPage({ params: { company } }: { params: { company: string } }) {
     async function action(data: FormData) {
         "use server";
