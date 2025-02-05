@@ -18,7 +18,7 @@ export const authOptions:AuthOptions = {
                     throw new Error("invalid credentials")
                 }
 
-                const { data: user , error} = await supabase.from("dashboard_users")
+                const { data: user , error} = await supabase.from("users")
                 .select("*")
                 .eq("email", credentials.email)
                 .single() 
@@ -56,7 +56,7 @@ export const authOptions:AuthOptions = {
     callbacks:{
         async session({session, token}){
             session.user.id = token.sub as string
-            session.user.role = token.role as 'admin' | 'manager' | 'support'
+            session.user.role = ""
             session.user.email = token.email as string
             session.user.name = token.name as string
 
@@ -67,12 +67,11 @@ export const authOptions:AuthOptions = {
                     id: session.user.id,
                     name: session.user.name,
                     email: session.user.email,
-                    role: session.user.role
                 },
                 exp: Math.floor(Date.now() / 1000) + (60 * 60 * 10),
             }
 
-            session.user.supabase_token = jwt.sign(supabaseTokenPayload, process.env.SERVICE_PASSWORD_JWT!)
+            session.user.supabase_token = jwt.sign(supabaseTokenPayload, process.env.SUPABASE_JWT_SECRET!)
 
             return session
         },
@@ -81,22 +80,21 @@ export const authOptions:AuthOptions = {
                 throw new Error("invalid token")
             }
 
-            const {data: user, error} = await supabase.from("dashboard_users")
+            const {data: user, error} = await supabase.from("users")
             .select("*")
             .eq("id", token.sub)
             .single() as { data: dbDashboardUserType, error: any }
-
+            
             if(error){
                 console.log(error)
                 throw new Error(error.message)
             }
 
-            if(!user || !user.username || !user.role || !user.email){
+            if(!user || !user.first_name || !user.email || !user.last_name){
                 throw new Error("invalid user")
             }
 
-            token.name = user.username
-            token.role = user.role
+            token.name = user.first_name + " " + user.last_name
             token.email = user.email
 
             return token

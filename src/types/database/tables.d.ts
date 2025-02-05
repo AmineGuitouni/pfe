@@ -1,8 +1,8 @@
 declare type dbDashboardUserType = {
     id: string | undefined;
-    username: string | undefined;
+    first_name: string | undefined;
+    last_name: string | undefined;
     password_hash: string | undefined;
-    role: 'admin' | 'manager' | 'support';
     email: string | undefined;
     created_at: string | undefined;
   };

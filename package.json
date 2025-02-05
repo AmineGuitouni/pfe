@@ -11,8 +11,8 @@
   "dependencies": {
     "@heroui/react": "^2.6.14",
     "@supabase/supabase-js": "^2.48.1",
-    "framer-motion": "^12.2.0",
     "bcrypt": "^5.1.1",
+    "framer-motion": "^12.2.0",
     "i18next": "^24.2.1",
     "i18next-resources-to-backend": "^1.2.1",
     "jsonwebtoken": "^9.0.2",

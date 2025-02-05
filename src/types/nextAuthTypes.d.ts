@@ -4,7 +4,11 @@ declare module "next-auth" {
   interface Session {
     user: {
       id: string
-      role: 'admin' | 'manager' | 'support'
+      role: string
+      firstName: string
+      lastName: string
+      company: string
+      email: string
       supabase_token: string
     } & DefaultSession["user"]
   }
