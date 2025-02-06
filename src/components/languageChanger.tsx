@@ -4,7 +4,11 @@ import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import i18nConfig from '../../i18config';
+import { Select, SelectItem } from '@heroui/react';
 
+const languages = [
+  "en","fr","ar","de"
+]
 export default function LanguageChanger() {
   const { i18n } = useTranslation();
   const currentLocale = i18n.language;
@@ -35,11 +39,20 @@ export default function LanguageChanger() {
   };
 
   return (
-    <select onChange={(e)=>handleChange(e.target.value)} value={currentLocale}>
-      <option value="en">English</option>
-      <option value="ar">Arabic</option>
-      <option value="fr">French</option>
-      <option value="de">German</option>
-    </select>
-  );
+      <Select
+      onSelectionChange={(e)=>handleChange(Array.from(e)[0] as string)}
+      selectionMode='single'
+      variant='bordered'
+      value={currentLocale}
+      classNames={{
+        base : "w-[70px] dark",
+        trigger:"border-light_blue-500 shadow-none text-logo_color",
+        value :"text-light_blue-500",
+        selectorIcon:"text-light_blue-500 text-md"
+      }}
+      defaultSelectedKeys={[currentLocale]}
+    >
+      {languages.map((lan)=> (<SelectItem key={lan} >{lan.toUpperCase()}</SelectItem>))}
+    </Select>
+    );
 }

@@ -1,5 +1,7 @@
 import TranslationsProvider from "@/providers/translationProvider";
 import initTranslations from '../i18n';
+import Nav from "@/components/navbar/navbar";
+import Footer from "@/components/footer";
 
 const i18nNamespaces = ['page'];
 
@@ -18,11 +20,13 @@ export default async function RootLayout({
                 namespaces={i18nNamespaces}
                 locale={locale}
                 resources={resources}>
-                <div 
-                    // className='max-w-[1920px] mx-auto sm:px-[20px] lg:px-[100px]  '
+                <main
+                  className='bg-dark_blue flex flex-col justify-center items-center'
                 >
+                <Nav/>
                 {children}
-                </div>
+                <Footer/>
+                </main>
             </TranslationsProvider>
 
     );

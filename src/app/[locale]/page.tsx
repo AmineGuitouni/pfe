@@ -1,23 +1,15 @@
-import initTranslations from '../i18n';
-import ExampleClientComponent from '@/components/clientComponent';
-import LanguageChanger from '@/components/languageChanger';
-import TranslationsProvider from '@/providers/translationProvider';
+import Background from "@/components/homePage/background";
+import Section1 from "@/components/homePage/section1";
+import Section2 from "@/components/homePage/section2";
 
-const i18nNamespaces = ['page'];
-
-export default async function Home({ params: { locale } } : {params: {locale: string}}) {
-  const { t, resources } = await initTranslations(locale, i18nNamespaces);
+export default async function Home() {
 
   return (
-    <TranslationsProvider
-      namespaces={i18nNamespaces}
-      locale={locale}
-      resources={resources}>
-      <main>
-        <h1>{t('header')}</h1>
-        <ExampleClientComponent />
-        <LanguageChanger />
-      </main>
-    </TranslationsProvider>
+    <div className='h-full flex flex-col items-center '>
+      <div className="w-[800px] h-[800px]  fixed -translate-y-[100px] blur-3xl bg-light_blue-500/10 rounded-full"></div>
+      <Background/>
+      <Section1/>
+      <Section2/>
+    </div>
   );
 }

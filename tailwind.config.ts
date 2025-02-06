@@ -11,11 +11,9 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        "blue_pfe":"#22577a",
-        "dark_grey":"#27292f",
-        "light_grey":"#8e92a2",
-        "white_pfe":"#f6fafc"
-
+        "dark_blue":"#081e25",
+        "light_blue":"#8ab0e0",
+        "light_blue-500":"#7dd5de",
       }
     },
   },
