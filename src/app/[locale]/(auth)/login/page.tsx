@@ -1,5 +1,5 @@
-import LoginCart from "@/components/login/loginCart";
-import LoginForm from "@/components/login/loginFormAdmin";
+import LoginCart from "@/components/auth/login/loginCart";
+import LoginForm from "@/components/auth/login/loginFormAdmin";
 import { authOptions } from "@/lib/auth/authOptions";
 import { getServerSession } from "next-auth";
 
