@@ -1,7 +1,11 @@
 import LoginCart from "@/components/login/loginCart";
-import LoginForm from "@/components/login/loginForm";
+import LoginForm from "@/components/login/loginFormAdmin";
+import { authOptions } from "@/lib/auth/authOptions";
+import { getServerSession } from "next-auth";
 
 export default async function page(){
+    const session = await getServerSession(authOptions);
+    console.log("session", session)
     return (
         <div className="w-full h-screen p-10  bg-dark_grey flex justify-between">
             <div className="w-[40%] h-full flex flex-col pl-5">

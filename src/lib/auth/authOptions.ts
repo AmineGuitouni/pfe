@@ -2,8 +2,8 @@ import {AuthOptions} from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 
 import bcrypt from "bcrypt";
-import { supabase  } from "./database/supabase";
 import jwt from 'jsonwebtoken'
+import { getUser } from "./helper";
 
 export const authOptions:AuthOptions = {
     providers:[
@@ -11,22 +11,15 @@ export const authOptions:AuthOptions = {
             name: "Credentials",
             credentials: {
                 email: { label: "email", type: "text"},
-                password: { label: "Password", type: "password" }
+                password: { label: "Password", type: "password" },
+                company: {type: "text"}
             },
             async authorize(credentials){
                 if(!credentials?.email || !credentials?.password){
                     throw new Error("invalid credentials")
                 }
 
-                const { data: user , error} = await supabase.from("users")
-                .select("*")
-                .eq("email", credentials.email)
-                .single() 
-                
-                if(error){
-                    console.log(error)
-                    throw new Error(error.message)
-                }
+                const user = await getUser(credentials)
 
                 if(!user || !user.password_hash){
                     throw new Error("invalid credentials")
@@ -56,7 +49,7 @@ export const authOptions:AuthOptions = {
     callbacks:{
         async session({session, token}){
             session.user.id = token.sub as string
-            session.user.role = ""
+            session.user.role = token.role as string
             session.user.email = token.email as string
             session.user.name = token.name as string
 
@@ -67,6 +60,7 @@ export const authOptions:AuthOptions = {
                     id: session.user.id,
                     name: session.user.name,
                     email: session.user.email,
+                    role: session.user.role
                 },
                 exp: Math.floor(Date.now() / 1000) + (60 * 60 * 10),
             }
@@ -75,19 +69,13 @@ export const authOptions:AuthOptions = {
 
             return session
         },
-        async jwt({token}){
+        async jwt({token, user}){
             if(!token.sub){
                 throw new Error("invalid token")
             }
 
-            const {data: user, error} = await supabase.from("users")
-            .select("*")
-            .eq("id", token.sub)
-            .single() as { data: dbDashboardUserType, error: any }
-            
-            if(error){
-                console.log(error)
-                throw new Error(error.message)
+            if(!user){
+                return token
             }
 
             if(!user || !user.first_name || !user.email || !user.last_name){
@@ -96,6 +84,7 @@ export const authOptions:AuthOptions = {
 
             token.name = user.first_name + " " + user.last_name
             token.email = user.email
+            token.role = user.role ? user.role : "owner"
 
             return token
         }

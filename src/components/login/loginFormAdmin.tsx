@@ -3,7 +3,7 @@ import { Button, Input } from "@heroui/react";
 import React, { useState } from "react";
 import { signIn } from "next-auth/react"
 
-export default function LoginForm() {
+export default function LoginFormAdmin() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
