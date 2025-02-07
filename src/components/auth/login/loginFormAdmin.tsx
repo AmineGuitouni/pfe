@@ -5,6 +5,7 @@ import NextLink from "next/link";
 import { signIn } from "next-auth/react"
 import { FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
+import { useRouter } from "next/navigation";
 
 export default function LoginFormAdmin() {
     const [email, setEmail] = useState("");
@@ -13,6 +14,8 @@ export default function LoginFormAdmin() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [isPasswordVisible, setPasswordVisible] = useState(false);
+
+    const router = useRouter();
 
     const submitHandler = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -25,7 +28,7 @@ export default function LoginFormAdmin() {
                 setError(callback.error)
             }
             else{
-                console.log(callback)
+                router.push("/")
             }
         })
         .catch((err) => {
@@ -68,8 +71,8 @@ export default function LoginFormAdmin() {
                 <Divider className="bg-white "/>
             </div>
             <div className="w-full flex items-center  justify-between gap-4">
-            <Button  size="md" isLoading={loading} radius="sm" variant="bordered" isDisabled={loading} className=" border  font-semibold w-full text-default-200 text-medium" startContent={<FcGoogle/>}>Google</Button>
-            <Button size="md" isLoading={loading} radius="sm" variant="bordered" isDisabled={loading} className="border  font-semibold w-full  text-default-200 text-medium" startContent={<FaGithub className="text-black"/>}>Github</Button>
+            <Button  size="md" radius="sm" variant="bordered" isDisabled={loading} className=" border  font-semibold w-full text-default-200 text-medium" startContent={<FcGoogle/>}>Google</Button>
+            <Button size="md" radius="sm" variant="bordered" isDisabled={loading} className="border  font-semibold w-full  text-default-200 text-medium" startContent={<FaGithub className="text-black"/>}>Github</Button>
             </div>
             <div className="w-full flex justify-center items-center gap-2">
                 <p className="text-white text-medium ">Don`t have an account ?</p>
