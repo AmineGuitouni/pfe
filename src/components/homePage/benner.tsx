@@ -13,7 +13,7 @@ const slides = [
   },
   {
     title: "Our Mission",
-    content: "To revolutionize workspaces by integrating smart automation, intelligent analytics, and seamless collaboration tools—empowering teams to achieve more with less effort."
+    content: "To revolutionize workspaces by integrating smart automation, intelligent analytics, and seamless collaboration tools empowering teams to achieve more with less effort."
   }
 ];
 
@@ -61,11 +61,11 @@ const Banner = () => {
                 <div className={cn(
                   "text-4xl sm:text-6xl font-semibold h-[70px] text-center",
                   "bg-gradient-to-r from-light_blue via-light_blue-500 to-white",
-                  "bg-clip-text text-transparent mb-5"
+                  "bg-clip-text text-transparent mb-3 sm:mb-5"
                 )}>
                   {slide.title}
                 </div>
-                <p className="text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-12">
+                <p className="text-sm sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-12">
                   {slide.content}
                 </p>
                 <div className="flex space-x-3 mb-8">
@@ -86,7 +86,7 @@ const Banner = () => {
           </div>
 
           {/* Navigation Arrows */}
-          <div className="absolute left-0 z-20 right-0 top-1/2 -translate-y-1/2 flex justify-between items-center px-4">
+          <div className="absolute left-0 z-20 right-0 top-1/2 -translate-y-1/2 hidden md:flex justify-between items-center px-4">
             <Button
               onPress={prevSlide}
               isIconOnly
@@ -105,11 +105,7 @@ const Banner = () => {
             </Button>
           </div>
 
-          {/* Decorative Elements */}
-          <div className="absolute z-10 top-0 left-0 w-full h-full">
-            <div className="absolute top-0 left-0 w-32 h-32 blur-3xl bg-light_blue-500/10 rounded-full -translate-x-1/2 -translate-y-1/2" />
-            <div className="absolute bottom-0 right-0 w-48 h-48 blur-3xl bg-light_blue-500/10 rounded-full translate-x-1/2 translate-y-1/2" />
-          </div>
+          
         </div>
       </div>
     </div>

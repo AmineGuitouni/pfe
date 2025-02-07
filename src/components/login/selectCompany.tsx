@@ -7,13 +7,13 @@ export default function SelectCompany({onSelectionChange}:{onSelectionChange?:(v
 
   return (
     <Autocomplete
-      className="max-w-xs"
+      className="mw-full"
       inputValue={filter}
       isLoading={loading}
       items={companys}
-      label="Select a character"
+      size="sm"
+      label="Select a company"
       placeholder="Type to search..."
-      variant="bordered"
       onInputChange={setFilter}
       onSelectionChange={(value) => onSelectionChange?.(value as string | null)}
     >

@@ -2,7 +2,7 @@
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, User } from "@heroui/react";
 import { HiOutlineLogout } from "react-icons/hi";
 import { IoMdSettings } from "react-icons/io";
-import { LuShoppingCart, LuUser } from "react-icons/lu";
+import {  LuUser } from "react-icons/lu";
 import { VscFeedback } from "react-icons/vsc";
 
 export default function DropDownMenu(){
@@ -15,7 +15,7 @@ export default function DropDownMenu(){
                 isBordered: true,
                 src: "https://i.pravatar.cc/150?u=a042581f4e29026024d",
                 }}
-                className="transition-transform text-logo_color font-semibold"
+                className="transition-transform text-light_blue-500 font-semibold"
                 description="@tonyreichert"
                 name="Tony Reichert"
                 classNames={
@@ -29,15 +29,12 @@ export default function DropDownMenu(){
             <DropdownMenu aria-label="User Actions" variant="flat">
             <DropdownItem key="profile" className="h-14 gap-2">
                 <p className="font-bold">Signed in as</p>
-                <p className="font-bold text-logo_color">@tonyreichert</p>
+                <p className="font-bold text-light_blue-500">@tonyreichert</p>
             </DropdownItem>
-            <DropdownItem key="account" startContent={<LuUser size={23}   />} className="text-xl gap-2 items-center hover:text-logo_color transition-all ease-linear">
+            <DropdownItem key="account" startContent={<LuUser size={23}   />} className="text-xl gap-2 items-center hover:text-light_blue-500 transition-all ease-linear">
                     Account
             </DropdownItem>
-            <DropdownItem key="cart" startContent={<LuShoppingCart size={23}  />} className="text-xl gap-2 items-center hover:text-logo_color transition-all ease-linear ">
-                    Cart
-            </DropdownItem>
-            <DropdownItem key="settings" startContent={<IoMdSettings size={23}  />} className="text-xl gap-2 items-center hover:text-logo_color transition-all ease-linear">
+            <DropdownItem key="settings" startContent={<IoMdSettings size={23}  />} className="text-xl gap-2 items-center hover:text-light_blue-500 transition-all ease-linear">
                     Settings
             </DropdownItem>
             <DropdownItem startContent={<VscFeedback size={23}  />} key="help_and_feedback">Help & Feedback</DropdownItem>

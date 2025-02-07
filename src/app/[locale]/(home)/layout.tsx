@@ -1,5 +1,5 @@
 import TranslationsProvider from "@/providers/translationProvider";
-import initTranslations from '../i18n';
+import initTranslations from '../../i18n';
 import Nav from "@/components/navbar/navbar";
 import Footer from "@/components/footer";
 
@@ -21,7 +21,7 @@ export default async function RootLayout({
                 locale={locale}
                 resources={resources}>
                 <main
-                  className='bg-dark_blue flex flex-col justify-center items-center'
+                  className='bg-dark_blue flex flex-col justify-center items-center overflow-x-hidden'
                 >
                 <Nav/>
                 {children}

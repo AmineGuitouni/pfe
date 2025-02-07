@@ -2,3 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+    .shaded-edges{
+      mask: linear-gradient(90deg,transparent,white 20%,white 80%,transparent);
+    }
+  }

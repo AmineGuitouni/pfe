@@ -13,16 +13,16 @@ export default function Section1() {
 
         <div className="flex flex-col gap-2 ">
           <h1 className="text-white text-4xl sm:text-6xl   text-center ">Revolutionize your</h1>
-          <div className="text-4xl sm:text-6xl font-semibold h-[70px] text-center bg-gradient-to-r from-light_blue via-light_blue-500 to-white bg-clip-text text-transparent">
+          <div className="text-4xl sm:text-6xl font-semibold h-[45px] sm:h-[70px] text-center bg-gradient-to-r from-light_blue via-light_blue-500 to-white bg-clip-text text-transparent">
             Workplace
           </div>
         </div>
 
-        <p className="text-white/70 sm:text-lg text-medium w-[40%] text-center">Experience the future of work with our revolutionary AI-driven platform that adapts to your team`s unique dynamics.</p>
+        <p className="text-white/70 sm:text-lg text-medium w-[70%] sm:w-[40%] text-center">Experience the future of work with our revolutionary AI-driven platform that adapts to your team`s unique dynamics.</p>
 
         <div className="flex gap-5 items-center mb-5">
-          <Button size="lg" className="bg-light_blue-500 text-dark_blue py-4 px-8 rounded-xl text-xl font-semibold">Get Started</Button>
-          <Button size="lg" variant="bordered" className="border-light_blue-500/70 text-light_blue-500 py-4 px-8 rounded-xl text-xl font-semibold">See more</Button>
+          <Button size="lg" className="bg-light_blue-500 text-dark_blue py-4 px-8 rounded-xl text-medium sm:text-xl font-semibold">Get Started</Button>
+          <Button size="lg" variant="bordered" className="border-light_blue-500/70 text-light_blue-500 py-4 px-8 rounded-xl text-medium sm:text-xl font-semibold">See more</Button>
         </div>
 
         <HomeCards/>
