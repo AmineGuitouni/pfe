@@ -1,5 +1,5 @@
-import LoginFormAdmin from "@/components/login/loginFormAdmin";
-import LoginFormWorker from "@/components/login/loginFormWorker";
+import LoginFormAdmin from "@/components/auth/login/loginFormAdmin";
+import LoginFormWorker from "@/components/auth/login/loginFormWorker";
 import Link from "next/link";
 // import { authOptions } from "@/lib/auth/authOptions";
 // import { getServerSession } from "next-auth";
