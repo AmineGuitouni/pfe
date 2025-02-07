@@ -20,9 +20,6 @@ export async function middleware(request: NextRequest) {
   const token = await getToken({req: request})
   const path = getPath(request.nextUrl.pathname);
 
-  console.log("middleware token", token)
-
-  console.log("middleware path", request.nextUrl.pathname, path)
   if(!token){
     let isAuthPage = false;
     authPages.forEach((page)=>{

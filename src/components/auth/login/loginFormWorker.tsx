@@ -46,7 +46,7 @@ export default function LoginFormWorker() {
 
     return (
         
-        <form onSubmit={submitHandler} className="w-[500px] max-h-[620px] border-1 p-8 rounded-lg shadow-md  bg-white/10 border-white/20 relative flex flex-col justify-center items-start gap-6">
+        <form onSubmit={submitHandler} className="w-[500px] max-h-[620px] border-1 p-8 px-4 sm:px-8 rounded-lg shadow-md  bg-white/10 border-white/20 relative flex flex-col justify-center items-start gap-6">
             <p className="text-white text-center w-full text-2xl ">Please enter your account details</p>
             <SelectCompany onSelectionChange={(value) =>{
                 if(value) setCompany(value);

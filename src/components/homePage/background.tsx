@@ -1,16 +1,14 @@
 export default function Background(){
-    return(
-        <div className=" fixed inset-0 flex flex-col gap-2 items-center w-full h-full overflow-hidden">
-        {Array.from({ length: 5 }).map((_, rowIndex) => (
-          <div key={rowIndex} className="flex gap-2">
-            {Array.from({ length:10}).map((_, colIndex) => (
-              <div
-                key={colIndex}
-                className="w-[180px] h-[180px] bg-white/5 rounded-xl opacity-30"
-              />
-            ))}
-          </div>
-        ))}
-      </div>
-    )
-}
+  return (
+    <div className="fixed inset-0 grid grid-cols-[repeat(auto-fill,180px)] grid-rows-[repeat(auto-fill,180px)] gap-2 place-content-center overflow-hidden -m-[180px]">
+      {Array.from({ length: 70 }).map((_, rowIndex) => (
+        Array.from({ length: 70 }).map((_, colIndex) => (
+          <div
+            key={`${rowIndex}-${colIndex}`}
+            className="w-[180px] h-[180px] bg-white/5 rounded-xl opacity-30"
+          />
+        ))
+      ))}
+    </div>
+  );
+};
