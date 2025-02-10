@@ -16,7 +16,6 @@ export default async function RootLayout({
   params: {locale: string}
 }>) {
   const session = await getServerSession(authOptions);
-    console.log(session)
 
     const { resources } = await initTranslations(locale, i18nNamespaces);
     return (

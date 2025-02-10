@@ -5,7 +5,7 @@ import NextLink from "next/link";
 import { signIn } from "next-auth/react"
 import { FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LoginFormAdmin() {
     const [email, setEmail] = useState("");
@@ -16,6 +16,9 @@ export default function LoginFormAdmin() {
     const [isPasswordVisible, setPasswordVisible] = useState(false);
 
     const router = useRouter();
+    const searchParams = useSearchParams();
+
+    const redirect = searchParams.get("redirect") || "/";
 
     const submitHandler = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,7 +31,7 @@ export default function LoginFormAdmin() {
                 setError(callback.error)
             }
             else{
-                router.push("/")
+                router.push(redirect)
             }
         })
         .catch((err) => {
