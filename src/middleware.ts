@@ -20,6 +20,8 @@ export async function middleware(request: NextRequest) {
   const token = await getToken({req: request})
   const path = getPath(request.nextUrl.pathname);
 
+  console.log(token);
+
   if(!token){
     let isAuthPage = false;
     authPages.forEach((page)=>{
@@ -37,10 +39,22 @@ export async function middleware(request: NextRequest) {
       })
       
       if(!isPublicPage){
-        return NextResponse.redirect(new URL('/login', request.url));
+        const loginUrl = new URL('/login', request.url);
+        const {search} = new URL(request.url);
+        loginUrl.searchParams.set('redirect', path+search);
+        loginUrl.searchParams.set("role", "admin");
+        return NextResponse.redirect(loginUrl);
       }
     }
   }else{
+    if(!token.email_verified && !path.startsWith("/verify")){
+      return NextResponse.redirect(new URL('/verify', request.url));
+    }
+
+    if(token.email_verified && path.startsWith("/verify")){
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+
     if(authPages.includes(path)){
       return NextResponse.redirect(new URL('/', request.url));
     }

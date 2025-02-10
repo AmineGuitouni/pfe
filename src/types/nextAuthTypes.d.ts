@@ -2,7 +2,16 @@ import {} from "next-auth"
 
 declare module "next-auth" {
   interface Session {
-    user: User
+    user: {
+      id: string
+      role: string
+      name: string
+      company: string
+      email: string
+      supabase_token: string
+      email_verified: boolean
+      image?: string | null
+    }
   }
 
   interface User {
@@ -12,6 +21,6 @@ declare module "next-auth" {
     last_name: string
     company: string
     email: string
-    supabase_token: string
+    email_verified: boolean
   }
 }
