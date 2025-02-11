@@ -1,6 +1,7 @@
 import { Button } from "@heroui/react";
 import { RiRobot2Fill } from "react-icons/ri";
 import HomeCards from "./homeCards";
+import Link from "next/link";
 
 export default function Section1() { 
     return(
@@ -21,7 +22,7 @@ export default function Section1() {
         <p className="text-white/70 sm:text-lg text-medium w-[70%] sm:w-[40%] text-center">Experience the future of work with our revolutionary AI-driven platform that adapts to your team`s unique dynamics.</p>
 
         <div className="flex gap-5 items-center mb-5">
-          <Button size="lg" className="bg-light_blue-500 text-dark_blue py-4 px-8 rounded-xl text-medium sm:text-xl font-semibold">Get Started</Button>
+          <Button size="lg" as={Link} href="/login?role=admin" className="bg-light_blue-500 text-dark_blue py-4 px-8 rounded-xl text-medium sm:text-xl font-semibold">Get Started</Button>
           <Button size="lg" variant="bordered" className="border-light_blue-500/70 text-light_blue-500 py-4 px-8 rounded-xl text-medium sm:text-xl font-semibold">See more</Button>
         </div>
 

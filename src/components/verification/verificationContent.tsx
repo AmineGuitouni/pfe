@@ -2,10 +2,11 @@ import { authOptions } from "@/lib/auth/authOptions";
 import { getServerSession } from "next-auth";
 import jwt from "jsonwebtoken";
 import { CheckCircle, XCircle } from "lucide-react";
-import { Button, Card, CardBody } from "@heroui/react";
+import { Alert, Card, CardBody } from "@heroui/react";
 import { supabase } from "@/lib/database/supabase";
 import UpdateSession from "./updateSession";
 import ErrorAction from "./content/errorAction";
+import Link from "next/link";
 
 function getErrorMessage(errorType: string | null): string {
   switch (errorType) {
@@ -56,7 +57,7 @@ export default async function VerificationContent({ token }: { token: string | n
     const states = {
       success: {
         icon: <CheckCircle className="w-16 h-16 text-success" />,
-        title: "Email Verified Successfully!",
+        title: "Email Verified Successfully !",
         message: "Your email has been successfully verified. You can now access all features of DigiGrowing.",
         action: (
           <UpdateSession/>
@@ -76,42 +77,33 @@ export default async function VerificationContent({ token }: { token: string | n
   
     return (
       <>
-      <Card>
-        <CardBody className="flex flex-col items-center text-center p-8 space-y-6">
+      <Card className="bg-white/10 border-white/20 border-1 mt-20">
+        <CardBody className="flex flex-col   items-center text-center p-8 space-y-6">
           {currentState.icon}
           
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-2xl text-white font-bold">
             {currentState.title}
           </h1>
           
-          <p className="text-gray-600">
+          <p className="text-white/50">
             {currentState.message}
           </p>
           
           {currentState.action}
   
           {verificationStatus === 'error' && (
-            <Card className="bg-danger-50 border-danger-200 w-full">
-              <CardBody>
-                <p className="text-danger text-sm">
-                  If you continue to have issues, please contact our support team.
-                </p>
-              </CardBody>
-            </Card>
+            <Alert color={"danger"}  title={`If you continue to have issues, please contact our support team.`} />
           )}
   
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-white/50">
             <p>
               Need help?{' '}
-              <Button 
+              <Link
                 href="/contact"
-                as="a"
-                variant="light"
-                color="primary"
-                className="p-0 h-auto font-normal"
+                className="text-sm text-light_blue-500 animate-pulse "
               >
                 Contact Support
-              </Button>
+              </Link>
             </p>
           </div>
         </CardBody>

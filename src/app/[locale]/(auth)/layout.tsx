@@ -11,6 +11,7 @@ export default async function RootLayout({
         <main
           className='max-w-[1920px] w-full min-h-screen mx-auto flex flex-col items-center justify-between'
         >
+            <Background/>
             <div className="w-full h-full bg-dark_grey flex justify-center items-center">
                 <div className="w-[40vw] h-[40vw] max-w-[800px] max-h-[800px] fixed left-1/2 -translate-x-1/2 blur-3xl bg-light_blue-500/10 rounded-full"></div>
                 <div className="w-full h-full flex flex-col gap-8 overflow-x-hidden">

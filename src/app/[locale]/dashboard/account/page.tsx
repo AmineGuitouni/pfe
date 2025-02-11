@@ -1,8 +1,10 @@
+import Companies from "@/components/dashboard/companies/companies";
+
 
 export default function Page() {
     return (
-        <div className="w-full h-full flex justify-start pl-10">
-            <h1 className="text-white">Account</h1>
+        <div className="w-full flex flex-col gap-5 p-10">
+            <Companies/>
         </div>
     );
 }

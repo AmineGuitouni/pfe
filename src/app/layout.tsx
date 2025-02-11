@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-dark_blue min-h-svh`}
+        className={`${geistSans.variable} ${geistMono.variable} font-Helvetica antialiased bg-dark_blue min-h-svh`}
       >
         <Providers>
         <AppSession>

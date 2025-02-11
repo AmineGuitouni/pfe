@@ -39,7 +39,7 @@ export default function ErrorAction(){
         <Button 
             color={error != "" ? "danger" : isSent ? "success" : "primary"}
             size="lg"
-            className="mt-4"
+            className="w-full bg-light_blue-500 text-dark_blue py-4 px-8 rounded-xl font-semibold"
             onPress={sendMail}
             isDisabled={isLoading}
             isLoading={isLoading}

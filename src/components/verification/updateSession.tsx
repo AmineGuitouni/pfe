@@ -34,7 +34,7 @@ export default function UpdateSession() {
             isLoading={isLoading}
             isDisabled={isLoading}
             size="lg"
-            className="mt-4"
+            className="w-full font-semibold text-dark_blue"
             onPress={click}
           >
             Go to Dashboard

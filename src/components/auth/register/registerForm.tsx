@@ -1,8 +1,9 @@
 "use client"
-import { Button, Divider, Input, Link } from "@heroui/react";
+import { Button,Input, Link } from "@heroui/react";
 import React, { useState } from "react";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 // Validation helper functions to match API
 const isValidEmail = (email: string) => {
@@ -241,6 +242,7 @@ export default function RegisterForm() {
                 onValueChange={handleChange('password')}
                 errorMessage={errors.password}
                 isInvalid={!!errors.password}
+                endContent={!isPasswordVisible ? <FaEyeSlash onClick={() => setPasswordVisible(!isPasswordVisible)} size={20} className="mb-1 text-default-500 flex-shrink-0 cursor-pointer" /> : <FaEye onClick={() => setPasswordVisible(!isPasswordVisible)} size={20} className="mb-1 text-default-500 flex-shrink-0 cursor-pointer" />}
             />
 
             <Input
@@ -254,20 +256,6 @@ export default function RegisterForm() {
                 errorMessage={errors.confirmPassword}
                 isInvalid={!!errors.confirmPassword}
             />
-
-            <div className="w-full flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <input
-                        type="checkbox"
-                        id="showPassword"
-                        onChange={(e) => setPasswordVisible(e.target.checked)}
-                    />
-                    <label htmlFor="showPassword" className="text-white text-sm">
-                        Show passwords
-                    </label>
-                </div>
-                <Link href="#" as={NextLink} underline="hover" className="text-white text-medium">Forgot password?</Link>
-            </div>
 
             {errors.submit && (
                 <p className="text-red-500 text-sm text-center w-full">{errors.submit}</p>
@@ -288,13 +276,13 @@ export default function RegisterForm() {
                 Register
             </Button>
 
-            <div className="w-full shaded-edges overflow-hidden flex justify-center items-center">
+            {/* <div className="w-full shaded-edges overflow-hidden flex justify-center items-center">
                 <Divider className="bg-white"/>
                 <p className="text-white text-medium mx-2">or</p>
                 <Divider className="bg-white"/>
-            </div>
+            </div> */}
 
-            <div className="w-full flex items-center justify-between gap-4">
+            {/* <div className="w-full flex items-center justify-between gap-4">
                 <Button 
                     size="md" 
                     radius="sm" 
@@ -313,11 +301,11 @@ export default function RegisterForm() {
                 >
                     Github
                 </Button>
-            </div>
+            </div> */}
 
             <div className="w-full flex justify-center items-center gap-2">
                 <p className="text-white text-medium">Already have an account?</p>
-                <Link href="#" as={NextLink} underline="hover" className="text-light_blue-500 animate-pulse text-medium">Sign in</Link>
+                <Link href="/Login" as={NextLink} underline="hover" className="text-light_blue-500 animate-pulse text-medium">Sign in</Link>
             </div>
         </form>
     );

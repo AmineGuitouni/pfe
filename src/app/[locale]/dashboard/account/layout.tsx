@@ -1,4 +1,5 @@
 import Header from "@/components/dashboard/header";
+import CompanyProvider from "@/components/dashboard/companies/useCompanies";
 import SideBar from "@/components/dashboard/sideBar";
 
 export default async function RootLayout({
@@ -12,9 +13,12 @@ export default async function RootLayout({
                   className='max-w-[1920px] h-screen max-h-[1000px] mx-auto flex '
                 >
                     <SideBar/>
-                    <div className="flex-grow flex flex-col gap-10">
+                    <div className="flex-grow flex flex-col ">
+                      <div className="w-[700px] h-[700px]  fixed left-[40%] translate-y-[20%]  blur-3xl bg-light_blue-500/5 rounded-full"></div>
                         <Header/>
-                        {children}
+                        <CompanyProvider>
+                          {children}
+                        </CompanyProvider>
                     </div>
                 </main>
     );

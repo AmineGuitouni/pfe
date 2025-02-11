@@ -17,8 +17,8 @@ export default function SideBar() {
                 <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">Security</Link>
                 <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">Audit Logs</Link>
             </div>
-            <div className="w-full h-[50px] text-white hover:text-danger-500 gap-2 transition-all ease-linear cursor-pointer border-b-1 border-b-white/20 flex items-center   px-5">
-                <LuLogOut />
+            <div className="w-full h-[50px] text-white group hover:text-danger-500 gap-2 transition-all ease-linear cursor-pointer border-b-1 border-b-white/20 flex items-center   px-5">
+                <LuLogOut  />
                 <h1 className="text-md">Log out</h1>
             </div>
         </div>

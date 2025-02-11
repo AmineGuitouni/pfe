@@ -1,10 +1,10 @@
 "use client"
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, User } from "@heroui/react";
 import { signOut, useSession } from "next-auth/react";
+import Link from "next/link";
 import { HiOutlineLogout } from "react-icons/hi";
 import { IoMdSettings } from "react-icons/io";
 import {  LuUser } from "react-icons/lu";
-import { VscFeedback } from "react-icons/vsc";
 
 export default function DropDownMenu(){
     const {data:session} = useSession();
@@ -38,13 +38,12 @@ export default function DropDownMenu(){
                 <p className="font-bold">Signed in as</p>
                 <p className="font-bold text-light_blue-500">{session.user.email}</p>
             </DropdownItem>
-            <DropdownItem key="account" startContent={<LuUser size={23}   />} className="text-xl gap-2 items-center hover:text-light_blue-500 transition-all ease-linear">
+            <DropdownItem key="account" as={Link} href="/dashboard/account" startContent={<LuUser size={23}   />} className="text-xl gap-2 items-center hover:text-light_blue-500 transition-all ease-linear">
                     Account
             </DropdownItem>
             <DropdownItem key="settings" startContent={<IoMdSettings size={23}  />} className="text-xl gap-2 items-center hover:text-light_blue-500 transition-all ease-linear">
                     Settings
             </DropdownItem>
-            <DropdownItem startContent={<VscFeedback size={23}  />} key="help_and_feedback">Help & Feedback</DropdownItem>
             <DropdownItem onPress={()=>signOut()} startContent={<HiOutlineLogout size={23}  />} key="logout" color="danger">
                 Log Out
             </DropdownItem>

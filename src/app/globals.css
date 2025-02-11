@@ -7,3 +7,9 @@
       mask: linear-gradient(90deg,transparent,white 20%,white 80%,transparent);
     }
   }
+  @font-face {
+    font-family: 'Helvetica';
+    src: url('/fonts/Helvetica.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+  }

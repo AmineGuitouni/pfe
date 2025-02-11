@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 import {heroui} from "@heroui/react";
+import { fontFamily } from 'tailwindcss/defaultTheme';
 
 const config: Config = {
   content: [
@@ -14,7 +15,11 @@ const config: Config = {
         "dark_blue":"#081e25",
         "light_blue":"#8ab0e0",
         "light_blue-500":"#7dd5de",
-      }
+        "modal_bg":"#212c30",
+      },
+      fontFamily: {
+        sans: ['Helvetica', ...fontFamily.sans], 
+      },
     },
   },
   darkMode: "class",

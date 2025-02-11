@@ -11,7 +11,7 @@ function getPath(path: string) {
   if(list.length > 1 && i18nConfig.locales.includes(list[1])){
     list = [list[0], ...list.slice(2)];
   }
-
+  if(list.length === 1) return "/";
   return list.join("/")
 }
 
