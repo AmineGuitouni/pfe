@@ -52,7 +52,10 @@ export const authOptions:AuthOptions = {
             session.user.role = token.role as string
             session.user.email = token.email as string
             session.user.name = token.name as string
+            session.user.first_name = token.first_name as string
+            session.user.last_name = token.last_name as string
             session.user.email_verified = token.email_verified as boolean
+            session.user.country = token.country as string
 
             const supabaseTokenPayload = {
                 sub: session.user.id,
@@ -89,9 +92,12 @@ export const authOptions:AuthOptions = {
             }
 
             token.name = user.first_name + " " + user.last_name
+            token.first_name = user.first_name
+            token.last_name = user.last_name
             token.email = user.email
             token.role = user.role ? user.role : "owner"
             token.email_verified = user.email_verified
+            token.country = user.country
 
             return token
         }

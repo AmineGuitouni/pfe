@@ -6,11 +6,14 @@ declare module "next-auth" {
       id: string
       role: string
       name: string
+      first_name: string
+      last_name: string
       company: string
       email: string
       supabase_token: string
       email_verified: boolean
       image?: string | null
+      country: string
     }
   }
 
@@ -20,6 +23,7 @@ declare module "next-auth" {
     first_name: string
     last_name: string
     company: string
+    country: string
     email: string
     email_verified: boolean
   }

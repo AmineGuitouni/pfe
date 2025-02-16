@@ -30,7 +30,8 @@ export default function LoginFormAdmin() {
                 if (callback?.error) {
                     setError(true); 
                 } else {
-                    router.push(redirect); 
+                    router.push(redirect);
+                    router.refresh();
                 }
             })
             .catch((err) => {
