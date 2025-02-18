@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 export async function GET() {
 
     const {data, error} = await supabase.from("company")
-    .select("id,name")
+    .select("id,name,created_at")
 
 
     if(error){
@@ -21,7 +21,7 @@ export async function POST(req:Request) {
     const {name, user_id}= await req.json();
     console.log(name,user_id);
     const {data, error} = await supabase.from("company")
-    .insert({name, user_id})
+    .insert({name, user_id })
     .select("id")
     .single()
 

@@ -1,14 +1,15 @@
 import React from 'react';
 import { Card, CardBody } from "@heroui/react";
-import { ChevronRight, Database } from 'lucide-react';
+import {  Database } from 'lucide-react';
 import Link from 'next/link';
 import { Database as DatabaseType } from '@/app/api/v1/[user_id]/databases/list/route';
+import { IoIosArrowForward } from 'react-icons/io';
 
 export default function DatabaseCard({ database }: { database: DatabaseType }) {
   return (
     <Link href={`/dashboard/account/databases/${database.id}`} className="block">
       <Card 
-        className="w-96 h-48 bg-[#081e25] hover:bg-[#212c30] transition-colors duration-200 group border border-white/10"
+        className="w-96 h-48 bg-white/5 hover:bg-white/10 rounded-lg transition-colors duration-200 group border border-white/20"
         isPressable
       >
         <CardBody className="p-6 flex flex-col justify-between overflow-hidden">
@@ -21,9 +22,7 @@ export default function DatabaseCard({ database }: { database: DatabaseType }) {
                   {database.name}
                 </h2>
               </div>
-              <ChevronRight 
-                className="w-5 h-5 text-white/50 group-hover:text-[#7dd5de] transition-all duration-200 group-hover:translate-x-1"
-              />
+              <IoIosArrowForward size={22} className="text-white/50 group-hover:text-light_blue-500 group-hover:translate-x-1 transition-all ease-linear"/>
             </div>
           </div>
 

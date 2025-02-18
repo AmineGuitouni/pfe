@@ -14,7 +14,7 @@ export default function PreferencesPage() {
                     <AccountInformation className="p-4 w-full"/>
                 </section>
 
-                <section className="border-1 border-white/20 rounded-lg bg-white/10 mb-8">
+                <section className="border-1 border-white/20 rounded-lg bg-white/5 mb-8">
                     <h2 className="text-white text-xl mx-4 my-2">Profile Information</h2>
                     <hr className="w-full border-white/20"/>
                     <ProfileInformation className="p-4 w-full"/>

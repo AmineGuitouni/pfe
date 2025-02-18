@@ -32,12 +32,12 @@ export default function DataBases() {
             </div>
 
             {isLoading ? (
-                <Spinner className="mx-auto" color="primary" />
+                <Spinner className=" absolute top-[50%] left-[57%]" color="default" />
             ) : error ? (
                 <Alert variant="flat" color="danger" title="Error loading databases">
                     {error}
                 </Alert>
-            ) : filteredDatabases.length === 0 ? (
+            ) : !databases ? (
                 <div className="text-white/50 text-center py-10">
                     No databases found. Create your first database connection.
                 </div>

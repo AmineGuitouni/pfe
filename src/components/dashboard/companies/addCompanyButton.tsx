@@ -93,7 +93,13 @@ export default function AddCompanyButton() {
             <Modal 
                 isOpen={isOpen} 
                 radius="sm" 
-                className="bg-modal_bg dark border-1 border-white/20 text-white" 
+                classNames={{
+                    base: "bg-modal_bg border rounded-lg border-white/20",
+                    header: "text-light_blue-500 border-b border-white/20",
+                    body: "pt-6",
+                    // footer: "border-t border-white/10",
+                    closeButton: "text-white/60 hover:text-white/80"
+                  }} 
                 onOpenChange={onOpenChange}
             >
                 <ModalContent>
@@ -117,22 +123,22 @@ export default function AddCompanyButton() {
                             />
                         </ModalBody>
                         <ModalFooter>
-                            <Button 
-                                color="danger" 
-                                variant="light" 
+                            <Button
+                                variant="light"
                                 onPress={() => {
                                     setError('');
                                     setName('');
                                     onClose();
                                 }}
+                                className="text-white/60 dark hover:text-white hover:bg-white/10"
                             >
-                                Close
+                                Cancel
                             </Button>
                             <Button 
                                 isLoading={loading}
                                 isDisabled={loading}
                                 type="submit" 
-                                className="bg-light_blue-500 text-dark_blue"
+                                className="bg-light_blue-500 text-dark_blue hover:bg-light_blue"
                             >
                                 Add
                             </Button>

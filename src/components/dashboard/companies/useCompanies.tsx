@@ -2,6 +2,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 export type Company = {
+    created_at: any;
     id: string,
     name: string
 };

@@ -89,10 +89,10 @@ export default function AddDatabaseButton() {
         onOpenChange={onOpenChange}
         className="dark"
         classNames={{
-          base: "bg-[#212c30] border border-white/10",
+          base: "bg-[#212c30] border rounded-lg border-white/10",
           header: "text-[#7dd5de] border-b border-white/10",
-          body: "py-6",
-          footer: "border-t border-white/10",
+          body: "pt-6",
+          // footer: "border-t border-white/10",
           closeButton: "text-white/60 hover:text-white/80"
         }}
       >
@@ -183,7 +183,7 @@ export default function AddDatabaseButton() {
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-[#7dd5de] text-[#081e25] font-semibold hover:bg-[#8ab0e0] transition-colors"
+                  className="bg-[#7dd5de] text-[#081e25] hover:bg-[#8ab0e0] transition-colors"
                   isLoading={loading}
                 >
                   Create Database

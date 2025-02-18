@@ -9,7 +9,7 @@ export default async function RootLayout({
 }>) {
 
     return (
-      <main
+      <div
         className='w-screen h-screen mx-auto flex '
       >
           <SideBar/>
@@ -20,6 +20,6 @@ export default async function RootLayout({
                 {children}
               </CompanyProvider>
           </div>
-      </main>
+      </div>
     );
 }
