@@ -5,7 +5,7 @@ import { DatabasePostRequestBody, DatabasePostResponseBody } from "@/app/api/v1/
 
 export default function useDataBases() {
   const [databases, setDatabases] = useState<Database[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
   const { data: session } = useSession();

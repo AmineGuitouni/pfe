@@ -37,12 +37,12 @@ export default function DataBases() {
                 <Alert variant="flat" color="danger" title="Error loading databases">
                     {error}
                 </Alert>
-            ) : !databases ? (
+            ) : databases.length === 0 ? (
                 <div className="text-white/50 text-center py-10">
                     No databases found. Create your first database connection.
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                <div className="flex flex-wrap gap-5">
                     {filteredDatabases.map(database => (
                         <DataBasesCard key={database.id} database={database} />
                     ))}

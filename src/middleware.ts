@@ -3,7 +3,7 @@ import i18nConfig from '../i18config';
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
-const authPages = ['/login', '/register'];
+const authPages = ['/login', '/register', '/forget-password', '/reset-password'];
 const publicPages = ["/"];
 
 function getPath(path: string) {
