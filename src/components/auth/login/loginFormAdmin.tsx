@@ -95,7 +95,7 @@ export default function LoginFormAdmin() {
                 }
             />
             <div className="w-full flex justify-end">
-                <Link href="#" as={NextLink} underline="hover" className="text-white text-medium">
+                <Link href="/forget-password" as={NextLink} underline="hover" className="text-white text-medium">
                     Forgot password?
                 </Link>
             </div>
