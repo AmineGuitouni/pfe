@@ -41,7 +41,7 @@ export default function CompanyProvider({ children }: { children: React.ReactNod
             } else {
                 setCompanies(result.data);
             }
-        } catch (err) {
+        } catch {
             setError(true);
         } finally {
             setLoading(false);

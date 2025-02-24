@@ -2,6 +2,7 @@ import { formatShortDate } from "@/lib/utils";
 import { IoIosArrowForward } from "react-icons/io";
 
 export default function CompanyCard({name,id,createdAt}:{name:string,id:string,createdAt:string}) {
+    console.log(id)
     return (
         <div className="w-96 h-48 border-1 cursor-pointer group hover:scale-[101%] border-white/20 p-5 bg-white/5 hover:bg-white/10 transition-all ease-linear rounded-lg flex flex-col justify-between ">
             <div className="w-full flex items-start justify-between">

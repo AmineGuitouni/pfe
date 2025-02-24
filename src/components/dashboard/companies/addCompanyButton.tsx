@@ -67,7 +67,7 @@ export default function AddCompanyButton() {
 
             setCompanies((prevCompanies) => 
                 prevCompanies ?
-                [...prevCompanies, {id:session?.user.id, name}] : [{id:session?.user.id, name}]
+                [...prevCompanies, {id:session?.user.id, name,created_at:data.created_at}] : [{id:session?.user.id, name,created_at:data.created_at}]
             );
 
             setName('');
