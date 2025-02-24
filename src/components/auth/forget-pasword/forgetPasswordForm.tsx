@@ -1,5 +1,5 @@
 "use client";
-import { Button, cn, Input, Link } from "@heroui/react";
+import { Alert, Button, Input, Link } from "@heroui/react";
 import React, { useState } from "react";
 import NextLink from "next/link";
 
@@ -55,19 +55,27 @@ export default function ForgetPasswordForm() {
                 isInvalid={error}
             />
             
-            <Button
+            {
+                !success ?
+                <Button
                 type="submit"
                 size="md"
                 isLoading={loading}
                 radius="sm"
                 isDisabled={loading} 
-                className={cn("bg-light_blue-500 text-dark_blue text-medium font-semibold w-full flex-shrink-0", success && "bg-green-500",error && "bg-red-500")}
-            >
-                Submit
-            </Button>
+                className="bg-light_blue-500 text-dark_blue text-medium font-semibold w-full flex-shrink-0"
+                >
+                    Submit
+                </Button> :
+                
+                <Alert description={"Please check your email"} title={"Success"} color="success" />
+            }
+            
+            {error && <Alert description={"An error occured, please try again"} title={"Error"} color="danger"/>}
+            
             <div className="w-full flex justify-center items-center gap-2">
                 <p className="text-white text-medium">back to login page, </p>
-                <Link href="/register" as={NextLink} underline="hover" className="text-light_blue-500 animate-pulse text-medium">
+                <Link href="/login" as={NextLink} underline="hover" className="text-light_blue-500 animate-pulse text-medium">
                     login
                 </Link>
             </div>
