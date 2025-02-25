@@ -2,6 +2,7 @@
 import { Accordion, AccordionItem, Button, cn, Input } from "@heroui/react";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
+import { toast } from "react-toastify";
 
 export default function AccountInformation({className}:{className?:string}) {
     const { data:session } = useSession();
@@ -15,10 +16,10 @@ export default function AccountInformation({className}:{className?:string}) {
         .then((res) =>{
             if(res.error){
                 console.log(res.error)
-                // toast error
+                toast.error("Something went wrong")
             }
             else{
-                // toast success
+                toast.success("Email changed successfully")
             }
         })
         .catch((err) => {
@@ -32,23 +33,8 @@ export default function AccountInformation({className}:{className?:string}) {
 
     return(
         <form className={cn("flex flex-col gap-4", className)}>
-            <div className="flex justify-between w-full gap-3">
-                <span className="text-white/60 text-sm flex-shrink-0">UserName</span>
-                <Input
-                    isDisabled
-                    radius="sm"
-                    variant="bordered"
-                    classNames={{
-                        base:"w-[60%]",
-                        inputWrapper:"border-1 border-white/20 focus-within:!border-white/50",
-                        input:"text-white/70",
-                    }}
-                    value={session && session.user ? session.user.name : undefined}
-                    placeholder="Enter your username"
-                />
-            </div>
 
-            <div className="flex justify-between w-full gap-3">
+            <div className="flex justify-between  w-full gap-3">
                 <span className="text-white/60 text-sm flex-shrink-0">Email</span>
                 <div className="w-[60%]">
                     <div className="flex items-center gap-4">
@@ -68,7 +54,7 @@ export default function AccountInformation({className}:{className?:string}) {
                             size="sm"
                             radius="sm"
                             color="primary"
-                            className="bg-light_blue-500 text-dark_blue text-xs"
+                            className="bg-light_blue-500 text-dark_blue text-xs flex-shrink-0"
                             onPress={sendEmailChangeMail}
                         >
                             Change Email

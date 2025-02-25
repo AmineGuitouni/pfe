@@ -1,6 +1,6 @@
 import Header from "@/components/dashboard/header";
 import CompanyProvider from "@/components/dashboard/companies/useCompanies";
-import SideBar from "@/components/dashboard/sideBar";
+import SideBar from "@/components/dashboard/sidebar/sideBar";
 
 export default async function RootLayout({
   children,

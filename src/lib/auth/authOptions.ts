@@ -56,6 +56,7 @@ export const authOptions:AuthOptions = {
             session.user.last_name = token.last_name as string
             session.user.email_verified = token.email_verified as boolean
             session.user.country = token.country as string
+            session.user.phone_number = token.phone_number as string
 
             const supabaseTokenPayload = {
                 sub: session.user.id,
@@ -98,6 +99,7 @@ export const authOptions:AuthOptions = {
             token.role = user.role ? user.role : "owner"
             token.email_verified = user.email_verified
             token.country = user.country
+            token.phone_number = user.phone_number
 
             return token
         }

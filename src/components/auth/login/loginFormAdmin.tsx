@@ -17,7 +17,7 @@ export default function LoginFormAdmin() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    const redirect = searchParams.get("redirect") || "/";
+    const redirect = searchParams.get("redirect") || "/dashboard/account";
 
     const submitHandler = async (e: React.FormEvent) => {
         e.preventDefault();
