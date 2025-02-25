@@ -2,6 +2,7 @@
 import { Alert, Button, cn, Input } from "@heroui/react";
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useRouter } from 'next/navigation';
 
 export default function ResetPasswordForm({ token }: { token: string | null }) {
   const [password, setPassword] = useState('');
@@ -10,11 +11,19 @@ export default function ResetPasswordForm({ token }: { token: string | null }) {
   const [error, setError] = useState<string | null>(null);  
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const router = useRouter();
 
   const submitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (password !== confirmPass) {
+      setError("Passwords must match");
+      return;
+    }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).{8,}$/;
+    if (!passwordRegex.test(password)) {
+      setError("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character");
       return;
     }
 
@@ -112,20 +121,34 @@ export default function ResetPasswordForm({ token }: { token: string | null }) {
           )
         }
       />
-      {success ?
-      
-      <Alert description={"Your password changed succesfully"}  color="success" /> :
-
-      <Button
-        type="submit"
-        size="md"
-        isLoading={loading}
-        radius="sm"
-        isDisabled={loading || password !== confirmPass} 
-        className={cn("bg-light_blue-500 text-dark_blue text-medium font-semibold w-full flex-shrink-0", success && "bg-green-500", error && "bg-red-500")}
-      >
-        Submit
-      </Button>}
+      {success ? (
+        <>
+          <Alert description={"Your password changed succesfully"} color="success" />
+          <Button
+            onPress={() => router.push('/login?role=admin')}
+            className={cn(
+              "bg-light_blue-500 text-dark_blue text-medium font-semibold w-full flex-shrink-0"
+            )}
+          >
+            Go to Login
+          </Button>
+        </>
+      ) : (
+        <Button
+          type="submit"
+          size="md"
+          isLoading={loading}
+          radius="sm"
+          isDisabled={loading || password !== confirmPass}
+          className={cn(
+            "bg-light_blue-500 text-dark_blue text-medium font-semibold w-full flex-shrink-0",
+            success && "bg-green-500",
+            error && "bg-red-500"
+          )}
+        >
+          Submit
+        </Button>
+      )}
     </form>
   );
 }

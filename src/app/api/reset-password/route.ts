@@ -1,4 +1,3 @@
-// app/api/auth/reset-password/route.ts
 import { supabase } from '@/lib/database/supabase';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -16,9 +15,9 @@ export async function POST(req: Request) {
             const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
             
             // Check if token is expired (JWT will throw if expired, but double-check)
-            // if (Date.now() >= decoded.exp * 1000) {
-            //     return NextResponse.json({ error: 'Token has expired' }, { status: 401 });
-            // }
+            if (Date.now() >= decoded.exp * 1000) {
+                return NextResponse.json({ error: 'Token has expired' }, { status: 401 });
+            }
             
             const userId = decoded.id;
             

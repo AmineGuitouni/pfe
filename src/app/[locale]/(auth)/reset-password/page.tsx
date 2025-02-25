@@ -3,8 +3,6 @@ import ForgotPasswordLoading from "@/components/auth/reset-password/verification
 import { Suspense } from "react";
 
 export default function ResetPasswordPage({ searchParams: { token } }: { searchParams: { token?: string | null } }) {
-
-    if(!token) return
     
     return (
         <main className="h-full w-full flex justify-center items-center p-4">
