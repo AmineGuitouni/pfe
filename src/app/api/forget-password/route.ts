@@ -16,7 +16,7 @@ export async function GET(req: Request) {
         }
 
         const {data,error} = await supabase.from("users")
-        .select("id")
+        .select("id, email_verified")
         .eq("email", email)
         .single()
 
@@ -27,6 +27,10 @@ export async function GET(req: Request) {
 
         if(!data || !data.id){
             return NextResponse.json({ok: true}, {status: 200});
+        }
+
+        if (!data.email_verified) {
+            return NextResponse.json({ error: "Email is not verified" }, { status: 400 });
         }
 
         const payload = {
