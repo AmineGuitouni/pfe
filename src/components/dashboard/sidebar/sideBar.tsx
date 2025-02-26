@@ -2,7 +2,7 @@ import Link from "next/link";
 import LogoutButton from "./logoutButton";
 export default function SideBar() {
     return (
-        <div className="w-[257px] h-full flex  flex-col  border-r-1 border-white/20 ">
+        <div className="w-[257px] h-[100sh] flex  flex-col  border-r-1 border-white/20 ">
             <div className="w-full h-[50px] border-b-1 border-b-white/20 flex items-center   px-5">
                 <h1 className="text-white text-lg">Dashboard</h1>
             </div>

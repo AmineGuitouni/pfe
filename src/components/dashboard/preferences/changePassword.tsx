@@ -4,45 +4,51 @@ import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
-export default function AccountInformation({className}:{className?:string}) {
+export default function ChangePassword({className}:{className?:string}) {
+    
     const { data:session } = useSession();
     const [isLoading, setIsLoading] = useState(false);
 
-    const sendEmailChangeMail = ()=>{
-        setIsLoading(true)
-        const origin = window.location.origin
-        fetch(`${origin}/api/change-email`, {method:"GET"})
-        .then((res) => res.json())
-        .then((res) =>{
-            if(res.ok){
-                toast.success("Email send successfully")
+    const sendEmailChangeMail = async () => {
+    
+            if(!session?.user.email){
+                return
             }
-            else{
-                console.log(res.error)
-                toast.error("Something went wrong")
+
+            try{
+                setIsLoading(true);
+                const res = await fetch(`/api/v1/preferences/change_password/sendMail?email=${session.user.email}`, {method:"GET"})
+                const data = await res.json();
+                if(data.ok){
+                    toast.success("Email send successfully")
+                }
+                else{
+                    toast.error("Something went wrong")
+                }
+    
             }
-        })
-        .catch((err) => {
-            console.log(err)
-            toast.error("Something went wrong")
-        })
-        .finally(() => {
-            setIsLoading(false)
-        })
-    }
+            catch(err){
+                console.log(err)
+            }
+            finally{
+                setIsLoading(false);
+            }
+    
+        };
+    
 
     return(
         <form className={cn("flex flex-col gap-4", className)}>
 
             <div className="flex justify-between  w-full gap-3">
-                <span className="text-white/60 text-sm flex-shrink-0">Email</span>
+                <span className="text-white/60 text-sm flex-shrink-0">Password</span>
                 <div className="w-[60%]">
                     <div className="flex items-center gap-4">
                         <Input
                             isDisabled
                             radius="sm"
                             variant="bordered"
-                            value={session && session.user ? session.user.email : undefined}
+                            value={"*******************"}
                             classNames={{
                                 inputWrapper:"border-1 border-white/20 focus-within:!border-white/50",
                                 input:"text-white/70",
@@ -57,7 +63,7 @@ export default function AccountInformation({className}:{className?:string}) {
                             className="bg-light_blue-500 text-dark_blue text-xs flex-shrink-0"
                             onPress={sendEmailChangeMail}
                         >
-                            Change Email
+                            Change password
                         </Button>
                     </div>
                     <Accordion variant="light" itemClasses={{
@@ -67,14 +73,14 @@ export default function AccountInformation({className}:{className?:string}) {
                     }}>
                         <AccordionItem key="1" aria-label="tips" title={(
                             <span className="text-white/70 text-xs">
-                                How can I change my email?
+                                How can I change my password?
                             </span>
                         )}>
                             <ul className="text-white/60 text-xs ml-8 list-disc">
-                                <li>{`Click on the "Change Email" button.`}</li>
+                                <li>{`Click on the "Change password" button.`}</li>
                                 <li>{`An email will be sent to ${session && session.user ? session.user.email : undefined}.`}</li>
                                 <li>{`Click on the link in the email.`}</li>
-                                <li>{`Enter your new email.`}</li>
+                                <li>{`Enter your new password.`}</li>
                                 <li>{`Click on "confirm".`}</li>
                             </ul>
                         </AccordionItem>

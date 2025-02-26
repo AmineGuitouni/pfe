@@ -9,17 +9,15 @@ export default async function RootLayout({
 }>) {
 
     return (
-      <div
-        className='w-screen h-screen mx-auto flex '
-      >
-          <SideBar/>
-          <div className="flex-grow flex flex-col ">
-            <div className="w-[700px] h-[700px]  fixed left-[40%] translate-y-[20%]  blur-3xl bg-light_blue-500/5 rounded-full"></div>
-              <Header/>
-              <CompanyProvider>
-                {children}
-              </CompanyProvider>
-          </div>
+    <div className='relative w-full min-h-screen mx-auto flex'>
+      <SideBar/>
+      <div className="flex-grow flex flex-col overflow-y-auto w-full">
+        <div className="w-[700px] h-[700px] fixed left-[40%] translate-y-[20%] blur-3xl bg-light_blue-500/5 rounded-full"></div>
+        <Header/>
+        <CompanyProvider>
+          {children}
+        </CompanyProvider>
       </div>
-    );
+    </div>
+  );
 }
