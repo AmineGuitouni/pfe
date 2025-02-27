@@ -1,4 +1,3 @@
-"use client";
 import { formatBytes } from "@/lib/utils/formatBytes";
 import { IndexStat, RecentQuery } from "@/types/databaseAnalyticsTypes";
 
@@ -12,7 +11,7 @@ export default function PerformanceTab({ indexStats, recentQueries }: Performanc
     <div className="space-y-6 mt-4 text-white">
       {/* Index Statistics Section */}
       <div>
-        <h4 className="font-bold text-lg mb-2">Index Statistics</h4>
+        <h4 className="font-bold text-lg mb-4 text-light_blue-500">Index Statistics</h4>
         <div className="overflow-x-auto rounded-xl border border-white/20">
           <table className="w-full">
             <thead className="bg-white/10">
@@ -40,7 +39,7 @@ export default function PerformanceTab({ indexStats, recentQueries }: Performanc
       {/* Recent Slow Queries Section (conditionally rendered) */}
       {recentQueries.length > 0 && (
         <div>
-          <h4 className="font-bold text-lg mb-2">Recent Slow Queries</h4>
+          <h4 className="font-bold text-lg mb-4 text-light_blue-500">Recent Slow Queries</h4>
           <div className="overflow-x-auto rounded-xl border border-white/20">
             <table className="w-full">
               <thead className="bg-white/10">

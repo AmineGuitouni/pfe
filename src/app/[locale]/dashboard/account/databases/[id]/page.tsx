@@ -1,10 +1,12 @@
 import { GetDatabaseResponse } from "@/app/api/v1/[user_id]/databases/[database_id]/get/route";
 import PerformanceTab from "@/components/dashboard/databases/database-analytics/PerformanceTab";
+import SizePieChart from "@/components/dashboard/databases/database-analytics/SizePieChart";
 import StorageTab from "@/components/dashboard/databases/database-analytics/StorageTab";
 import TablesTab from "@/components/dashboard/databases/database-analytics/TablesTab";
 import { authOptions } from "@/lib/auth/authOptions";
 import { formatBytes } from "@/lib/utils/formatBytes";
 import { BucketSize, IndexStat, RecentQuery, RowCount, TableSize } from "@/types/databaseAnalyticsTypes";
+import { Card, CardBody, CardFooter, CardHeader } from "@heroui/react";
 import { createClient, PostgrestError } from "@supabase/supabase-js";
 import { getServerSession } from "next-auth";
 import { headers } from "next/headers";
@@ -85,31 +87,64 @@ export default async function DataBaseInfoPage({params:{id}}:{params:{id:string}
         const totalTableSize = dbStats.tableSizes.reduce((acc, tableSize) => acc + tableSize.size_bytes, 0);
         const totalBucketSize = dbStats.bucketSizes.reduce((acc, bucketSize) => acc + bucketSize.size_bytes, 0);
         return (
-          <div className="text-white w-full">
-            <h1>Database Analytics</h1>
-            <div>Total DB Size: {formatBytes(totalTableSize)}</div>
-            <div>Total Storage Size: {formatBytes(totalBucketSize)}</div>
-            <TablesTab
-              tableSizes={dbStats.tableSizes.map((table) => ({
-                name: table.table_name,
-                size: table.size_bytes,
-                sizeFormatted: formatBytes(table.size_bytes),
-              }))}
-              rowCounts={dbStats.rowCounts}
-              indexStats={dbStats.indexStats}
-            />
-            <StorageTab
-              bucketSizes={dbStats.bucketSizes.map((bucket) => ({
-                name: bucket.bucket_name,
-                size: bucket.size_bytes,
-                sizeFormatted: formatBytes(bucket.size_bytes),
-              }))}
-              totalBucketsSize={totalBucketSize}
-            />
-            <PerformanceTab
-              indexStats={dbStats.indexStats}
-              recentQueries={dbStats.recentQueries}
-            />
+          <div className="w-full text-white">
+            <div className="mx-auto w-full max-w-[1200px] py-6 px-4 md:px-6 lg:px-14 xl:px-24 2xl:px-28 space-y-4">
+                <h1 className="font-bold text-2xl ">Database Analytics</h1>
+                <div className="flex gap-4 justify-between mb-4 flex-wrap">
+                    <Card className="bg-modal_bg border shadow-none flex-1 p-2 min-w-[400px] flex-shrink-0">
+                        <CardHeader className="text-lg text-light_blue font-semibold">
+                            Db Tables
+                        </CardHeader>
+                        <CardBody>
+                        <div className="h-[250px] aspect-square">
+                            <SizePieChart data={dbStats.tableSizes.map((table)=>({
+                                name: table.table_name,
+                                value: table.size_bytes
+                            }))}/>  
+                        </div>
+                        </CardBody>
+                        <CardFooter className="text-white">
+                            Total DB Size: {formatBytes(totalTableSize)}
+                        </CardFooter>
+                    </Card>
+                    <Card className="bg-modal_bg border shadow-none flex-1 p-2 min-w-[400px] flex-shrink-0">
+                        <CardHeader className="text-lg text-light_blue font-semibold">
+                            Storage
+                        </CardHeader>
+                        <CardBody>
+                        <div className="h-[250px] aspect-square">
+                            <SizePieChart data={dbStats.bucketSizes.map((table)=>({
+                                name: table.bucket_name,
+                                value: table.size_bytes
+                            }))}/>  
+                        </div>
+                        </CardBody>
+                        <CardFooter className="text-white">
+                            Total Storage Size: {formatBytes(totalBucketSize)}
+                        </CardFooter>
+                    </Card>
+                </div>
+                <TablesTab
+                tableSizes={dbStats.tableSizes.map((table) => ({
+                    name: table.table_name,
+                    size: table.size_bytes,
+                    sizeFormatted: formatBytes(table.size_bytes),
+                }))}
+                rowCounts={dbStats.rowCounts}
+                indexStats={dbStats.indexStats}
+                />
+                <StorageTab
+                bucketSizes={dbStats.bucketSizes.map((bucket) => ({
+                    name: bucket.bucket_name,
+                    size: bucket.size_bytes,
+                    sizeFormatted: formatBytes(bucket.size_bytes),
+                }))}
+                />
+                <PerformanceTab
+                indexStats={dbStats.indexStats}
+                recentQueries={dbStats.recentQueries}
+                />
+            </div>
           </div>
         );
     }

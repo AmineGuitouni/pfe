@@ -29,7 +29,7 @@ export default async function RootLayout({
   
 
   return (
-    <html>
+    <html suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-Helvetica antialiased bg-dark_blue min-h-svh w-full `}
       >
