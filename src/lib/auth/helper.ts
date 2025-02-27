@@ -6,6 +6,7 @@ export async function getUser(credentials:{
     email?: string
 }){
     if(credentials?.company){
+        // TODO: bech nbadel el logic hadha
         console.log(credentials.company)
         const {data, error} = await supabase.from("company")
         .select("user:users(key:keys(value))")
@@ -36,7 +37,7 @@ export async function getUser(credentials:{
     else{
         const { data , error} = await supabase.from("users")
         .select("*")
-        .eq("email", credentials.email)
+        .eq("email", credentials.email?.trim().toLowerCase())
         .single() 
 
         if(error){

@@ -7,7 +7,7 @@ import { authOptions } from "@/lib/auth/authOptions";
 import { formatBytes } from "@/lib/utils/formatBytes";
 import { BucketSize, IndexStat, RecentQuery, RowCount, TableSize } from "@/types/databaseAnalyticsTypes";
 import { Card, CardBody, CardFooter, CardHeader } from "@heroui/react";
-import { createClient, PostgrestError } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 import { getServerSession } from "next-auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";

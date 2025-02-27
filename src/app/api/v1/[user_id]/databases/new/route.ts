@@ -36,7 +36,7 @@ export async function POST(req:Request, {params:{user_id}}: {params:{user_id: st
 
     const { data, error } = await supabase
       .from("data_bases")
-      .insert({ name, user_id, connection_config })
+      .insert({ name: name.trim(), user_id, connection_config })
       .select("id")
       .single();
 

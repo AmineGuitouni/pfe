@@ -1,4 +1,3 @@
-import { formatBytes } from "@/lib/utils/formatBytes";
 import { BucketSizeStat } from "@/types/databaseAnalyticsTypes";
 
 interface StorageTabProps {

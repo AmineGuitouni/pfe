@@ -48,7 +48,7 @@ export async function POST(req: Request) {
         }
 
         // Validate email format
-        if (!isValidEmail(email)) {
+        if (!isValidEmail(email.trim().toLowerCase())) {
             return NextResponse.json({ 
                 error: "Invalid email format",
                 field: "email"
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
         const { data: existingUser } = await supabase
             .from("users")
             .select("email")
-            .eq("email", email)
+            .eq("email", email.trim().toLowerCase())
             .single();
 
         if (existingUser) {
@@ -91,7 +91,7 @@ export async function POST(req: Request) {
         const { data: existingPhone } = await supabase
             .from("users")
             .select("phone_number")
-            .eq("phone_number", phone_number)
+            .eq("phone_number", phone_number.trim())
             .single();
 
         if (existingPhone) {
@@ -124,12 +124,12 @@ export async function POST(req: Request) {
         const { data, error: dbError } = await supabase
             .from("users")
             .insert({
-                first_name,
-                last_name,
-                country,
-                email,
+                first_name: first_name.trim(),
+                last_name: last_name.trim(),
+                country: country.trim(),
+                email: email.trim().toLowerCase(),
                 password_hash,
-                phone_number,
+                phone_number: phone_number.trim(),
             })
             .select();
 
@@ -152,7 +152,7 @@ export async function POST(req: Request) {
         try {
             await resend.emails.send({
                 from: 'noReply@guitouni-studio.online',
-                to: [email],
+                to: [email.trim().toLowerCase()],
                 subject: 'Verify Your Email Address',
                 html: VerificationEmailTemplate(verificationUrl),
             });
@@ -179,7 +179,7 @@ export async function POST(req: Request) {
 export async function GET(req: Request) {
     try {
         const {searchParams, origin} = new URL(req.url)
-        const email = searchParams.get("email") || null
+        const email = searchParams.get("email")?.trim().toLocaleLowerCase() || null
 
         if(!email){
             console.log("no email")

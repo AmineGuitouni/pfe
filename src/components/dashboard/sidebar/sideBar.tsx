@@ -1,7 +1,6 @@
 "use client"
 import Link from "next/link";
 import LogoutButton from "./logoutButton";
-import { Menu, X } from "lucide-react";
 import { useSidBar } from "./contexts/sideBarContext";
 
 export default function SideBar() {
