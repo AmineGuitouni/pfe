@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/database/supabase";
+import { authedSupabase } from "@/lib/database/supabase";
 import { NextResponse } from "next/server";
 
 export type DatabasePostRequestBody = {
@@ -34,7 +34,7 @@ export async function POST(req:Request, {params:{user_id}}: {params:{user_id: st
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await authedSupabase(user_id)
       .from("data_bases")
       .insert({ name: name.trim(), user_id, connection_config })
       .select("id")
@@ -47,7 +47,7 @@ export async function POST(req:Request, {params:{user_id}}: {params:{user_id: st
 
     return NextResponse.json({ data });
   } catch (error) {
-    console.error(error);
+    console.error(error.message);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/database/supabase';
+import { authedSupabase } from '@/lib/database/supabase';
 
 interface Params {
   user_id: string;
@@ -10,7 +10,7 @@ export async function DELETE(request: Request, { params }: { params: Params }) {
   const { user_id, database_id } = params;
 
   try {
-    const { error } = await supabase
+    const { error } = await authedSupabase(user_id)
       .from('data_bases')
       .delete()
       .eq('id', database_id)
