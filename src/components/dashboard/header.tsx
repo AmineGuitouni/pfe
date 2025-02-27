@@ -12,7 +12,7 @@ export default function Header() {
     }, [path]);
 
     return (
-        <div className="w-full h-[50px] flex items-center px-5 border-b-1 border-white/20">
+        <div className="w-full h-[50px] flex items-center px-5 border-b-1 border-white/20 flex-shrink-0">
             <h1 className="text-white/50 text-sm">{pageName}</h1>
         </div>
     );

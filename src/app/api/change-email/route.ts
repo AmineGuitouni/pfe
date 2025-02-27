@@ -6,7 +6,9 @@ import { resend } from "@/lib/resend";
 import { EmailChangeTemplate } from "@/lib/emailtemplets/emailChange";
 
 export async function GET(req: Request) {
+
     const session = await getServerSession(authOptions);
+    
     if(!session || !session.user){
         return NextResponse.json({error:"Not logged in"}, {status:401});
     }
@@ -35,6 +37,8 @@ export async function GET(req: Request) {
         }
         
         return NextResponse.json({message:"Email sent"}, {status:200});
+
+        return NextResponse.json({ok : true})
 
     } catch (emailError) {
         console.log(emailError);

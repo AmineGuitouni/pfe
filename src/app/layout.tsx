@@ -26,11 +26,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  
 
   return (
     <html>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} font-Helvetica antialiased bg-dark_blue min-h-svh`}
+        className={`${geistSans.variable} ${geistMono.variable} font-Helvetica antialiased bg-dark_blue min-h-svh w-full `}
       >
         <Providers>
           <AppSession>
