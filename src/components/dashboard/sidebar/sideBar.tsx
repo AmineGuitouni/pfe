@@ -14,9 +14,9 @@ export default function SideBar() {
             <div className="w-full border-b-1 border-b-white/20 flex flex-col justify-start gap-4 py-5  px-5">
                 <h1 className="text-white/50 text-sm">Account</h1>
                 <Link href="/dashboard/account/preferences" className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">Preferences</Link>
-                <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">Access Tokens</Link>
+                <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">Billing page</Link>
                 <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">Security</Link>
-                <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">Audit Logs</Link>
+                <Link href={"/dashboard/account/audit-logs"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">Audit Logs</Link>
             </div>
             <LogoutButton/>
         </div>
