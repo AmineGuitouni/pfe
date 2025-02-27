@@ -24,6 +24,9 @@ export default function Header() {
             </button>
 
             <Breadcrumbs  onAction={(key)=>{
+                if(Number(key) <= 1) {
+                    return
+                }
                 router.push(path.split("/").slice(0, Number(key) + 1).join("/"))
             }}>
                 {path.split("/").map((segment, index) => (
