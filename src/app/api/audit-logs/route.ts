@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
+  const user_id = searchParams.get("user_id");
   const page = Number(searchParams.get("page") || "1");
   const limit = Number(searchParams.get("limit") || "10");
   const search = searchParams.get("search") || "";
@@ -12,7 +13,8 @@ export async function GET(req: NextRequest) {
   let query = supabase
     .from("audit_logs")
     .select("id, action, timestamp,old_data,new_data,table_name", { count: "exact" })
-    .order("timestamp", { ascending: sort === "asc" });
+    .eq("user_id", user_id)
+    .order("timestamp", { ascending: sort === "asc" })
 
   if (search) {
     query = query.ilike("action", `%${search}%`);
