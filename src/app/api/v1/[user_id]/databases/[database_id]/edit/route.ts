@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/database/supabase';
+import { authedSupabase } from '@/lib/database/supabase';
 
 interface Params {
   user_id: string;
@@ -17,7 +17,7 @@ export async function PUT(request: Request, { params }: { params: Params }) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const { error } = await supabase
+    const { error } = await authedSupabase(user_id)
       .from('data_bases')
       .update({
         name,
