@@ -42,7 +42,7 @@ export default function SideBar() {
                     <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
                         Billing page
                     </Link>
-                    <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
+                    <Link href={"/dashboard/account/security"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
                         Security
                     </Link>
                     <Link href={"/dashboard/account/audit-logs"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
