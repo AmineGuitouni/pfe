@@ -8,7 +8,7 @@ import {
     useDisclosure,
   } from "@heroui/react";
   import { FaEllipsisVertical } from "react-icons/fa6";
-  import { useEffect, useState } from "react";
+  import { useCallback, useEffect, useState } from "react";
   
   // Define a more specific type that still allows for dynamic properties
   type DynamicObject = Record<string, any>;
@@ -16,18 +16,17 @@ import {
   interface DiffResult {
     old: DynamicObject;
     new: DynamicObject;
-    changeType: "modified" | "created" | "deleted" | "none";
   }
   
-  export default function DetailsModal({oldData, newData,table_name}: {oldData: DynamicObject, newData: DynamicObject,table_name: string}) {
+  export default function DetailsModal({oldData, newData,table_name,action}: {oldData: DynamicObject, newData: DynamicObject,table_name: string,action:string}) {
     const {isOpen, onOpen, onOpenChange} = useDisclosure();
     const [differences, setDifferences] = useState<DiffResult>({ 
       old: {}, 
       new: {}, 
-      changeType: "none" 
     });
+    const [noChanges, setNoChanges] = useState(false);
 
-    function findDifferences(oldData: DynamicObject, newData: DynamicObject): DiffResult {
+    const findDifferences = useCallback((oldData: DynamicObject, newData: DynamicObject): DiffResult => {
 
       const oldObj: DynamicObject = oldData || {};
       const newObj: DynamicObject = newData || {};
@@ -35,30 +34,27 @@ import {
       const differences: DiffResult = {
         old: {},
         new: {},
-        changeType: "modified"
       };
       
       // Check if dealing with a complete creation or deletion
       const isOldEmpty = Object.keys(oldObj).length === 0 
       const isNewEmpty = Object.keys(newObj).length === 0;
       
-      if (isOldEmpty && !isNewEmpty) {
+      if (action === "insert") {
         // This is a complete creation of new data
-        differences.changeType = "created";
         differences.new = {...newObj};
         return differences;
       }
       
-      if (!isOldEmpty && isNewEmpty) {
+      if (action === "delete") {
         // This is a complete deletion of old data
-        differences.changeType = "deleted";
         differences.old = {...oldObj};
         return differences;
       }
       
       if (isOldEmpty && isNewEmpty) {
         // Both are empty, no changes
-        differences.changeType = "none";
+        setNoChanges(true)
         return differences;
       }
       
@@ -87,13 +83,13 @@ import {
       });
       
       return differences;
-    }
+    },[action])
     
     useEffect(() => {
       const diff = findDifferences(oldData, newData);
       setDifferences(diff);
-      if(differences.changeType === "none") return;
-    }, [oldData, newData, differences.changeType]);
+      if(noChanges) return;
+    }, [oldData, newData, table_name, action, noChanges, findDifferences]);
   
     const renderValue = (value: any) => {
       if (value === undefined || value === null) {
@@ -125,12 +121,12 @@ import {
             {(onClose) => (
               <>
                 <ModalHeader className="flex flex-col gap-1">
-                  {differences.changeType === "modified" && `Modified Data in table ${table_name}`}
-                  {differences.changeType === "created" && `New Data created in table ${table_name}`}
-                  {differences.changeType === "deleted" && `Data deleted in table ${table_name}`}
+                  {action === "update" && `Modified Data in table ${table_name}`}
+                  {action === "insert" && `New Data created in table ${table_name}`}
+                  {action === "delete" && `Data deleted in table ${table_name}`}
                 </ModalHeader>
                 <ModalBody  className="max-h-[500px] overflow-y-auto">
-                  { differences.changeType === "created" ? (
+                  { action === "insert" ? (
                     <div className="space-y-4">
                       <div className="bg-green-500/10 border border-green-500/30 rounded-md p-3 mb-4">
                         <p className="text-green-400">New data was created with the following values:</p>
@@ -144,7 +140,7 @@ import {
                         </div>
                       ))}
                     </div>
-                  ) : differences.changeType === "deleted" ? (
+                  ) : action === "delete" ? (
                     <div className="space-y-4">
                       <div className="bg-red-500/10 border border-red-500/30 rounded-md p-3 mb-4">
                         <p className="text-red-400">The following data was deleted:</p>

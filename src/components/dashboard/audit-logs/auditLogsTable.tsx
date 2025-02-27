@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import DetailsModal from "./detailsModal";
+import { Spinner } from "@heroui/react";
+import { useSession } from "next-auth/react";
 
 export type Log = {
   id: string;
@@ -19,9 +21,13 @@ export default function AuditLogTable() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [loading, setLoading] = useState(true);
+  const {data : session} = useSession()
 
   const fetchLogs = useCallback( async () => {
+    if (!session?.user.id) return;
     const params = new URLSearchParams({
+      user_id: session?.user.id,
       page: currentPage.toString(),
       limit: rowsPerPage.toString(),
       search: searchText,
@@ -48,18 +54,26 @@ export default function AuditLogTable() {
       setLogs([]);
       setTotalCount(0);
     }
-  },[currentPage, dateFilter, rowsPerPage, searchText, sortOrder])
+    finally {
+      setLoading(false);
+    }
+  },[currentPage, dateFilter, rowsPerPage, searchText, session?.user.id, sortOrder])
 
   useEffect(() => {
     fetchLogs();
   }, [searchText, dateFilter, currentPage, rowsPerPage, sortOrder, fetchLogs]);
 
   const totalPages = Math.ceil(totalCount / rowsPerPage);
-
-  console.log(logs)
-
+    
   return (
-    <div className="bg-transparent text-white min-h-screen">
+
+    <div className="bg-transparent text-white min-h-screen w-full">
+      { loading ? 
+
+      <div className="w-full h-full flex justify-center items-center pt-52">
+        <Spinner  color="default"  />
+      </div> :
+
       <div className="w-full mx-auto">
         <div className="flex flex-col sm:flex-row gap-4 mb-4">
           <input
@@ -91,7 +105,7 @@ export default function AuditLogTable() {
           </select>
         </div>
 
-        <div className="overflow-x-auto rounded-xl border border-white/20">
+        <div className="w-full overflow-x-auto rounded-xl border border-white/20">
           <table className="w-full">
             <thead className="bg-white/10">
               <tr>
@@ -102,17 +116,18 @@ export default function AuditLogTable() {
               </tr>
             </thead>
             <tbody>
-              {logs.map((log) => (
-                <tr
-                  key={log.id}
-                  className="border-t border-white/20 hover:bg-white/5"
-                >
-                  <td className="p-3">{log.id}</td>
-                  <td className="p-3">{log.action}</td>
-                  <td className="p-3">{log.date.toLocaleString()}</td>
-                  <td className="px-5"><DetailsModal table_name={log.table_name} oldData={log.old_data} newData={log.new_data}/></td>
-                </tr>
-              ))}
+              {
+                logs.map((log) => (
+                  <tr
+                    key={log.id}
+                    className="border-t border-white/20 hover:bg-white/5"
+                  >
+                    <td className="p-3">{log.id}</td>
+                    <td className="p-3">{log.action}</td>
+                    <td className="p-3">{log.date.toLocaleString()}</td>
+                    <td className="px-5"><DetailsModal action={log.action.toLowerCase()} table_name={log.table_name} oldData={log.old_data} newData={log.new_data}/></td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
@@ -160,7 +175,7 @@ export default function AuditLogTable() {
             </button>
           </div>
         </div>
-      </div>
+      </div>}
     </div>
   );
 }
