@@ -4,9 +4,7 @@ import { NextResponse } from "next/server";
 export type Database = {
     id: string;
     name: string;
-    type: string;
     created_at: string;
-    rigion?: string | null;
     connection_config: {
         SUPABASE_KEY: string;
         SUPABASE_JWT_SECRET: string;
@@ -23,7 +21,7 @@ export type DatabaseApiResponseBody = {
 export async function GET(req: Request, {params: {user_id}}: {params: {user_id: string}}) {
     try {
         const {data, error} = await supabase.from("data_bases")
-        .select("id, name, type, created_at, connection_config, rigion")
+        .select("id, name, created_at, connection_config")
         .eq("user_id", user_id);
 
         if (error) {

@@ -8,23 +8,24 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  useDisclosure,
 } from "@heroui/react";
 import { useSession } from "next-auth/react";
 import { Database } from "@/app/api/v1/[user_id]/databases/list/route";
 
-interface AddDatabaseButtonProps {
-  addDatabase?: (database: Omit<Database, "id" | "created_at">) => Promise<Response | undefined>
+interface EditDataBaseModalProps {
+  database: Database;
+  onOpenChange?: () => void;
+  isOpen: boolean;
+  editDatabase?: (databaseId: string, updatedDatabase: Omit<Database, "id" | "created_at">) => Promise<Response | undefined>
 }
 
-export default function AddDatabaseButton({addDatabase}:AddDatabaseButtonProps) {
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+export default function EditDataBaseModal({ database, onOpenChange, isOpen, editDatabase }: EditDataBaseModalProps) {
   const [formData, setFormData] = useState({
-    name: "",
-    supabaseUrl: "",
-    supabaseKey: "",
-    jwtSecret: "",
-    supabaseAnonKey: "",
+    name: database.name,
+    supabaseUrl: database.connection_config.NEXT_PUBLIC_SUPABASE_URL,
+    supabaseKey: database.connection_config.SUPABASE_KEY,
+    jwtSecret: database.connection_config.SUPABASE_JWT_SECRET,
+    supabaseAnonKey: database.connection_config.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   });
   const [error, setError] = useState("");
   const { data: session } = useSession();
@@ -32,7 +33,7 @@ export default function AddDatabaseButton({addDatabase}:AddDatabaseButtonProps) 
 
   const validateInput = () => {
     if (!formData.name.trim()) {
-      setError("Database name is required");
+      setError("Database name is required.");
       return false;
     }
 
@@ -42,11 +43,37 @@ export default function AddDatabaseButton({addDatabase}:AddDatabaseButtonProps) 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!session?.user?.id || !validateInput() || !addDatabase) return;
+    if (!session?.user?.id || !validateInput()) return;
 
     setLoading(true);
     try {
-      const response = await addDatabase({
+      const response = await fetch(`/api/v1/${session.user.id}/databases/${database.id}/edit`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          connection_config: {
+            NEXT_PUBLIC_SUPABASE_URL: formData.supabaseUrl,
+            SUPABASE_KEY: formData.supabaseKey,
+            NEXT_PUBLIC_SUPABASE_ANON_KEY: formData.supabaseAnonKey,
+            SUPABASE_JWT_SECRET: formData.jwtSecret,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        const errorMessage = errorData?.error || "Failed to update database";
+
+        setError("Internal Server Error: " + errorMessage);
+        return;
+      }
+
+      if(!editDatabase) return
+      
+      await editDatabase(database.id, {
         name: formData.name,
         connection_config: {
           NEXT_PUBLIC_SUPABASE_URL: formData.supabaseUrl,
@@ -56,15 +83,7 @@ export default function AddDatabaseButton({addDatabase}:AddDatabaseButtonProps) 
         },
       });
 
-      if (!response?.ok) {
-        const errorData = await response?.json();
-        const errorMessage = (await errorData)?.error || "Failed to create database";
-
-        setError("Internal Server Error: " + errorMessage);
-        return;
-      }
-
-      onOpenChange();
+      onOpenChange?.();
       setFormData({
         name: "",
         jwtSecret: "",
@@ -82,14 +101,6 @@ export default function AddDatabaseButton({addDatabase}:AddDatabaseButtonProps) 
 
   return (
     <>
-      <Button
-        onPress={onOpen}
-        size="sm"
-        className="bg-[#7dd5de] text-[#081e25] font-semibold hover:bg-[#8ab0e0] transition-colors"
-      >
-        New Database
-      </Button>
-
       <Modal 
         isOpen={isOpen} 
         onOpenChange={onOpenChange}
@@ -106,7 +117,7 @@ export default function AddDatabaseButton({addDatabase}:AddDatabaseButtonProps) 
         <ModalContent>
           {(onClose) => (
             <form onSubmit={handleSubmit}>
-              <ModalHeader>New Database Connection</ModalHeader>
+              <ModalHeader>Edit Database Connection</ModalHeader>
               <ModalBody className="gap-6">
                 <Input
                   label="Database Name"
@@ -194,7 +205,7 @@ export default function AddDatabaseButton({addDatabase}:AddDatabaseButtonProps) 
                   className="bg-[#7dd5de] text-[#081e25] hover:bg-[#8ab0e0] transition-colors"
                   isLoading={loading}
                 >
-                  Create Database
+                  Update Database
                 </Button>
               </ModalFooter>
             </form>

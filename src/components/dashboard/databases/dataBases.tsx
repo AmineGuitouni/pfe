@@ -8,18 +8,14 @@ import useDataBases from "./hooks/useDataBases";
 
 export default function DataBases() {
     const [searchTerm, setSearchTerm] = useState('');
-    const { databases, isLoading, error } = useDataBases();
+    const { databases, isLoading, error, deleteDatabase, editDatabase, addDatabase } = useDataBases();
 
-    const filteredDatabases = databases.filter(db =>
-        db.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        db.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        db.rigion?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredDatabases = databases.filter(database => database.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
     return (
-        <div className="w-full flex flex-col gap-10">
+        <div className="w-full flex flex-col gap-10 overflow-y-auto">
             <div className="w-full flex gap-5">
-                <AddDataBaseButton />
+                <AddDataBaseButton addDatabase={addDatabase} />
                 <Input
                     placeholder="Search databases..."
                     size="sm"
@@ -37,14 +33,14 @@ export default function DataBases() {
                 <Alert variant="flat" color="danger" title="Error loading databases">
                     {error}
                 </Alert>
-            ) : databases.length === 0 ? (
+            ) : filteredDatabases.length === 0 ? (
                 <div className="text-white/50 text-center py-10">
                     No databases found. Create your first database connection.
                 </div>
             ) : (
                 <div className="flex flex-wrap gap-5">
                     {filteredDatabases.map(database => (
-                        <DataBasesCard key={database.id} database={database} />
+                        <DataBasesCard key={database.id} database={database} deleteDatabase={deleteDatabase} editDatabase={editDatabase} />
                     ))}
                 </div>
             )}
