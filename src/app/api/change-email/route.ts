@@ -36,9 +36,7 @@ export async function GET(req: Request) {
             throw new Error("Email not sent");
         }
         
-        return NextResponse.json({message:"Email sent"}, {status:200});
-
-        return NextResponse.json({ok : true})
+        return NextResponse.json({ok:true}, {status:200});
 
     } catch (emailError) {
         console.log(emailError);

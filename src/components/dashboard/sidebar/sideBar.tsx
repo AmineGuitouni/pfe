@@ -1,7 +1,6 @@
 "use client"
 import Link from "next/link";
 import LogoutButton from "./logoutButton";
-import { Menu, X } from "lucide-react";
 import { useSidBar } from "./contexts/sideBarContext";
 
 export default function SideBar() {
@@ -27,33 +26,34 @@ export default function SideBar() {
                 
                 <div className="w-full border-b border-b-white/20 flex flex-col justify-start gap-4 py-5 px-5">
                     <h1 className="text-white/50 text-sm">General</h1>
-                    <Link href="/dashboard/account" className="text-white text-medium hover:text-blue-500 transition-all ease-linear">
+                    <Link href="/dashboard/account" className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
                         Companies
                     </Link>
-                    <Link href="/dashboard/account/databases" className="text-white text-medium hover:text-blue-500 transition-all ease-linear">
+                    <Link href="/dashboard/account/databases" className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
                         Databases
                     </Link>
                 </div>
                 
                 <div className="w-full border-b border-b-white/20 flex flex-col justify-start gap-4 py-5 px-5">
                     <h1 className="text-white/50 text-sm">Account</h1>
-                    <Link href="/dashboard/account/preferences" className="text-white text-medium hover:text-blue-500 transition-all ease-linear">
+                    <Link href="/dashboard/account/preferences" className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
                         Preferences
                     </Link>
-                    <Link href={"#"} className="text-white text-medium hover:text-blue-500 transition-all ease-linear">
+                    <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
                         Billing page
                     </Link>
-                    <Link href={"#"} className="text-white text-medium hover:text-blue-500 transition-all ease-linear">
+                    <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
                         Security
                     </Link>
-                    <Link href={"/dashboard/account/audit-logs"} className="text-white text-medium hover:text-blue-500 transition-all ease-linear">
+                    <Link href={"/dashboard/account/audit-logs"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
                         Audit Logs
                     </Link>
                 </div>
                 
-                <div className="mt-auto">
+                <div>
                     <LogoutButton />
                 </div>
+
             </div>
             
             {/* Overlay for mobile - closes sidebar when clicking outside */}
