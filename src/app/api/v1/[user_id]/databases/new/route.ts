@@ -47,7 +47,7 @@ export async function POST(req:Request, {params:{user_id}}: {params:{user_id: st
 
     return NextResponse.json({ data });
   } catch (error) {
-    console.error(error.message);
+    console.error(error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

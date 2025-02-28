@@ -11,7 +11,15 @@ export const authedSupabase = (userId: string) => {
     }
     
     const supabase_token = jwt.sign(supabaseTokenPayload, process.env.SUPABASE_JWT_SECRET!)
-    const client = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, supabase_token)
+    const client = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_KEY! ,
+        {
+            global: {
+                headers: {
+                    Authorization: `Bearer ${supabase_token}`
+                }
+            }
+        }
+    )
 
     return client
 }
