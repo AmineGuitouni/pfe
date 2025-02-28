@@ -4,6 +4,8 @@ import { Database as DatabaseIcon, Trash, MoreVertical, Edit, ArrowRight } from 
 import Link from 'next/link';
 import { Database, Database as DatabaseType } from '@/app/api/v1/[user_id]/databases/list/route';
 import EditDataBaseModal from './EditDataBaseModal';
+import { toast } from "react-toastify";
+import DatabaseDeleteConfirmation from "./modals/confirmationModal";
 
 interface DatabaseCardProps {
   database: DatabaseType;
@@ -13,16 +15,14 @@ interface DatabaseCardProps {
 
 export default function DatabaseCard({ database, deleteDatabase, editDatabase }: DatabaseCardProps) {
   const { isOpen:isEditModalOpen, onOpen:onOpenEditModal, onOpenChange:OpenChangeEditModal } = useDisclosure();
+  const { isOpen: isDeleteModalOpen, onOpen: onOpenDeleteModal, onClose: onCloseDeleteModal } = useDisclosure();
   
   const handleDelete = async () => {
-    const confirmDelete = window.confirm(`Are you sure you want to delete ${database.name}?`);
-    if (confirmDelete) {
-      const success = await deleteDatabase?.(database.id);
-      if (success) {
-        alert(`${database.name} deleted successfully!`);
-      } else {
-        alert(`Failed to delete ${database.name}. Please try again.`);
-      }
+    const success = await deleteDatabase?.(database.id);
+    if (success) {
+      toast.success(`${database.name} deleted successfully!`);
+    } else {
+      toast.error(`Failed to delete ${database.name}. Please try again.`);
     }
   };
 
@@ -73,7 +73,7 @@ export default function DatabaseCard({ database, deleteDatabase, editDatabase }:
                   startContent={<Trash className="w-4 h-4" />}
                   className="text-danger"
                   color="danger"
-                  onPress={handleDelete}
+                  onPress={onOpenDeleteModal}
                 >
                   Delete Database
                 </DropdownItem>
@@ -107,6 +107,14 @@ export default function DatabaseCard({ database, deleteDatabase, editDatabase }:
           isOpen={isEditModalOpen}
           onOpenChange={OpenChangeEditModal}
           editDatabase={editDatabase}
+        />
+      )}
+      {isDeleteModalOpen && (
+        <DatabaseDeleteConfirmation 
+          isOpen={isDeleteModalOpen}
+          onClose={onCloseDeleteModal}
+          onConfirmDelete={handleDelete}
+          databaseName={database.name}
         />
       )}
     </Card>
