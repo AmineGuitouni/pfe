@@ -8,6 +8,11 @@ interface Params {
 export interface CompanyType {
     id: string,
     name: string,
+    database:{
+        id: string;
+        name: string;
+        created_at: string;
+    } | null
     created_at: string,
 }
 
@@ -18,7 +23,7 @@ export interface CompaniesListResponse {
 
 export async function GET(req: Request, {params: {user_id}}: {params: Params}) {
     const {data, error} = await supabase.from("company")
-    .select("id,name,created_at")
+    .select("id,name,created_at, database:data_bases(id,name,created_at)")
     .eq("user_id", user_id);
 
     if(error){

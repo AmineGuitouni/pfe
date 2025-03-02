@@ -7,10 +7,10 @@ interface Params {
 
 export async function POST(req:Request, {params:{user_id}}: {params:Params}) {
 
-    const {name}= await req.json();
+    const {name, database_id}= await req.json();
 
     const {data, error} = await authedSupabase(user_id).from("company")
-    .insert({name, user_id })
+    .insert({name, user_id, database_id })
     .select("id")
     .single()
 

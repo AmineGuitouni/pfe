@@ -44,6 +44,7 @@ export default function Companies() {
                             name={company.name.toUpperCase()}
                             id={company.id}
                             createdAt={company.created_at}
+                            database_name={company.database ? company.database.name : "Shared Database (free)"}
                         />
                         
                     ))}

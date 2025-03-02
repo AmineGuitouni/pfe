@@ -1,8 +1,10 @@
 "use client"
-import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@heroui/react";
-import { useState } from "react";
+import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, SharedSelection, useDisclosure } from "@heroui/react";
+import { useState, useEffect } from "react";
 import { useCompanies } from "./contexts/useCompanies";
 import { useSession } from "next-auth/react";
+import { Database } from "@/app/api/v1/[user_id]/databases/list/route";
+import { CompanyType } from "@/app/api/v1/[user_id]/companies/list/route";
 
 export default function AddCompanyButton() {
     const {isOpen, onOpen, onOpenChange} = useDisclosure();
@@ -11,6 +13,8 @@ export default function AddCompanyButton() {
     const {setCompanies} = useCompanies();
     const {data:session} = useSession();
     const [loading, setLoading] = useState(false);
+    const [databases, setDatabases] = useState<Database[]>([]);
+    const [selectedDatabase, setSelectedDatabase] = useState<SharedSelection>(new Set([]));
 
     const validateInput = (value: string) => {
         if (value.trim().length === 0) {
@@ -25,6 +29,10 @@ export default function AddCompanyButton() {
             setError('Company name cannot exceed 50 characters');
             return false;
         }
+        if(Array.from(selectedDatabase).length > 1) {
+            setError('Please select only one database');
+            return false;
+        }
         setError('');
         return true;
     };
@@ -34,6 +42,22 @@ export default function AddCompanyButton() {
         setName(value);
         validateInput(value);
     };
+
+    useEffect(() => {
+        if (!isOpen || !session) return;
+        
+        const fetchDatabases = async () => {
+            try {
+                const response = await fetch(`/api/v1/${session.user.id}/databases/list`);
+                const { data } = await response.json();
+                setDatabases(data || []);
+            } catch (error) {
+                console.error('Failed to fetch databases:', error);
+            }
+        };
+
+        fetchDatabases();
+    }, [isOpen, session]);
 
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -48,6 +72,9 @@ export default function AddCompanyButton() {
         setLoading(true);
 
         const originUrl = window.location.origin;
+        const database = Array.from(selectedDatabase).length === 0 ? 
+        databases.find((database) => database.id === Array.from(selectedDatabase)[0]) :
+        undefined
 
         try {
             const response = await fetch(`${originUrl}/api/v1/${session.user.id}/companies/new`, {
@@ -55,7 +82,10 @@ export default function AddCompanyButton() {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({name}),
+                body: JSON.stringify({
+                    name,
+                    database_id: database ? database.id : null,
+                }),
             });
 
             const data = await response.json();
@@ -64,10 +94,23 @@ export default function AddCompanyButton() {
                 setError(data.error);
                 return;
             }
+            
+            const databaseData = database ? {
+                id: database.id,
+                name: database.name,
+                created_at: database.created_at
+            } : null
+
+            const newCompany: CompanyType = {
+                id:session.user.id, 
+                name,
+                created_at: new Date().toUTCString(),
+                database: databaseData
+            }
 
             setCompanies((prevCompanies) => 
                 prevCompanies ?
-                [...prevCompanies, {id:session?.user.id, name,created_at:data.created_at}] : [{id:session?.user.id, name,created_at:data.created_at}]
+                [...prevCompanies, newCompany] : [newCompany]
             );
 
             setName('');
@@ -121,6 +164,19 @@ export default function AddCompanyButton() {
                                 isInvalid={!!error}
                                 errorMessage={error}
                             />
+                            <Select
+                                label="Select Database (optional)"
+                                className="mt-4 dark"
+                                selectedKeys={selectedDatabase}
+                                onSelectionChange={setSelectedDatabase}
+                                variant="bordered"
+                            >
+                                {databases.map((db) => (
+                                    <SelectItem key={db.id} value={db.id}>
+                                        {db.name}
+                                    </SelectItem>
+                                ))}
+                            </Select>
                         </ModalBody>
                         <ModalFooter>
                             <Button
@@ -128,6 +184,7 @@ export default function AddCompanyButton() {
                                 onPress={() => {
                                     setError('');
                                     setName('');
+                                    setSelectedDatabase(new Set([]));
                                     onClose();
                                 }}
                                 className="text-white/60 dark hover:text-white hover:bg-white/10"

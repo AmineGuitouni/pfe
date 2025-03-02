@@ -18,7 +18,7 @@ const dropdownItems = [
     },
 ];
 
-export default function CompanyCard({name, id, createdAt}:{name:string, id:string, createdAt:string}) {
+export default function CompanyCard({name, id, createdAt, database_name}:{name:string, id:string, createdAt:string, database_name:string}) {
     const handleAction = (key: Key) => {
         console.log(`${key} company with id: ${id}`);
     };
@@ -28,7 +28,7 @@ export default function CompanyCard({name, id, createdAt}:{name:string, id:strin
             <div className="w-full flex items-start justify-between">
                 <div className="flex flex-col">
                     <h1 className="text-light_blue text-md font-[400]">{name}</h1>
-                    <h1 className="text-white/50 text-sm">20 workers</h1>
+                    <h1 className="text-white/50 text-sm">?? workers</h1>
                 </div>
                 
                 <div className="flex items-center">
@@ -61,8 +61,11 @@ export default function CompanyCard({name, id, createdAt}:{name:string, id:strin
                     </Dropdown>
                 </div>
             </div>
-            
-            <h1 className="text-white/50 text-sm">Created on {formatShortDate(createdAt)}</h1>
+
+            <div>
+                <h4 className="text-white/50 text-sm">Linked DataBase: {database_name}</h4>
+                <h4 className="text-white/50 text-sm">Created on {formatShortDate(createdAt)}</h4>
+            </div>
         </div>
     );
 }

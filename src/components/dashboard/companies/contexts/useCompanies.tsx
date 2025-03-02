@@ -1,17 +1,12 @@
 "use client"
+import { CompanyType } from "@/app/api/v1/[user_id]/companies/list/route";
 import { useSession } from "next-auth/react";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
-export type Company = {
-    created_at: any;
-    id: string,
-    name: string
-};
-
 const companyContext = createContext<{
-    companies: Company[] | null,
+    companies: CompanyType[] | null,
     error: boolean,
-    setCompanies: React.Dispatch<React.SetStateAction<Company[] | null>>,
+    setCompanies: React.Dispatch<React.SetStateAction<CompanyType[] | null>>,
     loading: boolean,
 }>({
     companies: null,
@@ -25,7 +20,7 @@ export function useCompanies() {
 }
 
 export default function CompanyProvider({ children }: { children: React.ReactNode }) {
-    const [companies, setCompanies] = useState<Company[] | null>(null);
+    const [companies, setCompanies] = useState<CompanyType[] | null>(null);
     const [error, setError] = useState(false);
     const [loading, setLoading] = useState(true);
     const {data: session} = useSession();
