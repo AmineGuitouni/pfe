@@ -1,7 +1,7 @@
 "use client"
 import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@heroui/react";
 import { useState } from "react";
-import { useCompanies } from "../companies/useCompanies";
+import { useCompanies } from "./contexts/useCompanies";
 import { useSession } from "next-auth/react";
 
 export default function AddCompanyButton() {
@@ -50,12 +50,12 @@ export default function AddCompanyButton() {
         const originUrl = window.location.origin;
 
         try {
-            const response = await fetch(`${originUrl}/api/dashboard/companies`, {
+            const response = await fetch(`${originUrl}/api/v1/${session.user.id}/companies/new`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({name, user_id:session?.user.id}),
+                body: JSON.stringify({name}),
             });
 
             const data = await response.json();

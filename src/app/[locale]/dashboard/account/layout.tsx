@@ -1,5 +1,5 @@
 import Header from "@/components/dashboard/header";
-import CompanyProvider from "@/components/dashboard/companies/useCompanies";
+import CompanyProvider from "@/components/dashboard/companies/contexts/useCompanies";
 import SideBar from "@/components/dashboard/sidebar/sideBar";
 import SideBarProvider from "@/components/dashboard/sidebar/contexts/sideBarContext";
 

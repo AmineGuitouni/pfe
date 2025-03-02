@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react';
 import { Alert, Input, Spinner } from "@heroui/react";
 import { IoSearchOutline } from "react-icons/io5";
 import CompanyCard from "./companyCard";
-import  {useCompanies}  from "../companies/useCompanies"; // Ensure this import is correct
+import  {useCompanies}  from "./contexts/useCompanies"; // Ensure this import is correct
 import AddCompanyButton from './addCompanyButton';
 
 export default function Companies() {
