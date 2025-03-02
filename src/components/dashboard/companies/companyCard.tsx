@@ -1,7 +1,13 @@
+"use client"
 import { formatShortDate } from "@/lib/utils";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@heroui/react";
-import { Key } from "react";
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button, cn, useDisclosure } from "@heroui/react";
+import { Key, useState } from "react";
+import { toast } from "react-toastify";
+import { useSession } from "next-auth/react";
+import { useCompanies } from "./contexts/useCompanies";
+import EditCompanyModal from "./editCompanyModal";
+import { CompanyType } from "@/app/api/v1/[user_id]/companies/list/route";
 
 const dropdownItems = [
     {
@@ -18,16 +24,66 @@ const dropdownItems = [
     },
 ];
 
-export default function CompanyCard({name, id, createdAt, database_name}:{name:string, id:string, createdAt:string, database_name:string}) {
+export default function CompanyCard({company}:{company:CompanyType}) {
+    const [isDeleteing, setIsDeleteing] = useState(false);
+    const {data:sessinon} = useSession();
+    const {setCompanies} = useCompanies();
+    const {isOpen: isEditModalOpen, onOpen: onOpenEditModal, onOpenChange: onOpenChangeEditModal} = useDisclosure();
+
+    const deleteCompany = async () => {
+        const originUrl = window.location.origin;
+        if(!sessinon?.user.id || !originUrl) return
+        setIsDeleteing(true);
+        try{
+            const response = await fetch(`${originUrl}/api/v1/${sessinon.user.id}/companies/${company.id}/delete`, {
+                method: "DELETE",
+            })
+
+            if(!response.ok){
+                const errorData = await response.json();
+                const errorMessage = errorData?.error || "Failed to delete company";
+                throw new Error(errorMessage);
+            }
+
+            setIsDeleteing(false);
+            setCompanies((prevCompanies) => {
+                if(!prevCompanies) return prevCompanies;
+                return prevCompanies.filter((c) => c.id !== company.id);
+            });
+            toast.success("Company deleted successfully");
+        }
+        catch(error){
+            console.log(error);
+            if(error instanceof Error){
+                toast.error(error.message);
+            }
+            else{
+                toast.error("Something went wrong");
+            }
+        }
+    };
+
     const handleAction = (key: Key) => {
-        console.log(`${key} company with id: ${id}`);
+        switch (key) {
+            case "delete":
+                deleteCompany();
+                break;
+            case "view":
+                break;
+            case "edit":
+                onOpenEditModal();
+                break;
+            default:
+                toast.error("Something went wrong");
+                break;
+        }
     };
 
     return (
-        <div className="w-96 h-48 border-1 cursor-pointer group hover:scale-[101%] border-white/20 p-5 bg-white/5 hover:bg-white/10 transition-all ease-linear rounded-lg flex flex-col justify-between">
+        <div className={cn("w-96 h-48 border-1 cursor-pointer group hover:scale-[101%] border-white/20 p-5 bg-white/5 hover:bg-white/10 transition-all ease-linear rounded-lg flex flex-col justify-between", isDeleteing && "pointer-events-none opacity-50 animate-pulse")}>
             <div className="w-full flex items-start justify-between">
                 <div className="flex flex-col">
-                    <h1 className="text-light_blue text-md font-[400]">{name}</h1>
+                    <h1 className="text-light_blue text-md font-[400] uppercase">{company.name}</h1>
                     <h1 className="text-white/50 text-sm">?? workers</h1>
                 </div>
                 
@@ -47,6 +103,7 @@ export default function CompanyCard({name, id, createdAt, database_name}:{name:s
                             aria-label="Company Actions" 
                             items={dropdownItems}
                             onAction={handleAction}
+                            disabledKeys={isDeleteing ? ["delete"] : []}
                         >
                             {(item) => (
                                 <DropdownItem
@@ -63,9 +120,15 @@ export default function CompanyCard({name, id, createdAt, database_name}:{name:s
             </div>
 
             <div>
-                <h4 className="text-white/50 text-sm">Linked DataBase: {database_name}</h4>
-                <h4 className="text-white/50 text-sm">Created on {formatShortDate(createdAt)}</h4>
+                <h4 className="text-white/50 text-sm">Linked DataBase: {company.database ? company.database.name: "Shared Database (free)"}</h4>
+                <h4 className="text-white/50 text-sm">Created on {formatShortDate(company.created_at)}</h4>
             </div>
+
+            <EditCompanyModal 
+                isOpen={isEditModalOpen} 
+                onOpenChange={onOpenChangeEditModal}
+                company={company}
+            />
         </div>
     );
 }

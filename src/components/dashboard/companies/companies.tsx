@@ -41,10 +41,7 @@ export default function Companies() {
                     {filteredCompanies.map(company => (
                         <CompanyCard 
                             key={company.id}
-                            name={company.name.toUpperCase()}
-                            id={company.id}
-                            createdAt={company.created_at}
-                            database_name={company.database ? company.database.name : "Shared Database (free)"}
+                            company={company}
                         />
                         
                     ))}
