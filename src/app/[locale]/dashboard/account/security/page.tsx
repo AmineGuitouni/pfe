@@ -1,5 +1,5 @@
 import ChangePassword from "@/components/dashboard/preferences/changePassword";
-import { Button } from "@heroui/react";
+import DeleteAccountButton from "@/components/dashboard/security/deleteAccountButton";
 import { BiSolidErrorAlt } from "react-icons/bi";
 
 export default function SecurityPage() {
@@ -27,7 +27,7 @@ export default function SecurityPage() {
                             <p className="text-white/50 text-md ">
                             Deleting your account is permanent and cannot be undone. Your data will be deleted.
                             </p>
-                            <Button color="danger" variant="solid" className=" text-danger-500 bg-danger-500/30 font-semibold my-4">Delete Account</Button>
+                            <DeleteAccountButton/>
                         </div>
                     </div>
                 </section>
