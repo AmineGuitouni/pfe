@@ -72,7 +72,7 @@ export default function AddCompanyButton() {
         setLoading(true);
 
         const originUrl = window.location.origin;
-        const database = Array.from(selectedDatabase).length === 0 ? 
+        const database = Array.from(selectedDatabase).length === 1 ? 
         databases.find((database) => database.id === Array.from(selectedDatabase)[0]) :
         undefined
 
@@ -88,7 +88,7 @@ export default function AddCompanyButton() {
                 }),
             });
 
-            const data = await response.json();
+            const {data} = await response.json();
 
             if (data.error) {
                 setError(data.error);
@@ -102,11 +102,13 @@ export default function AddCompanyButton() {
             } : null
 
             const newCompany: CompanyType = {
-                id:session.user.id, 
+                id:data.id, 
                 name,
                 created_at: new Date().toUTCString(),
                 database: databaseData
             }
+
+            console.log(newCompany)
 
             setCompanies((prevCompanies) => 
                 prevCompanies ?
