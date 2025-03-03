@@ -30,9 +30,13 @@ export default function Header() {
             <Breadcrumbs  onAction={(key)=>{
                 router.push(path.split("/").slice(0, Number(key) + 1 + startIndex).join("/"))
             }}>
-                {pathList.map((segment, index) => (
+                {pathList.map((segment, index) =>{
+                    if (segment.length>15) return (
+                        <BreadcrumbItem key={index}>Company</BreadcrumbItem>
+                    )
+                    return (
                     <BreadcrumbItem key={index}>{segment}</BreadcrumbItem>
-                ))}
+                )})}
             </Breadcrumbs>
         </div>
     );

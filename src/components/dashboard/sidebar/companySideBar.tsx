@@ -3,7 +3,8 @@ import Link from "next/link";
 import LogoutButton from "./logoutButton";
 import { useSidBar } from "./contexts/sideBarContext";
 
-export default function CompanySideBar() {
+export default function CompanySideBar({companyId}:{companyId: string}){
+
     const {isOpen, setIsOpen} = useSidBar();
 
     const toggleSidebar = () => {
@@ -25,34 +26,48 @@ export default function CompanySideBar() {
                 </div>
                 
                 <div className="w-full border-b border-b-white/20 flex flex-col justify-start gap-4 py-5 px-5">
-                    <h1 className="text-white/50 text-sm">General</h1>
-                    <Link href="#" className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
-                        Companies
+                    <h1 className="text-white/50 text-sm">User & Account Management</h1>
+                    <Link href={`/dashboard/${companyId}/users`} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
+                        users
                     </Link>
-                    <Link href="#" className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
-                        Databases
-                    </Link>
-                </div>
-                
-                <div className="w-full border-b border-b-white/20 flex flex-col justify-start gap-4 py-5 px-5">
-                    <h1 className="text-white/50 text-sm">Account</h1>
-                    <Link href="/dashboard/account/preferences" className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
-                        Preferences
-                    </Link>
-                    <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
-                        Billing page
-                    </Link>
-                    <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
-                        Security
+                    <Link href={`/dashboard/account`} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
+                        Account
                     </Link>
                     <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
                         Audit Logs
                     </Link>
                 </div>
                 
+                <div className="w-full border-b border-b-white/20 flex flex-col justify-start gap-4 py-5 px-5">
+                    <h1 className="text-white/50 text-sm">Task & Workflow</h1>
+                    <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
+                        TO-DO
+                    </Link>
+                </div>
+
+                <div className="w-full border-b border-b-white/20 flex flex-col justify-start gap-4 py-5 px-5">
+                    <h1 className="text-white/50 text-sm">Tools & Utilities</h1>
+                    <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
+                        AI
+                    </Link>
+                    <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
+                        Docs
+                    </Link>
+                    <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
+                        CLI
+                    </Link>
+                </div>
+                <div className="w-full border-b border-b-white/20 flex flex-col justify-start gap-4 py-5 px-5">
+                    <h1 className="text-white/50 text-sm">Insights & Monitoring</h1>
+                    <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
+                        Analytics
+                    </Link>
+                </div>
+                
                 <div>
                     <LogoutButton />
                 </div>
+
 
             </div>
             

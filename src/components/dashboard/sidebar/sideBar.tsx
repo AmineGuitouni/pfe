@@ -25,7 +25,7 @@ export default function SideBar() {
                 </div>
                 
                 <div className="w-full border-b border-b-white/20 flex flex-col justify-start gap-4 py-5 px-5">
-                    <h1 className="text-white/50 text-sm">General</h1>
+                    <h1 className="text-white/50 text-sm">Company & Data</h1>
                     <Link href="/dashboard/account" className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
                         Companies
                     </Link>
@@ -35,13 +35,17 @@ export default function SideBar() {
                 </div>
                 
                 <div className="w-full border-b border-b-white/20 flex flex-col justify-start gap-4 py-5 px-5">
-                    <h1 className="text-white/50 text-sm">Account</h1>
+                    <h1 className="text-white/50 text-sm">Configuration</h1>
                     <Link href="/dashboard/account/preferences" className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
                         Preferences
                     </Link>
                     <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
                         Billing page
                     </Link>
+                </div>
+
+                <div className="w-full border-b border-b-white/20 flex flex-col justify-start gap-4 py-5 px-5">
+                    <h1 className="text-white/50 text-sm">Security & Compliance</h1>
                     <Link href={"/dashboard/account/security"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
                         Security
                     </Link>
