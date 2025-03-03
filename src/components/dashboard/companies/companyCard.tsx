@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import { useCompanies } from "./contexts/useCompanies";
 import EditCompanyModal from "./editCompanyModal";
 import { CompanyType } from "@/app/api/v1/[user_id]/companies/list/route";
+import { useRouter } from "next/navigation";
 
 const dropdownItems = [
     {
@@ -29,6 +30,7 @@ export default function CompanyCard({company}:{company:CompanyType}) {
     const {data:sessinon} = useSession();
     const {setCompanies} = useCompanies();
     const {isOpen: isEditModalOpen, onOpen: onOpenEditModal, onOpenChange: onOpenChangeEditModal} = useDisclosure();
+    const router = useRouter();
 
     const deleteCompany = async () => {
         const originUrl = window.location.origin;
@@ -69,6 +71,7 @@ export default function CompanyCard({company}:{company:CompanyType}) {
                 deleteCompany();
                 break;
             case "view":
+                router.push(`/dashboard/${company.id}`);
                 break;
             case "edit":
                 onOpenEditModal();
