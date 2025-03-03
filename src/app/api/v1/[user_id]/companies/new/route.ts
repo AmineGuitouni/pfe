@@ -16,7 +16,7 @@ export async function POST(req:Request, {params:{user_id}}: {params:Params}) {
 
     if(error){
         console.log(error);
-        return NextResponse.json({data:[], error: error.message});      
+        return NextResponse.json({error: error.message});      
     }
 
     return NextResponse.json({data});
