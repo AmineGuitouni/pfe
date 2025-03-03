@@ -36,6 +36,10 @@ export default function Companies() {
                 <Spinner className='absolute top-[50%] left-[57%]' color='default'/>
             ) : error ? (
                 <Alert description={"Error in fetching companies"} title={"Error"} />
+            ) : filteredCompanies.length === 0 ? (
+                <div className="text-white/50 text-center py-10">
+                    No companies found. Create your first company.
+                </div>
             ) : (
                 <div className="flex flex-wrap gap-5">
                     {filteredCompanies.map(company => (

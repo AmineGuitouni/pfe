@@ -8,13 +8,13 @@ export async function GET(req: NextRequest) {
   const limit = Number(searchParams.get("limit") || "10");
   const search = searchParams.get("search") || "";
   const date = searchParams.get("date") || "";
-  const sort = searchParams.get("sort") || "asc";
+  const sort = searchParams.get("sort") || "ascending";
 
   let query = supabase
     .from("audit_logs")
     .select("id, action, timestamp,old_data,new_data,table_name", { count: "exact" })
     .eq("user_id", user_id)
-    .order("timestamp", { ascending: sort === "asc" })
+    .order("timestamp", { ascending: sort === "ascending" })
 
   if (search) {
     query = query.ilike("action", `%${search}%`);
