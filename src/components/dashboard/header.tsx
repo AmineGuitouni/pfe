@@ -13,6 +13,10 @@ export default function Header() {
         setIsOpen(!isOpen);
     };
 
+    let pathList = path.split("/")
+    const startIndex = pathList.indexOf("dashboard") + 1;
+    pathList = pathList.slice(startIndex);
+
     return (
         <div className="dark w-full h-[50px] flex items-center px-5 border-b-1 border-white/20 flex-shrink-0">
             <button 
@@ -24,12 +28,9 @@ export default function Header() {
             </button>
 
             <Breadcrumbs  onAction={(key)=>{
-                if(Number(key) <= 1) {
-                    return
-                }
-                router.push(path.split("/").slice(0, Number(key) + 1).join("/"))
+                router.push(path.split("/").slice(0, Number(key) + 1 + startIndex).join("/"))
             }}>
-                {path.split("/").map((segment, index) => (
+                {pathList.map((segment, index) => (
                     <BreadcrumbItem key={index}>{segment}</BreadcrumbItem>
                 ))}
             </Breadcrumbs>
