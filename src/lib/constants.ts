@@ -1,0 +1,1 @@
+export const APP_PERMISSIONS = ["user management", "group management"];

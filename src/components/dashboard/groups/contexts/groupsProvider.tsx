@@ -7,7 +7,10 @@ import { Group } from "../types/groupsTypes";
 interface GroupsContextType {
     selectedGroup: string | null;
     setSelectedGroup: React.Dispatch<React.SetStateAction<string | null>>;
-    groups: Group[]
+    groups: Group[],
+    setGroups: React.Dispatch<React.SetStateAction<Group[]>>,
+    isOpen: boolean,
+    setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const groupsContext = createContext<GroupsContextType | undefined>(undefined)
@@ -23,9 +26,18 @@ export function useGroupsContext() {
 export default function GroupsContextProvider({ children }: { children: React.ReactNode }) {
     const {groups} = useGroups()
     const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
+    const [isOpen, setIsOpen] = useState(false)
+    const [groupsState, setGroupsState] = useState<Group[]>(groups || [])
 
     return (
-        <groupsContext.Provider value={{ selectedGroup, setSelectedGroup, groups }}>
+        <groupsContext.Provider value={{
+            selectedGroup,
+            setSelectedGroup,
+            groups: groupsState,
+            setGroups: setGroupsState,
+            isOpen,
+            setIsOpen
+        }}>
             {children}
         </groupsContext.Provider>
     )
