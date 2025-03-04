@@ -5,7 +5,7 @@ import { GroupIcon, Edit, MoreVertical, Trash } from "lucide-react"
 import { Group } from "../types/groupsTypes"
 
 export default function GroupCard({group}:{group:Group}){
-    const {setSelectedGroup, selectedGroup} = useGroupsContext()
+    const {setSelectedGroup, selectedGroup, setIsOpen} = useGroupsContext()
     return(
         <Card
             className={cn(
@@ -13,7 +13,14 @@ export default function GroupCard({group}:{group:Group}){
                 selectedGroup === group.id && "bg-white/10 border-white/50"
             )}
             isPressable
-            onPress={() => setSelectedGroup(group.id)}
+            onPress={() => {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth',
+                    });
+                    setSelectedGroup(group.id)
+                    setIsOpen(true)
+                }}
             >
             <CardBody className="p-6 flex flex-col justify-between overflow-hidden">
                 {/* Top section */}

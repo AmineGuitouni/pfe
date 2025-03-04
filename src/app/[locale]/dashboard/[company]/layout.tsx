@@ -12,7 +12,7 @@ export default async function CompanyLayout({
 }>) {
 
     return (
-    <div className='relative w-full min-h-screen mx-auto flex'>
+    <div className='w-full min-h-screen mx-auto flex'>
       <SideBarProvider>
       <CompanySideBar companyId={company}/>
       <div className="flex-grow flex flex-col overflow-y-auto w-full">
