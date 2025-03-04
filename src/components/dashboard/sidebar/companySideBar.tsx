@@ -28,10 +28,10 @@ export default function CompanySideBar({companyId}:{companyId: string}){
                 <div className="w-full border-b border-b-white/20 flex flex-col justify-start gap-4 py-5 px-5">
                     <h1 className="text-white/50 text-sm">User & Account Management</h1>
                     <Link href={`/dashboard/${companyId}/users`} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
-                        users
+                        Users
                     </Link>
-                    <Link href={`/dashboard/account`} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
-                        Account
+                    <Link href={`/dashboard/${companyId}/groups`} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
+                        Groups
                     </Link>
                     <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
                         Audit Logs
