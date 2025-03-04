@@ -1,5 +1,5 @@
-import { createClient } from "@supabase/supabase-js"
 import { supabase } from "../database/supabase"
+import { getServerDBfromCompanyId } from "../database/externalServerSupabase";
 
 export async function getUser(credentials:{
     company?: string,
@@ -8,9 +8,17 @@ export async function getUser(credentials:{
     if(credentials?.company){
         // TODO: bech nbadel el logic hadha
         console.log(credentials.company)
-        const {data, error} = await supabase.from("company")
-        .select("user:users(key:keys(value))")
-        .eq('id', credentials.company)
+        const localSupabase = await getServerDBfromCompanyId(credentials.company);
+
+        if(!localSupabase){
+            throw new Error("Failed to connect to database")
+        }
+
+        const {data, error} = await localSupabase
+        .from("users")
+        .select("*")
+        .eq('company_id', credentials.company)
+        .eq("email", credentials.email)
         .single()
 
         if(error){
@@ -18,21 +26,10 @@ export async function getUser(credentials:{
             throw new Error(error.message)
         }
 
-        const companyUser = data.user as any
-        const keys = companyUser.key[0].value as any
-        
-        const localsb = createClient(keys.NEXT_PUBLIC_SUPABASE_URL,keys.SUPABASE_KEY);
-        const { data: localData, error: localError } = await localsb.from("users")
-        .select("*")
-        .eq("email", credentials.email)
-        .single()
 
-        if(localError){
-            console.log(localError)
-            throw new Error(localError.message)
+        return {
+            ...data, role : "worker",email_verified : true,
         }
-
-        return localData
     }
     else{
         const { data , error} = await supabase.from("users")

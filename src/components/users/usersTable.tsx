@@ -50,6 +50,7 @@ export default function UsersTable({ company_id }: { company_id: string }) {
         }
         topContent={
           <UsersFilters
+            company_id={company_id}
             searchText={searchText}
             onSearchChange={setSearchText}
             rowsPerPage={rowsPerPage}
