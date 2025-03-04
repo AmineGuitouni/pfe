@@ -5,11 +5,13 @@ import { Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRo
 import { useUsers } from "./hooks/useUsers";
 import { UsersFilters } from "./userFilter";
 import { formatShortDate } from "@/lib/utils";
+import ActionButton from "./actionButton";
 
 export default function UsersTable({ company_id }: { company_id: string }) {
   const {
     users,
     totalCount,
+    deleteUser,
     loading,
     searchText,
     setSearchText,
@@ -19,6 +21,7 @@ export default function UsersTable({ company_id }: { company_id: string }) {
     setCurrentPage,
     rowsPerPage,
     setRowsPerPage,
+    editUser,
   } = useUsers(company_id);
 
   const totalPages = Math.ceil(totalCount / rowsPerPage);
@@ -74,6 +77,7 @@ export default function UsersTable({ company_id }: { company_id: string }) {
           <TableColumn key="created_at" allowsSorting>
             Added at
           </TableColumn>
+          <TableColumn key="actions">Actions</TableColumn>
         </TableHeader>
         <TableBody
           emptyContent="No logs found"
@@ -83,13 +87,14 @@ export default function UsersTable({ company_id }: { company_id: string }) {
         >
           {(user) => {
             return (
-              <TableRow key={user.id}>
+              <TableRow key={user.id+" "+user.first_name}>
                 <TableCell>{user.first_name}</TableCell>
                 <TableCell>{user.last_name}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.phone_number}</TableCell>
                 <TableCell>{user.country}</TableCell>
                 <TableCell>{formatShortDate(user.created_at)}</TableCell>
+                <TableCell><ActionButton editUser={editUser} deleteUser={deleteUser} user={user}/></TableCell>
               </TableRow>
             )
           }}

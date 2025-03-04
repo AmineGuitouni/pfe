@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { SortDescriptor } from "@heroui/react";
 import { User } from "../types";
+import { toast } from "react-toastify";
 
 export const useUsers = (companyId: string) => {
   const [users, setUsers] = useState<User[]>([]);
@@ -52,7 +53,56 @@ export const useUsers = (companyId: string) => {
     fetchUsers();
   }, [fetchUsers]);
 
+  const deleteUser = async (userId: string) => {
+    
+    if (!session?.user.id || !companyId) return;
+    
+    try {
+      await fetch(`/api/v1/${userId}/companies/${companyId}/users`, {
+        method: "DELETE",
+      });
+
+      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
+      toast.success("User deleted successfully");
+    
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("Error deleting user");
+    }
+  }
+
+  const editUser = async ( updatedUser: User) => {
+    if (!session?.user.id || !companyId) return null;
+
+    try {
+      const response = await fetch(`/api/v1/${session.user.id}/companies/${companyId}/users`, {
+        method: "PUT",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user: updatedUser }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast.error(result.error || "Error updating user");
+        return;
+      }
+
+      setUsers((prevUsers) => prevUsers.map((user) => (user.id === updatedUser.id ? updatedUser : user)));
+      toast.success("User updated successfully");
+      return
+
+    } catch (error) {
+      console.error("Error updating user:", error);
+      toast.error(error instanceof Error ? error.message : "Error updating user");
+      return
+    }
+  }
+
   return {
+    editUser,
     users,
     totalCount,
     loading,
@@ -64,6 +114,7 @@ export const useUsers = (companyId: string) => {
     setCurrentPage,
     rowsPerPage,
     setRowsPerPage,
+    deleteUser,
     refetch,
   };
 };

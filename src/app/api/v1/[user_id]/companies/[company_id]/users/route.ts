@@ -22,9 +22,9 @@ export async function GET(req: NextRequest, {params: {company_id}}: {params: { c
     .eq("company_id", company_id)
     .order("created_at", { ascending: sort === "ascending" })
 
-  if (search) {
-    query = query.ilike("action", `%${search}%`);
-  }
+    if (search) {
+        query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%`);
+      }
 
 
   const from = (page - 1) * limit;
@@ -39,4 +39,81 @@ export async function GET(req: NextRequest, {params: {company_id}}: {params: { c
   }
 
   return NextResponse.json({ data, count });
+}
+
+export async function DELETE(req: NextRequest, {params: {company_id,user_id}}: {params: { company_id: string, user_id: string}}) {
+    const client = await getServerDBfromCompanyId(company_id);
+  
+    if (!client) {
+        return NextResponse.json({ data: [], count: 0, error: "Failed to connect to database" });
+    }   
+
+    const {error} = await client.from("users")
+    .delete()
+    .eq("id", user_id)
+    .eq("company_id", company_id)
+
+    if(error) {
+        console.error(error);
+        return NextResponse.json({error: error.message });
+    }
+
+    return NextResponse.json({  ok: true });
+
+}
+
+export async function PUT(
+  req: NextRequest, 
+  {params: {company_id}}: {params: { company_id: string}}
+) {
+  try {
+    const client = await getServerDBfromCompanyId(company_id);
+
+    if (!client) {
+      return NextResponse.json({ 
+        error: "Failed to connect to database" 
+      }, { status: 500 });
+    }   
+
+    const { user } = await req.json();
+
+    console.log(user);
+
+    // Validate input
+    if (!user) {
+      return NextResponse.json({ 
+        error: "User data is required" 
+      }, { status: 400 });
+    }
+
+    // Perform update
+    const { error } = await client
+      .from('users')
+      .update({
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
+        country: user.country,
+        phone_number: user.phone_number
+      })
+      .eq('id', user.id);
+
+    if (error) {
+      console.error('Update error:', error);
+      return NextResponse.json({ 
+        error: error.message 
+      }, { status: 500 });
+    }
+
+    return NextResponse.json({ 
+      ok: true,
+      message: 'User updated successfully' 
+    });
+
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    return NextResponse.json({ 
+      error: 'An unexpected error occurred' 
+    }, { status: 500 });
+  }
 }
