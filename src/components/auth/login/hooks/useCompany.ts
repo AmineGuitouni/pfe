@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 export type company = {
     id: string,
     name: string,
-    user_id: string,
-    created_at: string
 }
 
 export default function useCompany() {
@@ -17,10 +15,10 @@ export default function useCompany() {
         setLoading(true);
 
         const originUrl = window.location.origin
-        fetch(`${originUrl}/api/v1/companys/list?filter=${filter}`)
+        fetch(`${originUrl}/api/getCompanies?filter=${filter}`)
         .then(res => res.json())
         .then((data:{data:company[], error?:string}) => {
-            console.log(data)
+
             if(data.error){
                 setError(data.error)
             }
@@ -35,6 +33,7 @@ export default function useCompany() {
             setLoading(false);
         })
     },[filter])
+
 
     return {companys, loading, error, setFilter, filter}
 }

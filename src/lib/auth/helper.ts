@@ -6,7 +6,7 @@ export async function getUser(credentials:{
     email?: string
 }){
     if(credentials?.company){
-        // TODO: bech nbadel el logic hadha
+
         console.log(credentials.company)
         const localSupabase = await getServerDBfromCompanyId(credentials.company);
 

@@ -3,6 +3,7 @@ import {Autocomplete, AutocompleteItem} from "@heroui/react";
 import useCompany from "./hooks/useCompany";
 
 export default function SelectCompany({onSelectionChange}:{onSelectionChange?:(value:string | null) => void}) {
+
   const { companys, setFilter, loading, filter } = useCompany();
 
   return (

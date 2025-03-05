@@ -35,7 +35,7 @@ export default function LoginFormWorker() {
                 if (callback?.error) {
                     setError(callback.error); 
                 } else {
-                    router.push("/");
+                    router.push(`/dashboard/${company}`);
                     router.refresh();
                 }
             })

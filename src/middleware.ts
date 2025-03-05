@@ -16,10 +16,10 @@ function getPath(path: string) {
 }
 
 export async function middleware(request: NextRequest) {
-  // return i18nRouter(request, i18nConfig); // <<-- kan t7eb twa9ef el middleware na7 el comment mn el star hadha
   const token = await getToken({req: request})
   const path = getPath(request.nextUrl.pathname);
 
+  // Handle unauthenticated users
   if(!token){
     let isAuthPage = false;
     authPages.forEach((page)=>{
@@ -44,7 +44,20 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(loginUrl);
       }
     }
-  }else{
+  } else {
+
+    if(token.role === "worker") {
+      const workerCompanyId = token.company_id;
+      
+      const isHome = path === "/";
+      const isWorkerCompanyDashboard = path === `/dashboard/${workerCompanyId}` || 
+                                      path.startsWith(`/dashboard/${workerCompanyId}/`);
+      
+      if(!isHome && !isWorkerCompanyDashboard) {
+        return NextResponse.redirect(new URL(`/dashboard/${workerCompanyId}`, request.url));
+      }
+    }
+
     if(!token.email_verified && !path.startsWith("/verify")){
       return NextResponse.redirect(new URL('/verify', request.url));
     }
