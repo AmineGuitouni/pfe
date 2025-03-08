@@ -2,6 +2,7 @@
 
 import { Input } from "@heroui/react";
 import { SearchIcon } from "../dashboard/audit-logs/components/icons";
+import AddModal from "./addUserButton";
 
 interface AuditLogFiltersProps {
   searchText: string;
@@ -9,6 +10,7 @@ interface AuditLogFiltersProps {
   rowsPerPage: number;
   onRowsPerPageChange?: (value: number) => void;
   totalCount: number;
+  company_id: string
 }
 
 export const UsersFilters = ({
@@ -17,7 +19,10 @@ export const UsersFilters = ({
   rowsPerPage,
   onRowsPerPageChange,
   totalCount,
+  company_id
 }: AuditLogFiltersProps) => {
+
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col sm:flex-row gap-4">
@@ -31,6 +36,7 @@ export const UsersFilters = ({
           startContent={<SearchIcon className="text-default-300" />}
           variant="bordered"
         />
+        <AddModal company_id={company_id}/>
       </div>
       <div className="flex justify-between items-center">
         <span className="text-default-400 text-small">Total {totalCount} users</span>

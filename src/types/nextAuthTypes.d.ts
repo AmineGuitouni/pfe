@@ -15,6 +15,7 @@ declare module "next-auth" {
       image?: string | null
       country: string
       phone_number : string
+      company_id?: string | null
     }
   }
 
@@ -28,5 +29,6 @@ declare module "next-auth" {
     email: string
     email_verified: boolean
     phone_number: string
+    company_id?: string | null
   }
 }
