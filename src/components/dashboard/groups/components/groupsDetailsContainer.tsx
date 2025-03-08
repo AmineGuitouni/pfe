@@ -6,27 +6,65 @@ import PermissionCard from "./PermissionCard";
 import UserCardList from "./UserCardList";
 import { useGroupsContext } from "../contexts/groupsProvider";
 import { APP_PERMISSIONS as permissions } from "@/lib/constants";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { Group } from "../types/groupsTypes";
 
 export default function GroupsDetailsContainer() {
     const {selectedGroup, groups, setSelectedGroup, isOpen, setIsOpen} = useGroupsContext()
-    let group = undefined;
-    if(selectedGroup && isOpen) {
-        group = groups.find((group) => group.id === selectedGroup)
-    };
-
-    const [groupName, setGroupName] = useState(group?.name || '');
-    const [groupDescription, setGroupDescription] = useState(group?.description || '');
-    const [groupPermissions, setGroupPermissions] = useState<string[]>(group?.permissions || []);
+    const [initialGroup, setInitialGroup] = useState<Group | null>(null)
+    
+    const [groupName, setGroupName] = useState('');
+    const [groupDescription, setGroupDescription] = useState('');
+    const [groupPermissions, setGroupPermissions] = useState<string[]>([]);
     // const [groupMembers, setGroupMembers] = useState(group?.members || []);
 
+    useEffect(()=>{
+        const gruop = groups.find((group) => group.id === selectedGroup)
+
+        if(gruop){
+            setInitialGroup(gruop)
+            setGroupName(gruop.name)
+            setGroupDescription(gruop.description)
+            setGroupPermissions(gruop.permissions)
+        }
+        else{
+            setInitialGroup(null)
+            setGroupName('')
+            setGroupDescription('')
+            setGroupPermissions([])
+        }
+    },[selectedGroup,groups])
+
+    const onSave = () =>{
+        console.log("save")
+    }
+
+    const onCreate = ()=>{
+        console.log("onCreate")
+    }
+
+    const onSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (selectedGroup) {
+            onSave()
+        } else {
+            onCreate()
+        }
+    }
+
     return (
-        <div className="flex-grow mt-[72px]">
-            <div className="flex flex-col w-full border-2 rounded-lg border-white/20">
+        <motion.div
+            initial={{ opacity: 0, width: 0 }}
+            animate={{ opacity: isOpen ? 1 : 0, width: isOpen ? undefined : 0 }}
+            transition={{ duration: 0.5 }}
+            className="max-w-[calc(100%-404px)] flex-grow mt-[72px] sticky top-12 h-fit"
+        >
+            <form onSubmit={onSubmit} className="flex flex-col w-full border-2 rounded-lg border-white/20">
                 <div className="p-4 border-b-1 bg-white/5 border-white/20 flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-white">
                         {selectedGroup ? `Edit Group: ` : 'Create New Group'}
-                        {selectedGroup && group && <span className="text-lg underline font-normal text-white/80">{group.name}</span>}
+                        {selectedGroup && <span className="text-lg underline font-normal text-white/80">{groupName}</span>}
                     </h2>
                     <div className="flex gap-2 dark">
                         <Button
@@ -132,7 +170,7 @@ export default function GroupsDetailsContainer() {
                         console.log(`Removing user: ${userId}`);
                     }}
                 />
-            </div>
-        </div>
+            </form>
+        </motion.div>
     )
 }

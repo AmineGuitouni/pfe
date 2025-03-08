@@ -16,7 +16,7 @@ export default async function RootLayout({
     return (
 
                 <main
-                  className='bg-dark_blue flex flex-col justify-center items-center overflow-x-hidden'
+                  className='bg-dark_blue relative flex flex-col justify-center items-center w-full max-w-full'
                 >
                 <Background/>
                 <Nav session={session}/>

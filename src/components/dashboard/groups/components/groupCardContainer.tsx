@@ -26,13 +26,13 @@ export default function GroupCardContainer(){
 
     return(
         <motion.div 
-            className="w-full flex flex-col gap-10 flex-shrink-0"
+            className="flex flex-col gap-10"
             variants={containerVariants}
             initial="open"
             animate={isOpen ? "closed" : "open"}
             transition={{ duration: 0.5 }}
         >
-            <div className="w-full flex gap-5">
+            <div className="w-[384px] flex gap-5 rounded-r-lg backdrop-blur z-10">
                 <AddGroupButton />
                 <Input
                     placeholder="Search groups..."

@@ -5,9 +5,9 @@ import GroupsContextProvider from "@/components/dashboard/groups/contexts/groups
 export default function DataBasesPage() {
     return (
         <div className="w-full p-10">
-            <div className="w-full flex gap-5 overflow-x-hidden">
+            <div className="w-full gap-5 flex justify-between">
                 <GroupsContextProvider>
-                    <GroupCardContainer/>
+                    <GroupCardContainer/>                        
                     <GroupsDetailsContainer/>
                 </GroupsContextProvider>
             </div>

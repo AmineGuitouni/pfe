@@ -20,6 +20,7 @@ export default function CompanySideBar({companyId}:{companyId: string}){
                 transition-transform duration-300 ease-in-out
                 ${isOpen ? 'translate-x-0' : '-translate-x-full'} 
                 md:translate-x-0
+                flex-shrink-0
             `}>
                 <div className="w-full h-[50px] border-b border-b-white/20 flex items-center px-5">
                     <h1 className="text-white text-lg ml-16 md:ml-0">Dashboard</h1>

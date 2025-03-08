@@ -24,17 +24,16 @@ export function useGroupsContext() {
 }
 
 export default function GroupsContextProvider({ children }: { children: React.ReactNode }) {
-    const {groups} = useGroups()
+    const {groups, setGroups} = useGroups()
     const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
     const [isOpen, setIsOpen] = useState(false)
-    const [groupsState, setGroupsState] = useState<Group[]>(groups || [])
 
     return (
         <groupsContext.Provider value={{
             selectedGroup,
             setSelectedGroup,
-            groups: groupsState,
-            setGroups: setGroupsState,
+            groups,
+            setGroups,
             isOpen,
             setIsOpen
         }}>
