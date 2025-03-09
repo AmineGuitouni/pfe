@@ -3,14 +3,8 @@
 import { FaUsers } from "react-icons/fa";
 import { IoSearchOutline } from "react-icons/io5";
 import { Input } from "@heroui/react";
-import { UserCard } from "./UserCard";
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  initial: string;
-}
+import { UserCard, UserCardSkeleton } from "./UserCard";
+import { User } from "@/components/users/types";
 
 interface UserCardProps {
   currentMembers: User[];
@@ -18,6 +12,8 @@ interface UserCardProps {
   onSearch?: (query: string) => void;
   onAddUser?: (userId: string) => void;
   onRemoveUser?: (userId: string) => void;
+  searchValue?: string;
+  isloading?: boolean
 }
 
 export default function UserCardLists({
@@ -26,6 +22,8 @@ export default function UserCardLists({
   onSearch,
   onAddUser,
   onRemoveUser,
+  searchValue,
+  isloading
 }: UserCardProps) {
   return (
     <div className="p-4 text-white dark flex flex-col gap-4">
@@ -39,31 +37,40 @@ export default function UserCardLists({
         className="w-full max-w-[300px] dark text-white"
         endContent={<IoSearchOutline className="text-light_blue-500/70" />}
         variant="bordered"
+        value={searchValue}
         onChange={(e) => onSearch?.(e.target.value)}
       />
       
       <div className="border border-white/20 rounded-lg p-4">
         <h4 className="text-sm font-medium text-white/60 mb-3">CURRENT MEMBERS</h4>
-        {currentMembers.map((user) => (
-          <UserCard
-            key={user.id}
-            user={user}
-            variant="remove"
-            onAction={onRemoveUser}
-          />
-        ))}
+        {
+          isloading ? (
+            <UserCardSkeleton/>
+          ):
+          currentMembers.map((user) => (
+            <UserCard
+              key={user.id}
+              user={user}
+              variant="remove"
+              onAction={onRemoveUser}
+            />
+          ))
+        }
       </div>
       
       <div className="border border-white/20 rounded-lg p-4">
         <h4 className="text-sm font-medium text-white/60 mb-3">AVAILABLE USERS</h4>
-        {availableUsers.map((user) => (
-          <UserCard
-            key={user.id}
-            user={user}
-            variant="add"
-            onAction={onAddUser}
-          />
-        ))}
+        {
+          isloading ? Array.from({ length: 3 }).map((_, index) => <UserCardSkeleton key={index}/>):
+          availableUsers.map((user) => (
+            <UserCard
+              key={user.id}
+              user={user}
+              variant="add"
+              onAction={onAddUser}
+            />
+          ))
+        }
       </div>
     </div>
   );

@@ -17,6 +17,7 @@ export const useUsers = (companyId: string) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [loading, setLoading] = useState(true);
+  const [excludedUsers, setExcludedUsers] = useState<string[]>([]);
   const { data: session } = useSession();
 
   const fetchUsers = useCallback(async () => {
@@ -28,6 +29,7 @@ export const useUsers = (companyId: string) => {
       limit: rowsPerPage.toString(),
       search: searchText,
       sort: sortDescriptor.direction,
+      excludedUsers: JSON.stringify(excludedUsers),
     });
 
     try {
@@ -43,7 +45,7 @@ export const useUsers = (companyId: string) => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, rowsPerPage, searchText, session?.user.id, companyId, sortDescriptor]);
+  }, [currentPage, rowsPerPage, searchText, session?.user.id, companyId, sortDescriptor, excludedUsers]);
 
   useEffect(() => {
     fetchUsers();
@@ -116,5 +118,6 @@ export const useUsers = (companyId: string) => {
     setRowsPerPage,
     deleteUser,
     refetch,
+    setExcludedUsers
   };
 };

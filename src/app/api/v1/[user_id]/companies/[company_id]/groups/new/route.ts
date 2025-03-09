@@ -1,4 +1,3 @@
-import { Group } from '@/components/dashboard/groups/types/groupsTypes'
 import { getServerDBfromCompanyId } from '@/lib/database/externalServerSupabase'
 import { NextResponse } from 'next/server'
 
@@ -11,11 +10,12 @@ export interface CreateGroupRequestBody {
   name: string
   description?: string
   permissions: string[]
+  users: string[]
 }
 
 export interface CreateGroupResponseBody {
   error?: string
-  data?: Group
+  data?: {id: string}
 }
 
 export async function POST(request: Request, { params }: { params: params }) {
@@ -57,9 +57,25 @@ export async function POST(request: Request, { params }: { params: params }) {
       .select('id')
       .single()
 
-    if (error) throw error
+    if (error) throw error;
 
-    return NextResponse.json({ data: group.id })
+    if (!group) {
+      return NextResponse.json(
+        { error: 'Failed to create group' },
+        { status: 500 }
+      )
+    }
+
+    const { error: error2 } = await supabase
+      .from('user_groups')
+      .insert(body.users.map((user_id) => ({
+        user_id: user_id,
+        group_id: group.id
+      })))
+
+    if (error2) throw error2
+
+    return NextResponse.json({ data: group })
   } catch (error) {
     console.error(error)
     return NextResponse.json(

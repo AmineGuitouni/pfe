@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Divider, Input, Textarea } from "@heroui/react";
+import { Button, Divider, Input, ScrollShadow, Textarea } from "@heroui/react";
 import { FaInfoCircle, FaShieldAlt } from "react-icons/fa";
 import PermissionCard from "./PermissionCard";
 import UserCardList from "./UserCardList";
@@ -9,24 +9,44 @@ import { APP_PERMISSIONS as permissions } from "@/lib/constants";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Group } from "../types/groupsTypes";
+import { useUsers } from "@/components/users/hooks/useUsers";
+import { User } from "@/components/users/types";
+import { toast } from "react-toastify";
 
-export default function GroupsDetailsContainer() {
-    const {selectedGroup, groups, setSelectedGroup, isOpen, setIsOpen} = useGroupsContext()
+export default function GroupsDetailsContainer({company}:{company: string}) {
+    const {selectedGroup, groups, setSelectedGroup, isOpen, setIsOpen, addGroup, getGroupUsersDetails} = useGroupsContext()
+    const [actionLoading, setActionLoading] = useState(false)
     const [initialGroup, setInitialGroup] = useState<Group | null>(null)
+    const {
+        users,
+        loading,
+        searchText,
+        setSearchText,
+        setExcludedUsers
+    } = useUsers(company)
+
+    console.log(initialGroup)
     
     const [groupName, setGroupName] = useState('');
     const [groupDescription, setGroupDescription] = useState('');
     const [groupPermissions, setGroupPermissions] = useState<string[]>([]);
-    // const [groupMembers, setGroupMembers] = useState(group?.members || []);
+    const [groupMembers, setGroupMembers] = useState<User[]>([]);
 
     useEffect(()=>{
-        const gruop = groups.find((group) => group.id === selectedGroup)
+        const group = groups.find((group) => group.id === selectedGroup)
 
-        if(gruop){
-            setInitialGroup(gruop)
-            setGroupName(gruop.name)
-            setGroupDescription(gruop.description)
-            setGroupPermissions(gruop.permissions)
+        if(group){
+            console.log(group)
+            setInitialGroup(group)
+            setGroupName(group.name)
+            setGroupDescription(group.description)
+            setGroupPermissions(group.permissions)
+            setExcludedUsers(group.members)
+
+            getGroupUsersDetails(group.members)
+            .then((group_users)=>{
+                setGroupMembers(group_users)
+            })
         }
         else{
             setInitialGroup(null)
@@ -34,14 +54,38 @@ export default function GroupsDetailsContainer() {
             setGroupDescription('')
             setGroupPermissions([])
         }
-    },[selectedGroup,groups])
+    },[selectedGroup, groups, setExcludedUsers, getGroupUsersDetails])
 
     const onSave = () =>{
         console.log("save")
     }
 
-    const onCreate = ()=>{
-        console.log("onCreate")
+    const onCreate = async()=>{
+        setActionLoading(true)
+        try{
+            await addGroup({
+                name: groupName,
+                description: groupDescription,
+                permissions: groupPermissions,
+                users: groupMembers.map((user) => user.id)
+            })
+
+            toast.success("Group created successfully")
+
+            setGroupName('')
+            setGroupDescription('')
+            setGroupPermissions([])
+            setGroupMembers([])
+            
+            setIsOpen(false)
+        }
+        catch(err){
+            console.log(err)
+            toast.error("Something went wrong")
+        }
+        finally{
+            setActionLoading(false)
+        }
     }
 
     const onSubmit = (e: React.FormEvent) => {
@@ -60,7 +104,7 @@ export default function GroupsDetailsContainer() {
             transition={{ duration: 0.5 }}
             className="max-w-[calc(100%-404px)] flex-grow mt-[72px] sticky top-12 h-fit"
         >
-            <form onSubmit={onSubmit} className="flex flex-col w-full border-2 rounded-lg border-white/20">
+            <form onSubmit={onSubmit} className="flex flex-col w-full border-2 rounded-lg border-white/20 max-h-[calc(100vh-150px)]">
                 <div className="p-4 border-b-1 bg-white/5 border-white/20 flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-white">
                         {selectedGroup ? `Edit Group: ` : 'Create New Group'}
@@ -74,6 +118,8 @@ export default function GroupsDetailsContainer() {
                                 setSelectedGroup(null)
                                 setIsOpen(false)
                             }}
+                            isDisabled={actionLoading}
+                            isLoading={actionLoading}
                         >
                             Cancel
                         </Button>
@@ -85,6 +131,7 @@ export default function GroupsDetailsContainer() {
                         </Button>
                     </div>
                 </div>
+                <ScrollShadow className="overflow-y-auto h-full w-full">
                 <div className="p-4 text-white dark flex flex-col gap-4">
                     <h3 className="text-md font-medium text-white/80 flex items-center gap-2">
                         <FaInfoCircle className="w-4 h-4" />
@@ -132,44 +179,22 @@ export default function GroupsDetailsContainer() {
                 </div>
                 <Divider className="bg-white/20" />
                 <UserCardList
-                    currentMembers={[
-                        {
-                            id: "1",
-                            name: "Bob Johnson",
-                            email: "bob@example.com",
-                            initial: "B"
-                        }
-                    ]}
-                    availableUsers={[
-                        {
-                            id: "2",
-                            name: "Alice Brown",
-                            email: "alice@example.com",
-                            initial: "A"
-                        },
-                        {
-                            id: "3",
-                            name: "Charlie Wilson",
-                            email: "charlie@example.com",
-                            initial: "C"
-                        },
-                        {
-                            id: "4",
-                            name: "Diana Miller",
-                            email: "diana@example.com",
-                            initial: "D"
-                        }
-                    ]}
-                    onSearch={(query) => {
-                        console.log(`Searching for: ${query}`);
-                    }}
+                    currentMembers={groupMembers}
+                    availableUsers={users}
+                    searchValue={searchText}
+                    onSearch={setSearchText}
                     onAddUser={(userId) => {
-                        console.log(`Adding user: ${userId}`);
+                        if(groupMembers.find((user) => user.id === userId)) return;
+                        setGroupMembers(prev=>[...prev, users.find((user) => user.id === userId)!])
+                        setExcludedUsers(prev=>[...prev, userId])
                     }}
                     onRemoveUser={(userId) => {
-                        console.log(`Removing user: ${userId}`);
+                        setGroupMembers(groupMembers.filter((user) => user.id !== userId))
+                        setExcludedUsers(prev=>prev.filter((user) => user !== userId))
                     }}
+                    isloading={loading && users.length === 0}
                 />
+                </ScrollShadow>
             </form>
         </motion.div>
     )

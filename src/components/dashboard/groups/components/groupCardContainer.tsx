@@ -17,7 +17,7 @@ const containerVariants = {
 }
 
 export default function GroupCardContainer(){
-    const { groups, isOpen } = useGroupsContext()
+    const { groups, isOpen, loadingGroups} = useGroupsContext()
     const [searchTerm, setSearchTerm] = useState('');
 
     const filteredGroups = groups.filter(group =>
@@ -48,9 +48,20 @@ export default function GroupCardContainer(){
             <div
                 className="flex flex-wrap gap-5"
             >
-                {filteredGroups.map((group, index) => (
-                    <GroupCard key={index} group={group}/>
-                ))}
+                {
+                    loadingGroups ? "Loading..." :
+                    groups.length === 0 ? 
+                    <div className="text-white/50 text-center py-10 w-full">
+                        No groups found. Create your first groups.
+                    </div> :
+                    filteredGroups.length === 0 ? 
+                    <div className="text-white/50 text-center py-10 w-full">
+                        No groups found.
+                    </div> :
+                    filteredGroups.map((group, index) => (
+                        <GroupCard key={index} group={group}/>
+                    ))
+                }
             </div>
         </motion.div>
     )

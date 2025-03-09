@@ -33,14 +33,22 @@ export async function GET(request: Request, { params }: { params: params }) {
 
     const { data: groups, error } = await supabase
       .from('groups')
-      .select('id, name, created_at, description, members:group_members(user_id), permissions')
+      .select('id, name, created_at, description, members:user_groups(user_id), permissions, company_id')
       .eq('company_id', company_id)
       .order('created_at', { ascending: true })
 
-    if (error) throw error
+    if (error) throw error;
 
     return NextResponse.json({
-      data:groups.map(group => ({...group, members_count: group.members.length}))
+      data:groups.map(group => ({
+        id: group.id,
+        name: group.name,
+        description: group.description,
+        permissions: group.permissions,
+        members_count: group.members.length,
+        members: group.members.map(member => member.user_id),
+        created_at: group.created_at
+      })) satisfies Group[],
     })
   } 
   catch (error) {

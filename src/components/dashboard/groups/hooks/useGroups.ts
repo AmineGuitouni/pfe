@@ -1,207 +1,140 @@
 import { useCallback, useEffect, useState } from "react";
 import { Group } from "../types/groupsTypes";
-
-const dummyData: Group[] = [
-    {
-        id: "1",
-        name: "Group A",
-        description: "This is Group A",
-        members_count: 10,
-        members:[],
-        permissions:[],
-        created_at: "2023-01-01T00:00:00Z"
-    },
-    {
-        id: "2",
-        name: "Group B",
-        description: "This is Group B",
-        members_count: 15,
-        members:[],
-        permissions:[],
-        created_at: "2023-01-02T00:00:00Z"
-    },
-    {
-        id: "3",
-        name: "Group C",
-        description: "This is Group C",
-        members_count: 20,
-        members:[],
-        permissions:[],
-        created_at: "2023-01-03T00:00:00Z"
-    },
-    {
-        id: "4",
-        name: "Group D",
-        description: "This is Group D",
-        members_count: 25,
-        members:[],
-        permissions:[],
-        created_at: "2023-01-04T00:00:00Z"
-    },
-    {
-        id: "5",
-        name: "Group E",
-        description: "This is Group E",
-        members_count: 30,
-        members:[],
-        permissions:[],
-        created_at: "2023-01-05T00:00:00Z"
-    },
-    {
-        id: "6",
-        name: "Group F",
-        description: "This is Group F",
-        members_count: 35,
-        members:[],
-        permissions:[],
-        created_at: "2023-01-06T00:00:00Z"
-    },
-    {
-        id: "7",
-        name: "Group G",
-        description: "This is Group G",
-        members_count: 40,
-        members:[],
-        permissions:[],
-        created_at: "2023-01-07T00:00:00Z"
-    },
-    {
-        id: "8",
-        name: "Group H",
-        description: "This is Group H",
-        members_count: 45,
-        members:[],
-        permissions:[],
-        created_at: "2023-01-08T00:00:00Z"
-    },
-    {
-        id: "9",
-        name: "Group I",
-        description: "This is Group I",
-        members_count: 50,
-        members:[],
-        permissions:[],
-        created_at: "2023-01-09T00:00:00Z"
-    },
-    {
-        id: "10",
-        name: "Group J",
-        description: "This is Group J",
-        members_count: 55,
-        members:[],
-        permissions:[],
-        created_at: "2023-01-10T00:00:00Z"
-    },
-    {
-        id: "11",
-        name: "Group K",
-        description: "This is Group K",
-        members_count: 60,
-        members:[],
-        permissions:[],
-        created_at: "2023-01-11T00:00:00Z"
-    },
-    {
-        id: "12",
-        name: "Group L",
-        description: "This is Group L",
-        members_count: 65,
-        members:[],
-        permissions:[],
-        created_at: "2023-01-12T00:00:00Z"
-    },
-    {
-        id: "13",
-        name: "Group M",
-        description: "This is Group M",
-        members_count: 70,
-        members:[],
-        permissions:[],
-        created_at: "2023-01-13T00:00:00Z"
-    },
-    {
-        id: "14",
-        name: "Group N",
-        description: "This is Group N",
-        members_count: 75,
-        members:[],
-        permissions:[],
-        created_at: "2023-01-14T00:00:00Z"
-    },
-    {
-        id: "15",
-        name: "Group O",
-        description: "This is Group O",
-        members_count: 80,
-        members:[],
-        permissions:[],
-        created_at: "2023-01-15T00:00:00Z"
-    },
-    {
-        id: "16",
-        name: "Group P",
-        description: "This is Group P",
-        members_count: 85,
-        members:[],
-        permissions:[],
-        created_at: "2023-01-16T00:00:00Z"
-    },
-    {
-        id: "17",
-        name: "Group Q",
-        description: "This is Group Q",
-        members_count: 90,
-        members:[],
-        permissions:[],
-        created_at: "2023-01-17T00:00:00Z"
-    },
-    {
-        id: "18",
-        name: "Group R",
-        description: "This is Group R",
-        members_count: 95,
-        members:[],
-        permissions:[],
-        created_at: "2023-01-18T00:00:00Z"
-    },
-    {
-        id: "19",
-        name: "Group S",
-        description: "This is Group S",
-        members_count: 100,
-        members:[],
-        permissions:[],
-        created_at: "2023-01-19T00:00:00Z"
-    },
-    {
-        id: "20",
-        name: "Group T",
-        description: "This is Group T",
-        members_count: 105,
-        members:[],
-        permissions:[],
-        created_at: "2023-01-20T00:00:00Z"
-    }
-]
+import { toast } from "react-toastify";
+import { useSession } from "next-auth/react";
+import { GroupsRouteResponseBody } from "@/app/api/v1/[user_id]/companies/[company_id]/groups/list/route";
+import { CreateGroupRequestBody, CreateGroupResponseBody } from "@/app/api/v1/[user_id]/companies/[company_id]/groups/new/route";
 
 
-export default function useGroups() {
+export default function useGroups(company_id:string) {
     const [groups, setGroups] = useState<Group[]>([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const { data: session } = useSession();
 
     const fetchGroups = useCallback(async () => {
-        console.log("asdioajfhjaiufhais hfaisfhai ")
-        setGroups(dummyData);
-    },[])
+        if(!session?.user.id) {
+            return
+        }
+
+        setLoading(true);
+        try{
+            const response = await fetch(`/api/v1/${session.user.id}/companies/${company_id}/groups/list`);
+            if(!response.ok){
+                setError("Failed to fetch groups");
+                toast.error("Failed to fetch groups");
+                return;
+            }
+
+            const { data, error } = await response.json() as GroupsRouteResponseBody;
+
+            if(error){
+                setError(error);
+                toast.error(error);
+                return;
+            }
+
+            setGroups(data || []);
+        }
+        catch(e){
+            setError(e instanceof Error ? `Groups Error: ${e.message}` : "Something went wrong");
+            toast.error(e instanceof Error ? `Groups Error: ${e.message}` : "Something went wrong while fetching groups");
+        }
+        finally{
+            setLoading(false);
+        }
+    },[session?.user.id, company_id])
 
     useEffect(() => {
         fetchGroups();
     },[fetchGroups])
 
-    const addGroup = useCallback(() => {
-        
-    },[])
+    const addGroup = useCallback(async (newGroup: CreateGroupRequestBody) => {
+        if(!session?.user.id) {
+            return
+        }
 
-    return {groups, loading, error, addGroup, setGroups};
+        try{
+            const response = await fetch(`/api/v1/${session?.user.id}/companies/${company_id}/groups/new`, {
+                method: "POST",
+                body: JSON.stringify({
+                    name: newGroup.name,
+                    description: newGroup.description,
+                    permissions: newGroup.permissions,
+                    users: newGroup.users
+                })
+            })
+
+            if(!response.ok){
+                setError("Failed to add group");
+                toast.error("Failed to add group");
+                return;
+            }
+
+            const { data, error } = await response.json() as CreateGroupResponseBody;
+
+            if(error){
+                setError(error);
+                toast.error(error);
+                return;
+            }
+            if(!data){
+                setError("Failed to add group");
+                toast.error("Failed to add group");
+                return;
+            }
+
+            const addedGroup:Group = {
+                id: data.id,
+                name: newGroup.name,
+                description: newGroup.description || "",
+                members_count: newGroup.users.length,
+                members: newGroup.users,
+                permissions: newGroup.permissions,
+                created_at: new Date().toISOString()
+            }
+
+            setGroups((prevGroups) => [...prevGroups, addedGroup]);
+        }
+        catch(e){
+            setError(e instanceof Error ? `Groups Error: ${e.message}` : "Something went wrong");
+            toast.error(e instanceof Error ? `Groups Error: ${e.message}` : "Something went wrong while adding group");
+        }
+    },[company_id, session?.user.id])
+
+    const getGroupUsersDetails = useCallback(async (ids:string[])=>{
+        if(!session?.user.id) {
+            return
+        }
+
+        try{
+            const params = new URLSearchParams({
+                ids: JSON.stringify(ids)
+            });
+            
+            const response = await fetch(`/api/v1/${session.user.id}/companies/${company_id}/users?${params.toString()}`);
+
+            if(!response.ok){
+                setError("Failed to fetch users");
+                toast.error("Failed to fetch users");
+                return;
+            }
+
+            const {data, error} = await response.json();
+
+            if(error){
+                setError(error);
+                toast.error(error);
+                return;
+            }
+
+            return data;
+        }
+        catch(e){
+            setError(e instanceof Error ? `Groups Error: ${e.message}` : "Something went wrong");
+            toast.error(e instanceof Error ? `Groups Error: ${e.message}` : "Something went wrong while adding group");
+        }
+    },[session?.user.id, company_id])
+
+    return {groups, loading, error, addGroup, setGroups, getGroupUsersDetails};
 }

@@ -31,7 +31,7 @@ export default async function RootLayout({
   return (
     <html suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} font-Helvetica antialiased bg-dark_blue min-h-svh w-full max-w-full overflow-x-hidden`}
+        className={`${geistSans.variable} ${geistMono.variable} font-Helvetica antialiased bg-dark_blue min-h-svh w-full max-w-full overflow-x-hidden scrollbar-custom`}
       >
         <Providers>
           <AppSession>

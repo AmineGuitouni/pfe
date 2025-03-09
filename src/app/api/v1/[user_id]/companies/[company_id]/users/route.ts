@@ -4,10 +4,43 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest, {params: {company_id}}: {params: { company_id: string}}) {
 
   const { searchParams } = new URL(req.url);
+
+  const ids = searchParams.get("ids") ? JSON.parse(searchParams.get("ids")!) : undefined;
+  
+  if(ids){
+    try{
+      const client = await getServerDBfromCompanyId(company_id);
+    
+      if (!client) {
+        return NextResponse.json({ data: [], error: "Failed to connect to database" });
+      }
+  
+      const query = client
+        .from("users")
+        .select("id,first_name,last_name,phone_number,country,email,created_at")
+        .in("id", ids)
+  
+      const { data, error } = await query;
+  
+      if (error) {
+        console.error(error);
+        return NextResponse.json({ data: [], error: error.message });
+      }
+  
+      console.log(data);
+      return NextResponse.json({ data });
+    }
+    catch(e){
+      console.error(e);
+      return NextResponse.json({ data: [], error: e instanceof Error ? e.message : "An unexpected error occurred" });
+    }
+  }
+
   const page = Number(searchParams.get("page") || "1");
   const limit = Number(searchParams.get("limit") || "10");
   const search = searchParams.get("search") || "";
   const sort = searchParams.get("sort") || "ascending";
+  const excludedUsers = searchParams.get("excludedUsers") ? JSON.parse(searchParams.get("excludedUsers")!) : [];
 
   const client = await getServerDBfromCompanyId(company_id);
   
@@ -15,11 +48,11 @@ export async function GET(req: NextRequest, {params: {company_id}}: {params: { c
     return NextResponse.json({ data: [], count: 0, error: "Failed to connect to database" });
   }
 
-
   let query = client
     .from("users")
     .select("id,first_name,last_name,phone_number,country,email,created_at", { count: "exact" })
     .eq("company_id", company_id)
+    .not("id", "in", `(${excludedUsers.join(",")})`)
     .order("created_at", { ascending: sort === "ascending" })
 
     if (search) {
