@@ -14,7 +14,21 @@ interface GroupsContextType {
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>,
     loadingGroups: boolean,
     addGroup: (newGroup: CreateGroupRequestBody) => Promise<void>,
-    getGroupUsersDetails: (groupId: string[]) => Promise<any>
+    getGroupUsersDetails: (groupId: string[]) => Promise<any>,
+    deleteGroup: (groupId: string) => Promise<void>,
+    updateGroup: ({
+        id,
+        name,
+        description,
+        permissions,
+        users,
+    } : {
+        id: string,
+        name: string,
+        description: string,
+        permissions: string[],
+        users: string[],
+    }) => Promise<void>
 }
 
 const groupsContext = createContext<GroupsContextType | undefined>(undefined)
@@ -28,7 +42,7 @@ export function useGroupsContext() {
 }
 
 export default function GroupsContextProvider({ children, company_id }: { children: React.ReactNode, company_id: string }) {
-    const {groups, setGroups, loading:loadingGroups, addGroup, getGroupUsersDetails} = useGroups(company_id)
+    const {groups, setGroups, loading:loadingGroups, addGroup, getGroupUsersDetails, deleteGroup, updateGroup} = useGroups(company_id)
     const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
     const [isOpen, setIsOpen] = useState(false)
 
@@ -42,7 +56,9 @@ export default function GroupsContextProvider({ children, company_id }: { childr
             setIsOpen,
             loadingGroups,
             addGroup,
-            getGroupUsersDetails
+            getGroupUsersDetails,
+            deleteGroup,
+            updateGroup
         }}>
             {children}
         </groupsContext.Provider>

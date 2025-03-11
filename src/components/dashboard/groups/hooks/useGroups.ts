@@ -136,5 +136,109 @@ export default function useGroups(company_id:string) {
         }
     },[session?.user.id, company_id])
 
-    return {groups, loading, error, addGroup, setGroups, getGroupUsersDetails};
+    const deleteGroup = useCallback(async (group_id:string) => {
+        if(!session?.user.id) {
+            return
+        }
+
+        try{
+            const response = await fetch(`/api/v1/${session.user.id}/companies/${company_id}/groups/${group_id}/delete`, {
+                method: "DELETE"
+            })
+
+            if(!response.ok){
+                setError("Failed to delete group");
+                toast.error("Failed to delete group");
+                return;
+            }
+
+            setGroups((prevGroups) => prevGroups.filter((g) => g.id !== group_id));
+        }
+        catch(e){
+            setError(e instanceof Error ? `Groups Error: ${e.message}` : "Something went wrong");
+            toast.error(e instanceof Error ? `Groups Error: ${e.message}` : "Something went wrong while deleting group");
+        }
+    },[company_id, session?.user.id])
+
+    const updateGroup = useCallback(async ({
+        id,
+        name,
+        description,
+        permissions,
+        users,
+    } : {
+        id: string,
+        name: string,
+        description: string,
+        permissions: string[],
+        users: string[],
+    })=>{
+        if(!session?.user.id) {
+            return
+        }
+
+        try{
+            const group = groups.find((g) => g.id === id);
+
+            if(!group){
+                setError("Group not found");
+                toast.error("Group not found");
+                return;
+            }
+
+            const newUsers = users.filter((u) => !group.members.includes(u));
+            const removedUsers = group.members.filter((u) => !users.includes(u));
+
+            const response = await fetch(`/api/v1/${session.user.id}/companies/${company_id}/groups/${id}/edit`, {
+                method: "PUT",
+                body: JSON.stringify({
+                    name,
+                    description,
+                    permissions,
+                    newUsers,
+                    removedUsers
+                })
+            })
+
+            if(!response.ok){
+                console.log(response);
+                setError("Failed to update group");
+                toast.error("Failed to update group");
+                return;
+            }
+
+            const { data, error } = await response.json() as CreateGroupResponseBody
+
+            if(error){
+                setError(error);
+                toast.error(error);
+                return;
+            }
+
+            if(!data){
+                setError("Failed to update group");
+                toast.error("Failed to update group");
+                return;
+            }
+
+            const updatedGroup:Group = {
+                id: id,
+                name: name,
+                description: description || "",
+                members_count: users.length,
+                members: users,
+                permissions: permissions,
+                created_at: group.created_at
+            }
+
+            setGroups((prevGroups) => prevGroups.map((g) => g.id === id ? updatedGroup : g));
+        }
+        catch(e){
+            setError(e instanceof Error ? `Groups Error: ${e.message}` : "Something went wrong");
+            toast.error(e instanceof Error ? `Groups Error: ${e.message}` : "Something went wrong while updating group");
+        }
+
+    },[company_id, groups, session?.user.id])
+
+    return {groups, loading, error, addGroup, setGroups, getGroupUsersDetails, deleteGroup, updateGroup};
 }

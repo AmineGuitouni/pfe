@@ -3,9 +3,39 @@ import { Button, Card, CardBody, cn, Dropdown, DropdownItem, DropdownMenu, Dropd
 import { useGroupsContext } from "../contexts/groupsProvider"
 import { GroupIcon, Edit, MoreVertical, Trash } from "lucide-react"
 import { Group } from "../types/groupsTypes"
+import { Key } from "react"
 
 export default function GroupCard({group}:{group:Group}){
-    const {setSelectedGroup, selectedGroup, setIsOpen} = useGroupsContext()
+    const {setSelectedGroup, selectedGroup, setIsOpen, deleteGroup} = useGroupsContext()
+    const handelDelete = async () => {
+        try {
+            await deleteGroup(group.id)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const handelEdit = () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth',
+        });
+        setSelectedGroup(group.id)
+        setIsOpen(true)
+    }
+
+    const onAction = (key: Key)=>{
+        switch (key) {
+            case "delete":
+                handelDelete();
+                break;
+            case "edit":
+                handelEdit();
+                break;
+            default:
+                break;
+        }
+    }
     return(
         <Card
             className={cn(
@@ -13,15 +43,8 @@ export default function GroupCard({group}:{group:Group}){
                 selectedGroup === group.id && "bg-white/10 border-white/50"
             )}
             isPressable
-            onPress={() => {
-                    window.scrollTo({
-                        top: 0,
-                        behavior: 'smooth',
-                    });
-                    setSelectedGroup(group.id)
-                    setIsOpen(true)
-                }}
-            >
+            onPress={handelEdit}
+        >
             <CardBody className="p-6 flex flex-col justify-between overflow-hidden">
                 {/* Top section */}
                 <div className="space-y-4">
@@ -43,7 +66,7 @@ export default function GroupCard({group}:{group:Group}){
                             <MoreVertical className="w-5 h-5" />
                             </Button>
                         </DropdownTrigger>
-                        <DropdownMenu aria-label="Database actions">
+                        <DropdownMenu aria-label="Database actions" onAction={onAction}>
                             <DropdownItem 
                                 key="edit" 
                                 startContent={<Edit className="w-4 h-4" />}

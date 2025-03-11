@@ -8,15 +8,14 @@ import { useGroupsContext } from "../contexts/groupsProvider";
 import { APP_PERMISSIONS as permissions } from "@/lib/constants";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Group } from "../types/groupsTypes";
 import { useUsers } from "@/components/users/hooks/useUsers";
 import { User } from "@/components/users/types";
 import { toast } from "react-toastify";
 
 export default function GroupsDetailsContainer({company}:{company: string}) {
-    const {selectedGroup, groups, setSelectedGroup, isOpen, setIsOpen, addGroup, getGroupUsersDetails} = useGroupsContext()
+    const {selectedGroup, groups, setSelectedGroup, isOpen, setIsOpen, addGroup, getGroupUsersDetails, updateGroup} = useGroupsContext()
     const [actionLoading, setActionLoading] = useState(false)
-    const [initialGroup, setInitialGroup] = useState<Group | null>(null)
+
     const {
         users,
         loading,
@@ -24,8 +23,6 @@ export default function GroupsDetailsContainer({company}:{company: string}) {
         setSearchText,
         setExcludedUsers
     } = useUsers(company)
-
-    console.log(initialGroup)
     
     const [groupName, setGroupName] = useState('');
     const [groupDescription, setGroupDescription] = useState('');
@@ -36,8 +33,6 @@ export default function GroupsDetailsContainer({company}:{company: string}) {
         const group = groups.find((group) => group.id === selectedGroup)
 
         if(group){
-            console.log(group)
-            setInitialGroup(group)
             setGroupName(group.name)
             setGroupDescription(group.description)
             setGroupPermissions(group.permissions)
@@ -49,15 +44,32 @@ export default function GroupsDetailsContainer({company}:{company: string}) {
             })
         }
         else{
-            setInitialGroup(null)
             setGroupName('')
             setGroupDescription('')
             setGroupPermissions([])
         }
     },[selectedGroup, groups, setExcludedUsers, getGroupUsersDetails])
 
-    const onSave = () =>{
-        console.log("save")
+    const onSave = async () =>{
+        if(!selectedGroup) return
+
+        setActionLoading(true)
+
+        try{
+            await updateGroup({
+                id: selectedGroup!,
+                name: groupName,
+                description: groupDescription,
+                permissions: groupPermissions,
+                users: groupMembers.map((user) => user.id)
+            })
+        }
+        catch(err){
+            console.log(err)
+        }
+        finally{
+            setActionLoading(false)
+        }
     }
 
     const onCreate = async()=>{
