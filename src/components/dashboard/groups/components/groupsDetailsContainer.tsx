@@ -82,8 +82,6 @@ export default function GroupsDetailsContainer({company}:{company: string}) {
                 users: groupMembers.map((user) => user.id)
             })
 
-            toast.success("Group created successfully")
-
             setGroupName('')
             setGroupDescription('')
             setGroupPermissions([])

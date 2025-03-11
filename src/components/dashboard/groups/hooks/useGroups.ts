@@ -155,6 +155,7 @@ export default function useGroups(company_id:string) {
             }
 
             setGroups((prevGroups) => prevGroups.filter((g) => g.id !== group_id));
+            toast.success("Group deleted successfully!");
         }
         catch(e){
             setError(e instanceof Error ? `Groups Error: ${e.message}` : "Something went wrong");
