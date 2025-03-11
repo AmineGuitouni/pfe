@@ -17,7 +17,7 @@ export default async function CompanyLayout({
 
     return (
       <main
-      className='bg-dark_blue relative flex justify-center items-center w-full max-w-full'
+      className='bg-dark_blue relative flex w-full max-w-full'
     >
       <SideBarProvider>
       <CompanySideBar companyId={company} session={session}/>

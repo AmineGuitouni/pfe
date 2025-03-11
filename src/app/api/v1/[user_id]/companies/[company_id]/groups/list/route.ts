@@ -1,3 +1,5 @@
+export const fetchCache = "force-no-store"
+
 import { Group } from '@/components/dashboard/groups/types/groupsTypes'
 import { getServerDBfromCompanyId } from '@/lib/database/externalServerSupabase'
 import { NextResponse } from 'next/server'
@@ -33,7 +35,7 @@ export async function GET(request: Request, { params }: { params: params }) {
 
     const { data: groups, error } = await supabase
       .from('groups')
-      .select('id, name, created_at, description, members:user_groups(user_id), permissions, company_id')
+      .select('id, name, created_at, description, members:user_groups(user_id), permissions')
       .eq('company_id', company_id)
       .order('created_at', { ascending: true })
 

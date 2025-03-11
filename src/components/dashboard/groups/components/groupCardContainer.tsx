@@ -2,7 +2,7 @@
 import { motion } from "framer-motion";
 import { useGroupsContext } from "../contexts/groupsProvider";
 import GroupCard from "./groupCard";
-import { Input } from "@heroui/react";
+import { Input, Spinner } from "@heroui/react";
 import { IoSearchOutline } from "react-icons/io5";
 import { useState } from "react";
 import AddGroupButton from "./AddGroupButton";
@@ -49,7 +49,9 @@ export default function GroupCardContainer(){
                 className="flex flex-wrap gap-5"
             >
                 {
-                    loadingGroups ? "Loading..." :
+                    loadingGroups ? (
+                        <Spinner color='default' size="lg"/>
+                    ) :
                     groups.length === 0 ? 
                     <div className="text-white/50 text-center py-10 w-full">
                         No groups found. Create your first groups.

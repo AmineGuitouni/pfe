@@ -19,7 +19,9 @@ export default function useGroups(company_id:string) {
 
         setLoading(true);
         try{
-            const response = await fetch(`/api/v1/${session.user.id}/companies/${company_id}/groups/list`);
+            const response = await fetch(`/api/v1/${session.user.id}/companies/${company_id}/groups/list`,{
+                next: { 'revalidate': 1 }
+            });
             if(!response.ok){
                 setError("Failed to fetch groups");
                 toast.error("Failed to fetch groups");
@@ -207,17 +209,11 @@ export default function useGroups(company_id:string) {
                 return;
             }
 
-            const { data, error } = await response.json() as CreateGroupResponseBody
+            const { error } = await response.json() as CreateGroupResponseBody
 
             if(error){
                 setError(error);
                 toast.error(error);
-                return;
-            }
-
-            if(!data){
-                setError("Failed to update group");
-                toast.error("Failed to update group");
                 return;
             }
 
@@ -232,6 +228,8 @@ export default function useGroups(company_id:string) {
             }
 
             setGroups((prevGroups) => prevGroups.map((g) => g.id === id ? updatedGroup : g));
+
+            toast.success("Group updated successfully");
         }
         catch(e){
             setError(e instanceof Error ? `Groups Error: ${e.message}` : "Something went wrong");
