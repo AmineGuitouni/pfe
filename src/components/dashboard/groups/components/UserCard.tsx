@@ -1,6 +1,6 @@
 "use client";
 
-import { User as UserType } from "@/components/users/types";
+import { User as UserType } from "@/components/users/types/types";
 import { User, Button } from "@heroui/react";
 import { IoTrashOutline, IoPersonAddOutline } from "react-icons/io5";
 

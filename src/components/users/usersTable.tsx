@@ -22,6 +22,8 @@ export default function UsersTable({ company_id }: { company_id: string }) {
     rowsPerPage,
     setRowsPerPage,
     editUser,
+    selectedGroups,
+    setSelectedGroups
   } = useUsers(company_id);
 
   const totalPages = Math.ceil(totalCount / rowsPerPage);
@@ -50,6 +52,8 @@ export default function UsersTable({ company_id }: { company_id: string }) {
         }
         topContent={
           <UsersFilters
+            selectedGroups={selectedGroups}
+            setSelectedGroups={setSelectedGroups}
             company_id={company_id}
             searchText={searchText}
             onSearchChange={setSearchText}
@@ -78,6 +82,9 @@ export default function UsersTable({ company_id }: { company_id: string }) {
           <TableColumn key="created_at" allowsSorting>
             Added at
           </TableColumn>
+          <TableColumn key="group" allowsSorting>
+            Group
+          </TableColumn>
           <TableColumn key="actions">Actions</TableColumn>
         </TableHeader>
         <TableBody
@@ -95,6 +102,7 @@ export default function UsersTable({ company_id }: { company_id: string }) {
                 <TableCell>{user.phone_number}</TableCell>
                 <TableCell>{user.country}</TableCell>
                 <TableCell>{formatShortDate(user.created_at)}</TableCell>
+                <TableCell>{user.group}</TableCell>
                 <TableCell><ActionButton editUser={editUser} deleteUser={deleteUser} user={user}/></TableCell>
               </TableRow>
             )

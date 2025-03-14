@@ -2,7 +2,7 @@
 import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button, useDisclosure} from "@heroui/react";
 import { FaEllipsisVertical } from "react-icons/fa6";
 import DeleteModal from "./deleteModal";
-import { User } from "./types";
+import { User } from "./types/types";
 import EditModal from "./editUserModal";
 
 export default function ActionButton({user,deleteUser,editUser}:{user:User,deleteUser: (userId: string) => Promise<void>,editUser: (updatedUser: User) => Promise<null | undefined>}) {

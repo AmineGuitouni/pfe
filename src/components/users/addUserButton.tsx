@@ -12,6 +12,7 @@ import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { IoPersonAddSharp } from "react-icons/io5";
 import { toast } from "react-toastify";
+import SelectGroups from "./groupSelector";
 
 export default function AddModal({company_id}:{company_id:string}) {
     const [loading, setLoading] = useState(false);
@@ -19,6 +20,8 @@ export default function AddModal({company_id}:{company_id:string}) {
     const [error, setError] = useState('');
     const { isOpen, onOpenChange, onOpen } = useDisclosure();
     const {data:session} = useSession();
+    const [group,setGroup] = useState('');
+
 
     const validateEmail = (email: string) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -49,8 +52,12 @@ export default function AddModal({company_id}:{company_id:string}) {
         setLoading(true);
 
         try {
+            const params = new URLSearchParams({
+                email: email,
+                group: group
+              })
             // Send invitation
-            const response = await fetch(`/api/v1/${session.user.id}/companies/${company_id}/add-user?email=${encodeURIComponent(email)}`, {
+            const response = await fetch(`/api/v1/${session.user.id}/companies/${company_id}/users/new?${params.toString()}`, {
                 method: 'GET',
             });
 
@@ -150,6 +157,12 @@ export default function AddModal({company_id}:{company_id:string}) {
                                         required
                                     />
                                 </div>
+
+                                <div className="flex justify-between items-center w-full gap-3 mb-3">
+                                    <span className="text-white/60 text-sm flex-shrink-0">Group</span>
+                                    <SelectGroups company_id={company_id} onSelectionChange={(value) => setGroup(value as string)} />
+                                </div>
+
 
                                 <div className="flex justify-end gap-2 w-full">
                                     <Button

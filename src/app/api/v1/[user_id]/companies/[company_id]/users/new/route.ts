@@ -10,9 +10,10 @@ export async function GET(req: Request, {params: {company_id}}: {params: { compa
         const url = new URL(req.url);
         const { searchParams } = url;
         const email = searchParams.get("email");
+        const group = searchParams.get("group");
         
-        // Validate email
-        if (!email) {
+        // Validate email and group
+        if (!email || !group || group.trim() === '') {
             return NextResponse.json({ error: "Email is required" }, { status: 400 });
         }
 
@@ -68,6 +69,7 @@ export async function GET(req: Request, {params: {company_id}}: {params: { compa
         const payload = {
             email,
             company_id,
+            group,
             exp: Math.floor(Date.now() / 1000) + (60 * 20), // 20 minutes expiration
         };
 

@@ -29,6 +29,7 @@ export async function POST(req: Request) {
             
             const email = decoded.email;
             const company_id = decoded.company_id;
+            const group = decoded.group;
             
             const hashedPassword = await bcrypt.hash(password, 10);
             
@@ -42,7 +43,7 @@ export async function POST(req: Request) {
         }
 
         // Check if user already exists in the company database
-        const { error: userError } = await client
+        const { data: user, error: userError } = await client
             .from("users")
             .insert({
                 first_name,
@@ -51,13 +52,28 @@ export async function POST(req: Request) {
                 password_hash: hashedPassword,
                 country,
                 phone_number,
-                company_id
+                company_id,
             })
+            .select("id")
             .single();
 
         if (userError) {
             console.error('User creation error:', userError);
             return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
+        }
+
+
+        const { error: groupError } = await client
+            .from("user_groups")
+            .insert({
+                user_id : user.id,
+                group_id: group,
+                
+            })
+
+        if (groupError) {
+            console.error('Group creation error:', groupError);
+            return NextResponse.json({ error: 'Failed to create group' }, { status: 500 });
         }
 
             

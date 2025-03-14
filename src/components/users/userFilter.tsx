@@ -3,14 +3,17 @@
 import { Input } from "@heroui/react";
 import { SearchIcon } from "../dashboard/audit-logs/components/icons";
 import AddModal from "./addUserButton";
+import RoleFilter from "./roleFilter";
 
-interface AuditLogFiltersProps {
+interface UsersFiltersProps {
   searchText: string;
   onSearchChange?: (value: string) => void;
   rowsPerPage: number;
   onRowsPerPageChange?: (value: number) => void;
   totalCount: number;
-  company_id: string
+  company_id: string;
+  selectedGroups: Set<string>;
+  setSelectedGroups: React.Dispatch<React.SetStateAction<Set<string>>>;
 }
 
 export const UsersFilters = ({
@@ -19,10 +22,10 @@ export const UsersFilters = ({
   rowsPerPage,
   onRowsPerPageChange,
   totalCount,
-  company_id
-}: AuditLogFiltersProps) => {
-
-
+  company_id,
+  selectedGroups,
+  setSelectedGroups
+}: UsersFiltersProps) => {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col sm:flex-row gap-4">
@@ -35,6 +38,11 @@ export const UsersFilters = ({
           className="flex-grow"
           startContent={<SearchIcon className="text-default-300" />}
           variant="bordered"
+        />
+        <RoleFilter 
+          company_id={company_id} 
+          selectedGroups={selectedGroups} 
+          setSelectedGroups={setSelectedGroups} 
         />
         <AddModal company_id={company_id}/>
       </div>

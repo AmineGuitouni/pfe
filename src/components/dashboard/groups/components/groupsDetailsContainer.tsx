@@ -9,7 +9,7 @@ import { APP_PERMISSIONS as permissions } from "@/lib/constants";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useUsers } from "@/components/users/hooks/useUsers";
-import { User } from "@/components/users/types";
+import { User } from "@/components/users/types/types";
 import { toast } from "react-toastify";
 
 export default function GroupsDetailsContainer({company}:{company: string}) {

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { SortDescriptor } from "@heroui/react";
-import { User } from "../types";
+import { User } from "../types/types";
 import { toast } from "react-toastify";
 
 export const useUsers = (companyId: string) => {
@@ -19,6 +19,27 @@ export const useUsers = (companyId: string) => {
   const [loading, setLoading] = useState(true);
   const [excludedUsers, setExcludedUsers] = useState<string[]>([]);
   const { data: session } = useSession();
+  const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set());
+  const [availableGroups, setAvailableGroups] = useState<string[]>([]);
+
+  // Fetch available groups for the company
+  useEffect(() => {
+    const fetchGroups = async () => {
+      if (!session?.user.id || !companyId) return;
+      
+      try {
+        const response = await fetch(`/api/v1/${session.user.id}/companies/${companyId}/groups`);
+        const data = await response.json();
+        if (data && Array.isArray(data.groups)) {
+          setAvailableGroups(data.groups);
+        }
+      } catch (error) {
+        console.error("Error fetching groups:", error);
+      }
+    };
+    
+    fetchGroups();
+  }, [session?.user.id, companyId]);
 
   const fetchUsers = useCallback(async () => {
     if (!session?.user.id || !companyId) return;
@@ -32,8 +53,13 @@ export const useUsers = (companyId: string) => {
       excludedUsers: JSON.stringify(excludedUsers),
     });
 
+    // Add selected groups to the params if any are selected
+    if (selectedGroups.size > 0) {
+      params.append('groups', JSON.stringify(Array.from(selectedGroups)));
+    }
+
     try {
-      const response = await fetch(`/api/v1/${session.user.id}/companies/${companyId}/users?${params.toString()}`);
+      const response = await fetch(`/api/v1/${session.user.id}/companies/${companyId}/users/list?${params.toString()}`);
       const { data, count } = await response.json();
       
       setUsers(data || []);
@@ -45,8 +71,9 @@ export const useUsers = (companyId: string) => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, rowsPerPage, searchText, session?.user.id, companyId, sortDescriptor, excludedUsers]);
+  }, [currentPage, rowsPerPage, searchText, session?.user.id, companyId, sortDescriptor, excludedUsers, selectedGroups]);
 
+  // Refetch users when filter parameters change
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
@@ -56,11 +83,10 @@ export const useUsers = (companyId: string) => {
   }, [fetchUsers]);
 
   const deleteUser = async (userId: string) => {
-    
     if (!session?.user.id || !companyId) return;
     
     try {
-      await fetch(`/api/v1/${userId}/companies/${companyId}/users`, {
+      await fetch(`/api/v1/${session?.user.id}/companies/${companyId}/users/${userId}/delete`, {
         method: "DELETE",
       });
 
@@ -73,11 +99,12 @@ export const useUsers = (companyId: string) => {
     }
   }
 
-  const editUser = async ( updatedUser: User) => {
+  const editUser = async (updatedUser: User) => {
     if (!session?.user.id || !companyId) return null;
+    if(!updatedUser || !updatedUser.id) return null;
 
     try {
-      const response = await fetch(`/api/v1/${session.user.id}/companies/${companyId}/users`, {
+      const response = await fetch(`/api/v1/${session.user.id}/companies/${companyId}/users/${updatedUser.id}/edit`, {
         method: "PUT",
         headers: {
           'Content-Type': 'application/json',
@@ -94,12 +121,11 @@ export const useUsers = (companyId: string) => {
 
       setUsers((prevUsers) => prevUsers.map((user) => (user.id === updatedUser.id ? updatedUser : user)));
       toast.success("User updated successfully");
-      return
-
+      return;
     } catch (error) {
       console.error("Error updating user:", error);
       toast.error(error instanceof Error ? error.message : "Error updating user");
-      return
+      return;
     }
   }
 
@@ -118,6 +144,9 @@ export const useUsers = (companyId: string) => {
     setRowsPerPage,
     deleteUser,
     refetch,
-    setExcludedUsers
+    setExcludedUsers,
+    selectedGroups,
+    setSelectedGroups,
+    availableGroups
   };
 };

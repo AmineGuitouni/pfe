@@ -8,7 +8,7 @@ import {
     Input,
 } from "@heroui/react";
 import { useState } from "react";
-import { User } from "./types";
+import { User } from "./types/types";
 
 export default function EditModal({
     isOpen, 

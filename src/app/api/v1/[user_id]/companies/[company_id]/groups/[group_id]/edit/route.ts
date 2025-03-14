@@ -25,6 +25,8 @@ export async function PUT(reqest: Request, { params }: { params: Params }) {
             return NextResponse.json({error: "Failed to connect to database"}, {status: 500})
         }
 
+        console.log(body);
+
         const { error } = await supabase
         .from("groups")
         .update({
