@@ -2,29 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const authPages = ['/login', '/register', '/forget-password', '/reset-password'];
 export const publicPages = ["/"];
+export const protectedPages = ["/dashboard"]
 
-export async function publicPagesMiddleware({path, request}:{path: string, request: NextRequest}) {
-    let isAuthPage = false;
-    authPages.forEach((page)=>{
-        if(path.startsWith(page)){
-        isAuthPage = true;
-        }
-    })
-    
-    if(!isAuthPage){
-        let isPublicPage = false
-        publicPages.forEach((page)=>{
-        if(path === page){
-            isPublicPage = true;
-        }
-        })
-        
-        if(!isPublicPage){
-            const loginUrl = new URL('/login', request.url);
-            const {search} = new URL(request.url);
-            loginUrl.searchParams.set('redirect', path+search);
-            loginUrl.searchParams.set("role", "admin");
-            return NextResponse.redirect(loginUrl);
+export function protectedPagesMiddleware({path, request}:{path: string, request: NextRequest}) {
+    for(const route in protectedPages){
+        if(path.startsWith(route)){
+            return NextResponse.redirect(new URL('/', request.url));
         }
     }
+
+    return null
 }

@@ -3,7 +3,7 @@ import i18nConfig from '../i18config';
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import apiMiddleware from './middlewares/api.middleware';
-import { publicPagesMiddleware } from './middlewares/pages.middleware';
+import { protectedPagesMiddleware } from './middlewares/pages.middleware';
 import emailVerificationMiddleware from './middlewares/emailVerification.middleware';
 
 function getPath(path: string) {
@@ -24,12 +24,13 @@ export async function middleware(request: NextRequest) {
   if(path.startsWith("/api")){
     return apiMiddleware({path, token});
   }
-
+  
   // Handle unauthenticated users
   if(!token){
-    const publicPagesMiddlewareRes = publicPagesMiddleware({path, request});
-    if(publicPagesMiddlewareRes){
-      return publicPagesMiddlewareRes
+    const protectedPagesMiddlewareRes = protectedPagesMiddleware({path, request});
+    if(protectedPagesMiddlewareRes){
+      console.log(`route ${path} is protected`)
+      return protectedPagesMiddlewareRes
     }
   } else {
     if(token.role === "worker") {
