@@ -4,7 +4,7 @@ import { FaUsers } from "react-icons/fa";
 import { IoSearchOutline } from "react-icons/io5";
 import { Input } from "@heroui/react";
 import { UserCard, UserCardSkeleton } from "./UserCard";
-import { User } from "@/components/users/types";
+import { User } from "@/components/users/types/types";
 
 interface UserCardProps {
   currentMembers: User[];

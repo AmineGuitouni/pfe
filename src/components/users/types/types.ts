@@ -6,4 +6,10 @@ export type User = {
     country: string;
     phone_number: string;
     created_at: string;
+    group : string
+}
+
+export type GroupSelected = {
+    id: string;
+    name: string;
 }
