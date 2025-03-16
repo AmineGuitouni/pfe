@@ -38,7 +38,6 @@ export async function GET(request: Request, { params }: { params: params }) {
       .order('created_at', { ascending: true })
       .ilike('name', `%${search}%`)
 
-    console.log({groups})
 
     if (error) throw error;
 

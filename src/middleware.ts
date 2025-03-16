@@ -50,10 +50,11 @@ export async function middleware(request: NextRequest) {
       const workerCompanyId = token.company_id;
       
       const isHome = path === "/";
+      const provide_cv_path = path === `/provide_cv`;
       const isWorkerCompanyDashboard = path === `/dashboard/${workerCompanyId}` || 
                                       path.startsWith(`/dashboard/${workerCompanyId}/`);
       
-      if(!isHome && !isWorkerCompanyDashboard) {
+      if(!isHome && !isWorkerCompanyDashboard && !provide_cv_path){ 
         return NextResponse.redirect(new URL(`/dashboard/${workerCompanyId}`, request.url));
       }
     }
