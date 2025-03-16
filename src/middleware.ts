@@ -2,9 +2,9 @@ import { i18nRouter } from 'next-i18n-router';
 import i18nConfig from '../i18config';
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
-
-const authPages = ['/login', '/register', '/forget-password', '/reset-password'];
-const publicPages = ["/"];
+import apiMiddleware from './middlewares/api.middleware';
+import { protectedPagesMiddleware } from './middlewares/pages.middleware';
+import emailVerificationMiddleware from './middlewares/emailVerification.middleware';
 
 function getPath(path: string) {
   let list = path.split('/');
@@ -19,33 +19,20 @@ export async function middleware(request: NextRequest) {
   const token = await getToken({req: request})
   const path = getPath(request.nextUrl.pathname);
 
+  console.log({path});
+
+  if(path.startsWith("/api")){
+    return apiMiddleware({path, token});
+  }
+  
   // Handle unauthenticated users
   if(!token){
-    let isAuthPage = false;
-    authPages.forEach((page)=>{
-      if(path.startsWith(page)){
-        isAuthPage = true;
-      }
-    })
-    
-    if(!isAuthPage){
-      let isPublicPage = false
-      publicPages.forEach((page)=>{
-        if(path === page){
-          isPublicPage = true;
-        }
-      })
-      
-      if(!isPublicPage){
-        const loginUrl = new URL('/login', request.url);
-        const {search} = new URL(request.url);
-        loginUrl.searchParams.set('redirect', path+search);
-        loginUrl.searchParams.set("role", "admin");
-        return NextResponse.redirect(loginUrl);
-      }
+    const protectedPagesMiddlewareRes = protectedPagesMiddleware({path, request});
+    if(protectedPagesMiddlewareRes){
+      console.log(`route ${path} is protected`)
+      return protectedPagesMiddlewareRes
     }
   } else {
-
     if(token.role === "worker") {
       const workerCompanyId = token.company_id;
       
@@ -59,16 +46,14 @@ export async function middleware(request: NextRequest) {
       }
     }
 
-    if(!token.email_verified && !path.startsWith("/verify")){
-      return NextResponse.redirect(new URL('/verify', request.url));
-    }
+    const emailVerificationMiddlewareRes = emailVerificationMiddleware({
+      path,
+      token,
+      request
+    })
 
-    if(token.email_verified && path.startsWith("/verify")){
-      return NextResponse.redirect(new URL('/', request.url));
-    }
-
-    if(authPages.includes(path)){
-      return NextResponse.redirect(new URL('/', request.url));
+    if(emailVerificationMiddlewareRes){
+      return emailVerificationMiddlewareRes
     }
   }
 
@@ -76,5 +61,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: '/((?!api|static|.*\\..*|_next).*)'
+  matcher: '/((?!static|.*\\..*|_next).*)'
 };
