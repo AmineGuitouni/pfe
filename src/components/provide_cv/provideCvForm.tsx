@@ -45,7 +45,13 @@ export default function ProvideCvForm() {
         if(!file) return
         try{
             const extractedText = await extractTextFromPdf(file);
-            console.log("Extracted text from PDF:", extractedText);
+            console.log({extractedText});
+            const res = await fetch('/api/cv_parcer', {
+                method:"POST",
+                body: extractedText
+            })
+            const data = await res.json();
+            console.log({data});
         }
         catch(err){
             console.log(err);

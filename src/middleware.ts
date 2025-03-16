@@ -16,8 +16,12 @@ function getPath(path: string) {
 }
 
 export async function middleware(request: NextRequest) {
+
+  // return i18nRouter(request, i18nConfig);
+
   const token = await getToken({req: request})
   const path = getPath(request.nextUrl.pathname);
+
 
   console.log({path});
 
