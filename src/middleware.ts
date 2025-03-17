@@ -16,8 +16,14 @@ function getPath(path: string) {
 }
 
 export async function middleware(request: NextRequest) {
+
+  // return i18nRouter(request, i18nConfig);
+
   const token = await getToken({req: request})
   const path = getPath(request.nextUrl.pathname);
+
+
+  console.log({path});
 
   if(path.startsWith("/api")){
     return apiMiddleware({path, token});
@@ -35,10 +41,11 @@ export async function middleware(request: NextRequest) {
       const workerCompanyId = token.company_id;
       
       const isHome = path === "/";
+      const provide_cv_path = path === `/provide_cv`;
       const isWorkerCompanyDashboard = path === `/dashboard/${workerCompanyId}` || 
                                       path.startsWith(`/dashboard/${workerCompanyId}/`);
       
-      if(!isHome && !isWorkerCompanyDashboard) {
+      if(!isHome && !isWorkerCompanyDashboard && !provide_cv_path){ 
         return NextResponse.redirect(new URL(`/dashboard/${workerCompanyId}`, request.url));
       }
     }

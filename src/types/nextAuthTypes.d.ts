@@ -16,6 +16,7 @@ declare module "next-auth" {
       country: string
       phone_number : string
       company_id?: string | null
+      cv_provided ?: boolean
     }
   }
 
@@ -30,5 +31,6 @@ declare module "next-auth" {
     email_verified: boolean
     phone_number: string
     company_id?: string | null
+    cv_provided ?: boolean
   }
 }
