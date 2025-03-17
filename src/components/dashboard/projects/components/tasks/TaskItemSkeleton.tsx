@@ -1,8 +1,18 @@
-import React from 'react';
+import { motion } from 'framer-motion';
+const variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+}
 
-const TaskItemSkeleton: React.FC = () => {
+export default function TaskItemSkeleton({index}:{index:number}) {
   return (
-    <div className="p-4 h-[122px] border-l-4 border-1 border-white/20 rounded-lg bg-white/5 animate-pulse">
+    <motion.div
+      variants={variants}
+      initial="hidden"
+      animate="visible"
+      transition={{ duration: 0.2, delay: 0.1 * index }}
+      className="p-4 h-[122px] border-l-4 border-1 border-white/20 rounded-lg bg-white/5 animate-pulse"
+    >
       <div className="flex items-center justify-between">
         <div className="w-3/4 h-6 bg-gray-700 rounded"></div>
         <div className="flex">
@@ -16,8 +26,6 @@ const TaskItemSkeleton: React.FC = () => {
         <div className="w-1/4 h-4 bg-gray-700 rounded"></div>
         <div className="w-1/2 h-4 bg-gray-700 rounded ml-1"></div>
       </div>
-    </div>
+    </motion.div>
   );
 };
-
-export default TaskItemSkeleton;

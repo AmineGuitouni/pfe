@@ -68,3 +68,22 @@ Provide your analysis in a structured JSON format following this structure:
 Be comprehensive in your analysis and make sure to recommend task types that truly match the candidate's skills and experience. For the recommended task types, consider categories like software development, data analysis, project management, design, content creation, etc., and be specific about the domains where they would excel.
 `
 }
+
+export const projectTasksPrompt = (projectName: string, projectDescription: string) =>{
+return `
+You are an expert project manager. Your task is to generate a list of tasks based on a project name and description.
+
+Project Name: ${projectName}
+Project Description: ${projectDescription}
+
+Please analyze this project and generate a list of tasks in a structured JSON format following this structure:
+{
+  "title": "string",
+  "description": "string",
+  "dependencies": ["string"] // list of previous task titles,
+  "difficultyLevel": number // from 1 to 5 the bigger the harder
+}
+
+Be comprehensive in your analysis and make sure that the difficulty level is a number between 1 and 5.
+`
+}

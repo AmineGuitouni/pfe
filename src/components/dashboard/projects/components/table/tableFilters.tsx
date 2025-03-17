@@ -21,7 +21,7 @@ export const TableFilters = ({
     params.set("projectName", project.name);
     params.set("projectDescription", project.description);
     params.set("projectDeadline", project.deadline);
-    router.push(`${pathName}/new?${params.toString()}`);
+    router.push(`${pathName}/tasks?${params.toString()}`);
   }
 
   return (
