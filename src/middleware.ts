@@ -19,8 +19,6 @@ export async function middleware(request: NextRequest) {
   const token = await getToken({req: request})
   const path = getPath(request.nextUrl.pathname);
 
-  console.log({path});
-
   if(path.startsWith("/api")){
     return apiMiddleware({path, token});
   }
