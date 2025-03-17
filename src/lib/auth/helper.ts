@@ -7,7 +7,6 @@ export async function getUser(credentials:{
 }){
     if(credentials?.company){
 
-        console.log(credentials.company)
         const localSupabase = await getServerDBfromCompanyId(credentials.company);
 
         if(!localSupabase){

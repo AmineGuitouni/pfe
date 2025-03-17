@@ -20,12 +20,8 @@ interface Skill {
   }
   
 export interface CVData {
-    name: string;
-    contact: {
-      email: string;
-      phone?: string;
-      linkedin?: string;
-    };
+    id : string;
+    user_id : string;
     summary: string;
     skills: Skill[];
     workExperience: WorkExperience[];

@@ -145,10 +145,7 @@ export default function AddUserForm({ token }: { token: string | null }) {
             // Show success message
             toast.success("Registration successful !");
             
-            // Optional: redirect after a delay
-            setTimeout(() => {
-                router.push("/");
-            }, 3000);
+            router.push('/');
 
         } catch (err) {
             setErrors(prev => ({

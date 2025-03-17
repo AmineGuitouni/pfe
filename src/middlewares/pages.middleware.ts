@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const authPages = ['/login', '/register', '/forget-password', '/reset-password'];
 export const publicPages = ["/"];
-export const protectedPages = ["/dashboard"]
+export const protectedPages = ["/dashboard", "/provide_cv"];
 
 export function protectedPagesMiddleware({path, request}:{path: string, request: NextRequest}) {
-    for(const route in protectedPages){
-        if(path.startsWith(route)){
-            return NextResponse.redirect(new URL('/', request.url));
-        }
-    }
 
-    return null
+    const isProtectedPage = protectedPages.some(route => path === route || path.startsWith(`${route}/`));
+    
+    if (isProtectedPage) {
+        return NextResponse.redirect(new URL(`/`, request.url));
+    }
+    
+    return null;
 }

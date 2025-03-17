@@ -2,18 +2,36 @@
 
 import { extractTextFromPdf } from '@/lib/ai/extractTextFromPdf';
 import { Button } from '@heroui/react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { useState, useRef, ChangeEvent, DragEvent, FormEvent } from 'react';
-
-
+import { toast } from 'react-toastify';
 
 export default function ProvideCvForm() {
     const [file, setFile] = useState<File | null>(null);
     const [isDragging, setIsDragging] = useState<boolean>(false);
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [loading, setLoading] = useState<boolean>(false);
+    const router = useRouter();
+    const {data: session , update} = useSession();
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0];
         if (selectedFile) {
+            // Check file size (10MB limit)
+            if (selectedFile.size > 10 * 1024 * 1024) {
+                toast.error("File size exceeds 10MB limit");
+                return;
+            }
+            
+            // Check file type
+            const fileType = selectedFile.type;
+            if (!['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(fileType)) {
+                toast.error("Please upload a PDF, DOC, or DOCX file");
+                return;
+            }
+            
             setFile(selectedFile);
         }
     };
@@ -33,35 +51,146 @@ export default function ProvideCvForm() {
         setIsDragging(false);
         
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            setFile(e.dataTransfer.files[0]);
+            const droppedFile = e.dataTransfer.files[0];
+            
+            // Check file size (10MB limit)
+            if (droppedFile.size > 10 * 1024 * 1024) {
+                toast.error("File size exceeds 10MB limit");
+                return;
+            }
+            
+            // Check file type
+            const fileType = droppedFile.type;
+            if (!['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(fileType)) {
+                toast.error("Please upload a PDF, DOC, or DOCX file");
+                return;
+            }
+            
+            setFile(droppedFile);
         }
     };
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // Handle form submission with the file
-        console.log("Submitting file:", file);
+        
+        // Authentication check
+        if (!session?.user?.id) {
+            toast.error("You must be logged in to upload your CV");
+            router.push('/login');
+            return;
+        }
+        
+        // Role check
+        if (session.user.role !== "worker") {
+            toast.error("Only worker accounts can upload CVs");
+            return;
+        }
+        
+        // Company association check
+        if (!session.user.company_id) {
+            toast.error("Your account is not associated with any company");
+            return;
+        }
+        
+        // File check
+        if (!file) {
+            toast.error("Please select a file to upload");
+            return;
+        }
+        
+        setIsSubmitting(true);
+        
+        try {
 
-        if(!file) return
-        try{
-            const extractedText = await extractTextFromPdf(file);
-            console.log({extractedText});
-            const res = await fetch('/api/cv_parcer', {
-                method:"POST",
-                body: extractedText
-            })
-            const data = await res.json();
-            console.log({data});
+            setLoading(true);
+            // Extract text from PDF
+            let extractedText;
+            try {
+                extractedText = await extractTextFromPdf(file);
+                if (!extractedText || extractedText.trim() === '') {
+                    toast.error("Could not extract text from the file");
+                    setIsSubmitting(false);
+                    return;
+                }
+            } catch (extractError) {
+                console.error("Text extraction error:", extractError);
+                toast.error("Failed to extract text from your CV");
+                setIsSubmitting(false);
+                return;
+            }
+            
+            // Send to API
+            const response = await fetch('/api/cv_parcer', {
+                method: "POST",
+                body: extractedText,
+                headers: {
+                    'Content-Type': 'text/plain',
+                }
+            });
+            
+            // Handle response
+            if (!response.ok) {
+                const errorData = await response.json();
+                
+                switch (response.status) {
+                    case 401:
+                        toast.error("Authentication error. Please login again.");
+                        router.push('/login');
+                        break;
+                    case 403:
+                        toast.error("You don't have permission to perform this action");
+                        break;
+                    case 400:
+                        toast.error(errorData.error || "Invalid CV data provided");
+                        break;
+                    case 422:
+                        toast.error("Failed to process your CV data. Please try a different format.");
+                        break;
+                    case 502:
+                        toast.error("AI processing service unavailable. Please try again later.");
+                        break;
+                    case 503:
+                        toast.error("Database connection error. Please try again later.");
+                        break;
+                    default:
+                        toast.error(errorData.error || "Failed to process your CV");
+                }
+                
+                setIsSubmitting(false);
+                return;
+            }
+            
+            // Success case
+            const data = await response.json();
+            if (data.ok) {
+                if(data.cv_informations_id) {
+                    await update({
+                        cv_informations: data.cv_informations_id,
+                    })
+                
+                    toast.success("CV uploaded successfully!");
+                    router.push(`/dashboard/${session.user.company_id}`);
+                }
+                else {
+                    toast.error("Failed to update session");
+                }
+            } else {
+                toast.error(data.message || "Unknown error occurred");
+                setIsSubmitting(false);
+            }
+        } catch (err) {
+            console.error("CV upload error:", err);
+            toast.error("Network or server error. Please try again later.");
+            setIsSubmitting(false);
         }
-        catch(err){
-            console.log(err);
+        finally {
+            setLoading(false);
         }
-        // You would add your actual submission logic here
     };
 
     return (
         <form 
-            className="w-[500px] max-h-[600px] border-1 p-8 px-4 sm:px-8 rounded-lg shadow-md bg-white/10 border-white/20 relative flex flex-col justify-center items-start gap-8 "
+            className="w-[500px] max-h-[600px] border-1 p-8 px-4 sm:px-8 rounded-lg shadow-md bg-white/10 border-white/20 relative flex flex-col justify-center items-start gap-8"
             onSubmit={handleSubmit}
         >
             <div className="w-full flex flex-col gap-3">
@@ -113,16 +242,16 @@ export default function ProvideCvForm() {
                             </svg>
                             <p className="text-white font-medium mb-1">Drag and drop your CV here</p>
                             <p className="text-gray-400 text-sm">or click to browse files</p>
-                            <p className="text-gray-500 text-xs mt-4">Supported formats: PDF, DOC, DOCX</p>
+                            <p className="text-gray-500 text-xs mt-4">Supported formats: PDF, DOC, DOCX (Max 10MB)</p>
                         </>
                     )}
                 </div>
                 
                 <div className="flex items-center mt-4 text-success-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4  mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <p className=" text-xs">
+                    <p className="text-xs">
                         Your CV data will be analyzed securely to match you with appropriate tasks.
                     </p>
                 </div>
@@ -130,15 +259,15 @@ export default function ProvideCvForm() {
             
             <Button 
                 type="submit" 
-                isDisabled={!file}
+                isDisabled={!file || isSubmitting || loading}
+                isLoading={loading}
                 size="md"
                 radius="sm"
                 className="bg-light_blue-500 text-dark_blue text-medium font-semibold w-full flex-shrink-0"
-                disabled={!file}
+                disabled={!file || isSubmitting}
             >
-                Continue
+                {isSubmitting ? 'Processing...' : 'Continue'}
             </Button>
         </form>
     )
 }
-

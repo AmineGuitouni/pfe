@@ -20,26 +20,7 @@ export const useUsers = (companyId: string) => {
   const [excludedUsers, setExcludedUsers] = useState<string[]>([]);
   const { data: session } = useSession();
   const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set());
-  const [availableGroups, setAvailableGroups] = useState<string[]>([]);
 
-  // Fetch available groups for the company
-  useEffect(() => {
-    const fetchGroups = async () => {
-      if (!session?.user.id || !companyId) return;
-      
-      try {
-        const response = await fetch(`/api/v1/${session.user.id}/companies/${companyId}/groups`);
-        const data = await response.json();
-        if (data && Array.isArray(data.groups)) {
-          setAvailableGroups(data.groups);
-        }
-      } catch (error) {
-        console.error("Error fetching groups:", error);
-      }
-    };
-    
-    fetchGroups();
-  }, [session?.user.id, companyId]);
 
   const fetchUsers = useCallback(async () => {
     if (!session?.user.id || !companyId) return;
@@ -147,6 +128,5 @@ export const useUsers = (companyId: string) => {
     setExcludedUsers,
     selectedGroups,
     setSelectedGroups,
-    availableGroups
   };
 };

@@ -20,12 +20,6 @@ Please analyze this CV and extract the following information in a structured for
 
 Provide your analysis in a structured JSON format following this structure:
 {
-  "name": "",
-  "contact": {
-    "email": "",
-    "phone": "",
-    "linkedin": ""
-  },
   "summary": "",
   "skills": [
     {

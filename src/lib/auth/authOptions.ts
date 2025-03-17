@@ -58,7 +58,7 @@ export const authOptions:AuthOptions = {
             session.user.country = token.country as string
             session.user.phone_number = token.phone_number as string
             session.user.company_id = token.company_id as string
-            session.user.cv_provided = token.cv_provided as boolean
+            session.user.cv_informations = token.cv_informations as string
 
             const supabaseTokenPayload = {
                 sub: session.user.id,
@@ -103,7 +103,7 @@ export const authOptions:AuthOptions = {
             token.country = user.country
             token.phone_number = user.phone_number
             token.company_id = user.company_id
-            token.cv_provided = user.cv_provided
+            token.cv_informations = user.cv_informations
 
             return token
         }
