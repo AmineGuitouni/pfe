@@ -1,10 +1,11 @@
 import { i18nRouter } from 'next-i18n-router';
 import i18nConfig from '../i18config';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import apiMiddleware from './middlewares/api.middleware';
 import { protectedPagesMiddleware } from './middlewares/pages.middleware';
 import emailVerificationMiddleware from './middlewares/emailVerification.middleware';
+import checkCvProvided from './middlewares/checkCvProvided';
 
 function getPath(path: string) {
   let list = path.split('/');
@@ -23,8 +24,6 @@ export async function middleware(request: NextRequest) {
   const path = getPath(request.nextUrl.pathname);
 
 
-  console.log({path});
-
   if(path.startsWith("/api")){
     return apiMiddleware({path, token});
   }
@@ -37,17 +36,10 @@ export async function middleware(request: NextRequest) {
       return protectedPagesMiddlewareRes
     }
   } else {
-    if(token.role === "worker") {
-      const workerCompanyId = token.company_id;
-      
-      const isHome = path === "/";
-      const provide_cv_path = path === `/provide_cv`;
-      const isWorkerCompanyDashboard = path === `/dashboard/${workerCompanyId}` || 
-                                      path.startsWith(`/dashboard/${workerCompanyId}/`);
-      
-      if(!isHome && !isWorkerCompanyDashboard && !provide_cv_path){ 
-        return NextResponse.redirect(new URL(`/dashboard/${workerCompanyId}`, request.url));
-      }
+    const cv_provided = await checkCvProvided({path, token, request});
+
+    if(cv_provided){
+      return cv_provided
     }
 
     const emailVerificationMiddlewareRes = emailVerificationMiddleware({
