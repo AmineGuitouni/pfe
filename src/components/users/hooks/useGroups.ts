@@ -6,20 +6,15 @@ import { GroupSelected} from "../types/types";
 
 export const useGroups = (companyId: string) => {
   const [groups, setGroups] = useState<GroupSelected[]>([]);
-  const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(true);
   const { data: session } = useSession();
 
   const fetchUsers = useCallback(async () => {
     if (!session?.user.id || !companyId) return;
     setLoading(true);
-    
-    const params = new URLSearchParams({
-      search: searchText,
-    });
 
     try {
-      const response = await fetch(`/api/v1/${session.user.id}/companies/${companyId}/groups/list/get-ids?${params.toString()}`);
+      const response = await fetch(`/api/v1/${session.user.id}/companies/${companyId}/groups/list/get-ids`);
       const { data } = await response.json();
       
       setGroups(data || []);
@@ -29,7 +24,7 @@ export const useGroups = (companyId: string) => {
     } finally {
       setLoading(false);
     }
-  }, [searchText, session?.user.id, companyId]);
+  }, [session?.user.id, companyId]);
 
   useEffect(() => {
     fetchUsers();
@@ -40,7 +35,5 @@ export const useGroups = (companyId: string) => {
   return {
     groups,
     loading,
-    searchText,
-    setSearchText,
   };
 };

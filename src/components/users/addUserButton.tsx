@@ -13,6 +13,7 @@ import { useState } from "react";
 import { IoPersonAddSharp } from "react-icons/io5";
 import { toast } from "react-toastify";
 import SelectGroups from "./groupSelector";
+import type { Selection } from "@heroui/react";
 
 export default function AddModal({company_id}:{company_id:string}) {
     const [loading, setLoading] = useState(false);
@@ -20,8 +21,7 @@ export default function AddModal({company_id}:{company_id:string}) {
     const [error, setError] = useState('');
     const { isOpen, onOpenChange, onOpen } = useDisclosure();
     const {data:session} = useSession();
-    const [group,setGroup] = useState('');
-
+    const [selectedGroups, setSelectedGroups] = useState<Selection>(new Set([]));
 
     const validateEmail = (email: string) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -48,14 +48,26 @@ export default function AddModal({company_id}:{company_id:string}) {
             return;
         }
 
+        if (Array(selectedGroups).length === 0 ) {
+            setError('Please select at least one group');
+            return;
+        }
+
         // Set loading state
         setLoading(true);
 
         try {
-            const params = new URLSearchParams({
-                email: email,
-                group: group
-              })
+            // Convert Set to Array for URL params
+            const groupsArray = Array.from(selectedGroups as Set<string>);
+            
+            const params = new URLSearchParams();
+            params.append('email', email);
+            
+            // Add each group as a separate param
+            groupsArray.forEach(group => {
+                params.append('groups', group);
+            });
+            
             // Send invitation
             const response = await fetch(`/api/v1/${session.user.id}/companies/${company_id}/users/new?${params.toString()}`, {
                 method: 'GET',
@@ -89,6 +101,7 @@ export default function AddModal({company_id}:{company_id:string}) {
 
             // Clear email and close modal
             setEmail('');
+            setSelectedGroups(new Set([]));
             closeModal();
 
         } catch (err) {
@@ -159,10 +172,12 @@ export default function AddModal({company_id}:{company_id:string}) {
                                 </div>
 
                                 <div className="flex justify-between items-center w-full gap-3 mb-3">
-                                    <span className="text-white/60 text-sm flex-shrink-0">Group</span>
-                                    <SelectGroups company_id={company_id} onSelectionChange={(value) => setGroup(value as string)} />
+                                    <span className="text-white/60 text-sm flex-shrink-0">Groups</span>
+                                    <SelectGroups 
+                                        company_id={company_id} 
+                                        onSelectionChange={(value) => setSelectedGroups(value)} 
+                                    />
                                 </div>
-
 
                                 <div className="flex justify-end gap-2 w-full">
                                     <Button

@@ -1,16 +1,13 @@
-
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase";
 
-
 export async function POST(req: Request) {
     try {
+        const {token, first_name, last_name, password, country, phone_number} = await req.json();
         
-        const {token,first_name, last_name, password,country ,phone_number} = await req.json();
-        
-        // Validate email
+        // Validate input
         if (!token) {
             return NextResponse.json({ error: "token is required" }, { status: 400 });
         }
@@ -29,64 +26,69 @@ export async function POST(req: Request) {
             
             const email = decoded.email;
             const company_id = decoded.company_id;
-            const group = decoded.group;
+            const groups = decoded.groups;
             
+            // Validate groups
+            if (!groups || !Array.isArray(groups) || groups.length === 0) {
+                return NextResponse.json({ error: 'No groups specified for user' }, { status: 400 });
+            }
+
             const hashedPassword = await bcrypt.hash(password, 10);
             
             // Get company-specific database client
-        const client = await getServerDBfromCompanyId(company_id);
-          
-        if (!client) {
-            return NextResponse.json({ 
-                error: "Failed to connect to database" 
-            }, { status: 500 });
-        }
+            const client = await getServerDBfromCompanyId(company_id);
+              
+            if (!client) {
+                return NextResponse.json({ 
+                    error: "Failed to connect to database" 
+                }, { status: 500 });
+            }
 
-        // Check if user already exists in the company database
-        const { data: user, error: userError } = await client
-            .from("users")
-            .insert({
-                first_name,
-                last_name,
-                email,
-                password_hash: hashedPassword,
-                country,
-                phone_number,
-                company_id,
-            })
-            .select("id")
-            .single();
+            // Create the user
+            const { data: user, error: userError } = await client
+                .from("users")
+                .insert({
+                    first_name,
+                    last_name,
+                    email,
+                    password_hash: hashedPassword,
+                    country,
+                    phone_number,
+                    company_id,
+                })
+                .select("id")
+                .single();
 
-        if (userError) {
-            console.error('User creation error:', userError);
-            return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
-        }
+            if (userError) {
+                console.error('User creation error:', userError);
+                return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
+            }
 
+            // Prepare group assignments for batch insert
+            const groupAssignments = groups.map(group_id => ({
+                user_id: user.id,
+                group_id
+            }));
 
-        const { error: groupError } = await client
-            .from("user_groups")
-            .insert({
-                user_id : user.id,
-                group_id: group,
+            // Insert all group assignments
+            const { error: groupError } = await client
+                .from("user_groups")
+                .insert(groupAssignments);
+
+            if (groupError) {
+                console.error('Group assignment error:', groupError);
+                return NextResponse.json({ error: 'Failed to assign groups' }, { status: 500 });
+            }
                 
-            })
-
-        if (groupError) {
-            console.error('Group creation error:', groupError);
-            return NextResponse.json({ error: 'Failed to create group' }, { status: 500 });
-        }
-
-            
             return NextResponse.json({ 
                 success: true, 
-                message: 'user registered successfully!' 
+                message: 'User registered successfully!' 
             }, { status: 200 });
             
         } catch (tokenError) {
             console.error('Token verification error:', tokenError);
             return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
         }
-
     }
     catch(error) {
         console.error('Unhandled error:', error);

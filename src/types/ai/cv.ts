@@ -1,10 +1,10 @@
-interface Skill {
+  export interface Skill {
     name: string;
     level: string; // "Beginner" | "Intermediate" | "Advanced" | "Expert"
     yearsOfExperience: number;
   }
   
-  interface WorkExperience {
+  export interface WorkExperience {
     company: string;
     role: string;
     duration: string;
@@ -12,7 +12,7 @@ interface Skill {
     technologies: string[];
   }
   
-  interface Education {
+  export interface Education {
     degree: string;
     institution: string;
     year: string;

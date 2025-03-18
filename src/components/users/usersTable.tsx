@@ -103,7 +103,7 @@ export default function UsersTable({ company_id }: { company_id: string }) {
                 <TableCell>{user.country}</TableCell>
                 <TableCell>{formatShortDate(user.created_at)}</TableCell>
                 <TableCell>{user.group}</TableCell>
-                <TableCell><ActionButton editUser={editUser} deleteUser={deleteUser} user={user}/></TableCell>
+                <TableCell><ActionButton editUser={editUser} deleteUser={deleteUser} user={user} company_id={company_id}/></TableCell>
               </TableRow>
             )
           }}

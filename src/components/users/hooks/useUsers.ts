@@ -110,6 +110,36 @@ export const useUsers = (companyId: string) => {
     }
   }
 
+  const GetCvInformations = useCallback(async (id: string) => {
+    if (!id) return null;
+    
+    try {
+
+        const origin = window.location.origin
+        console.log(`${origin}/api/v1/${session?.user.id}/companies/${companyId}/users/list/get_cv_info?id=${id}`)
+        // Send the ID as a simple string parameter, no JSON stringification needed
+        const res = await fetch(`${origin}/api/v1/${session?.user.id}/companies/${companyId}/users/list/get_cv_info?id=${id}`, {
+            method: "GET",
+        });
+
+        
+        // Check for network or server errors first
+        if (!res.ok) {
+            const errorText = await res.text(); // Get the raw text instead of trying to parse JSON
+            console.error("API error response:", errorText);
+            throw new Error(`Failed to fetch CV information: ${res.status}`);
+        }
+
+        
+        const result = await res.json();
+        return result.data;
+    } catch (error) {
+        console.error("Error fetching CV information:", error);
+        // Return null instead of throwing to prevent component errors
+        return null;
+    }
+}, [companyId, session?.user.id]);
+
   return {
     editUser,
     users,
@@ -128,5 +158,6 @@ export const useUsers = (companyId: string) => {
     setExcludedUsers,
     selectedGroups,
     setSelectedGroups,
+    GetCvInformations
   };
 };

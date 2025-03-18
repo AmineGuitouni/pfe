@@ -10,11 +10,15 @@ export async function GET(req: Request, {params: {company_id}}: {params: { compa
         const url = new URL(req.url);
         const { searchParams } = url;
         const email = searchParams.get("email");
-        const group = searchParams.get("group");
+        const groups = searchParams.getAll("groups");
         
-        // Validate email and group
-        if (!email || !group || group.trim() === '') {
+        // Validate email and groups
+        if (!email) {
             return NextResponse.json({ error: "Email is required" }, { status: 400 });
+        }
+
+        if (!groups || groups.length === 0) {
+            return NextResponse.json({ error: "At least one group is required" }, { status: 400 });
         }
 
         // Validate email format
@@ -69,7 +73,7 @@ export async function GET(req: Request, {params: {company_id}}: {params: { compa
         const payload = {
             email,
             company_id,
-            group,
+            groups,
             exp: Math.floor(Date.now() / 1000) + (60 * 20), // 20 minutes expiration
         };
 

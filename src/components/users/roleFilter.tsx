@@ -1,7 +1,7 @@
 "use client"
-import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/react";
+import { Select, SelectItem } from "@heroui/react";
 import { useGroups } from "./hooks/useGroups";
-import { IoIosArrowDown } from "react-icons/io";
+import type { Selection } from "@heroui/react";
 
 export default function RoleFilter({
   company_id,
@@ -12,39 +12,32 @@ export default function RoleFilter({
   selectedGroups: Set<string>,
   setSelectedGroups: React.Dispatch<React.SetStateAction<Set<string>>>
 }) {
-
-  const {groups} = useGroups(company_id);
+  const { groups } = useGroups(company_id);
 
   // Handle selection change
-  const handleSelectionChange = (keys: any) => {
-    setSelectedGroups(keys);
+  const handleSelectionChange = (keys: Selection) => {
+    setSelectedGroups(keys as Set<string>);
   };
 
   return (
-    <Dropdown>
-      <DropdownTrigger className="hidden sm:flex">
-        <Button
-          variant="flat"
-          endContent={<IoIosArrowDown className="mt-1" />}
-          className="bg-white/10 text-light_blue-500 text-sm px-3 flex-shrink-0 "
-        >
-          {selectedGroups.size > 0 ? selectedGroups.values().next().value : "Filter by group"}
-        </Button>
-      </DropdownTrigger>
-      <DropdownMenu
-        disallowEmptySelection={false}
-        aria-label="Table Columns"
-        closeOnSelect={false}
+    <div className="hidden sm:block w-[20%]">
+      <Select
+        className="flex-shrink-0 w-full"
+        placeholder="Filter by group"
         selectedKeys={selectedGroups}
+        variant="flat"
         selectionMode="multiple"
         onSelectionChange={handleSelectionChange}
+        classNames={{
+          trigger: "bg-white/10 text-light_blue-500 text-sm px-3 flex-shrink-0"
+        }}
       >
         {groups.map((groupItem) => (
-          <DropdownItem key={groupItem.name} className="capitalize">
+          <SelectItem key={groupItem.name} className="capitalize">
             {groupItem.name}
-          </DropdownItem>
+          </SelectItem>
         ))}
-      </DropdownMenu>
-    </Dropdown>
+      </Select>
+    </div>
   );
 }

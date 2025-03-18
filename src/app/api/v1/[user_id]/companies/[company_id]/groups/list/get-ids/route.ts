@@ -12,8 +12,6 @@ interface params {
 export async function GET(request: Request, { params }: { params: params }) {
 
   const { company_id } = params
-  const { searchParams } = new URL(request.url)
-  const search = searchParams.get("search") || ""
 
   if (!company_id) {
     return NextResponse.json(
@@ -36,7 +34,6 @@ export async function GET(request: Request, { params }: { params: params }) {
       .select('id, name')
       .eq('company_id', company_id)
       .order('created_at', { ascending: true })
-      .ilike('name', `%${search}%`)
 
 
     if (error) throw error;
