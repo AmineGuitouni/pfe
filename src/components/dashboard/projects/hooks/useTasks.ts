@@ -89,32 +89,45 @@ export default function useTasks({
   }, [fetchTasks]);
 
 
-  const deleteTask = useCallback((taskIndex: number) => {
+  const deleteTask = useCallback((tasks: string[]) => {
     setTasks(prevTasks => {
-      if (taskIndex < 0 || taskIndex >= prevTasks.length) return prevTasks;
-  
-      const taskToDelete = prevTasks[taskIndex];
-      const tasksToDelete = new Set<string>([taskToDelete.title]);
-  
-      // Find all dependent tasks recursively
-      let hasChanged;
-      do {
-        hasChanged = false;
-        prevTasks.forEach(task => {
-          if (tasksToDelete.has(task.title)) return; // Already marked for deletion
-          if (task.dependencies.some(dep => tasksToDelete.has(dep))) {
-            tasksToDelete.add(task.title);
-            hasChanged = true;
-          }
-        });
-      } while (hasChanged);
-  
-      // Filter out deleted tasks and update cache
-      const newTasks = prevTasks.filter(task => !tasksToDelete.has(task.title));
-      setCachedTasks(newTasks);
-      return newTasks;
+      const newTasks = prevTasks.filter(task => !tasks.includes(task.title));
+      const sortedNewTasks = sortTasks(newTasks);
+      setCachedTasks(sortedNewTasks);
+      return sortedNewTasks;
     });
+    
   },[setCachedTasks])
 
-  return { tasks, isLoading, error, regenerateTasks, deleteTask };
+  const editTask = useCallback((task: GeneratedTask, oldTaskId: number) => {
+    setTasks(prevTasks => {
+      const taskToEdit = prevTasks[oldTaskId];
+      const newTasks = prevTasks.map((oldTask, idx)=>{
+        if(idx === oldTaskId){
+          return task
+        }
+        return {...oldTask, dependencies: oldTask.dependencies.map((d)=>{
+          if(d === taskToEdit.title){
+            return task.title
+          }
+          return d
+        })}
+      })
+      const sortedNewTasks = sortTasks(newTasks);
+      setCachedTasks(sortedNewTasks);
+      return sortedNewTasks;
+    })
+  },[setCachedTasks])
+
+  const addTask = useCallback((task: GeneratedTask) => {
+    
+    setTasks(prevTasks => {
+      const newTasks = [...prevTasks, task];
+      const sortedNewTasks = sortTasks(newTasks);
+      setCachedTasks(sortedNewTasks);
+      return sortedNewTasks;
+    })
+  },[setCachedTasks])
+
+  return { tasks, isLoading, error, regenerateTasks, deleteTask, editTask, addTask };
 }

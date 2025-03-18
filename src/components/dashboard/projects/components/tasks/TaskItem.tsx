@@ -1,9 +1,10 @@
 import React from 'react';
 import { FiEdit, FiTrash2 } from 'react-icons/fi';
 import { AiOutlineLink } from 'react-icons/ai';
-import { Chip } from '@heroui/react';
+import { Chip, useDisclosure } from '@heroui/react';
 import { GeneratedTask } from '../../types';
 import { motion } from 'framer-motion';
+import EditTaskModal from '../modals/editTaskModal';
 
 interface TaskItemProps {
   task: GeneratedTask;
@@ -11,6 +12,7 @@ interface TaskItemProps {
   onDependencyClick: (dependency: string) => void;
   isHighlighted: boolean;
   onDelete?: (index: number) => void;
+  onEdit?: (task: GeneratedTask) => void;
 }
 
 const borderColors = ['#2dd4bf', '#60a5fa', '#facc15', '#f87171', '#a855f7'];
@@ -25,8 +27,12 @@ const TaskItem = React.forwardRef<HTMLDivElement, TaskItemProps>(({
   onDependencyClick, 
   isHighlighted,
   onDelete,
+  onEdit,
 }, ref) => {
-    return (
+  const {isOpen, onOpen, onOpenChange} = useDisclosure();
+
+  return (
+    <>
       <motion.div
       ref={ref}
         variants={variants}
@@ -44,18 +50,16 @@ const TaskItem = React.forwardRef<HTMLDivElement, TaskItemProps>(({
             style={{ color: borderColors[task.difficultyLevel - 1] }}
           >{task.title}</h3>
           <div className="flex">
-            {/* Edit and Delete Buttons */}
-            <button className="w-4 h-4  rounded mr-1 text-gray-400 hover:text-light_blue">
+            <button onClick={onOpen} className="w-4 h-4 rounded mr-1 text-gray-400 hover:text-light_blue">
               <FiEdit size={16} />
             </button>
-            <button onClick={()=>{onDelete?.(index)}} className="w-4 h-4  rounded text-gray-400 hover:text-red-500">
+            <button onClick={()=>{onDelete?.(index)}} className="w-4 h-4 rounded text-gray-400 hover:text-red-500">
               <FiTrash2 size={16} />
             </button>
           </div>
         </div>
         <p className="text-gray-300 mt-2">{task.description}</p>
         <div className="flex items-center mt-2">
-          {/* Dependency Icon */}
           <AiOutlineLink size={16} style={{ color: 'rgb(107 114 128)', marginRight: '0.5rem' }} />
           <span className="text-sm text-gray-400">Dependencies:</span>
           {task.dependencies.length === 0 ? (
@@ -81,7 +85,16 @@ const TaskItem = React.forwardRef<HTMLDivElement, TaskItemProps>(({
           )}
         </div>
       </motion.div>
-    );
+
+      <EditTaskModal
+        task={task}
+        tasks={[]}
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        onEditTask={onEdit}
+      />
+    </>
+  );
 });
-  TaskItem.displayName = 'TaskItem';
-  export default TaskItem
+TaskItem.displayName = 'TaskItem';
+export default TaskItem

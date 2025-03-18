@@ -174,7 +174,7 @@ export default function AddCompanyButton() {
                                 variant="bordered"
                             >
                                 {databases.map((db) => (
-                                    <SelectItem key={db.id} value={db.id}>
+                                    <SelectItem key={db.id}>
                                         {db.name}
                                     </SelectItem>
                                 ))}

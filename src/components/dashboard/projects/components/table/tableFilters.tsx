@@ -16,11 +16,10 @@ export const TableFilters = ({
 }: TableFiltersProps) => {
   const router = useRouter();
   const pathName = usePathname();
-  const createProject = async (project: { name: string; description: string; deadline: string }) => {
+  const createProject = async (project: { name: string; description: string; }) => {
     const params = new URLSearchParams();
     params.set("projectName", project.name);
     params.set("projectDescription", project.description);
-    params.set("projectDeadline", project.deadline);
     router.push(`${pathName}/tasks?${params.toString()}`);
   }
 

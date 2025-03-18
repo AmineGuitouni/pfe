@@ -1,6 +1,7 @@
 import { SortDescriptor } from "@heroui/react";
-import { Project } from "next/dist/build/swc";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Project } from "../types";
+import { useSession } from "next-auth/react";
 
 interface useProjectsProps {
     company_id: string;
@@ -12,7 +13,7 @@ export default function useProjects({
     rowPerPage = 10
 }:useProjectsProps) {
     const [projects, setProjects] = useState<Project[]>([])
-    const [isLoading, setIsLoading] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState("")
 
 
@@ -27,16 +28,24 @@ export default function useProjects({
         return Math.ceil(projects.length / rowPerPage)
     }, [projects, rowPerPage])
 
-    console.log(company_id)
+    const {data:session} = useSession();
 
     const fetchProjects = useCallback(async (count: number) => {
+        if(!session?.user.id) return
         if(count <= 0){
             return
         }
         try {
-            const response = await fetch(`/api/v1/projects/list`, {
+            setIsLoading(true);
+            const response = await fetch(`/api/v1/${session.user.id}/companies/${company_id}/projects/list`, {
                 method: "GET",
             });
+
+            if(!response.ok){
+                setError("Something went wrong");
+                return;
+            }
+
             const result = await response.json();
             if (result.error) {
                 setError(result.error);
@@ -48,7 +57,7 @@ export default function useProjects({
         } finally {
             setIsLoading(false);
         }
-    },[]);
+    },[session?.user.id, company_id]);
 
     useEffect(()=>{
         fetchProjects(3)

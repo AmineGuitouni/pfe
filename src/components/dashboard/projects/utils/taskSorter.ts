@@ -1,7 +1,7 @@
-import { Task } from "../types";
+import { GeneratedTask } from "../types";
 
-export function sortTasks(tasks: Task[]): Task[] {
-  const titleToTask = new Map<string, Task>();
+export function sortTasks(tasks: GeneratedTask[]): GeneratedTask[] {
+  const titleToTask = new Map<string, GeneratedTask>();
   tasks.forEach(task => titleToTask.set(task.title, task));
 
   const dependents = new Map<string, string[]>();

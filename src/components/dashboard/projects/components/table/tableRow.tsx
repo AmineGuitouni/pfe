@@ -1,15 +1,19 @@
 import { TableRow, TableCell } from "@heroui/react";
+import { Project } from "../../types";
+import { formatShortDate } from "@/lib/utils";
 
 interface AuditLogRowProps {
-  log: any;
+  project: Project;
 }
 
-export const ProjectsTableRow = ({ log }: AuditLogRowProps) => {
+export const ProjectsTableRow = ({ project }: AuditLogRowProps) => {
   return (
-    <TableRow key={log.id}>
-      <TableCell>{log.id}</TableCell>
-      <TableCell>{log.action}</TableCell>
-      <TableCell>{log.date.toLocaleString()}</TableCell>
+    <TableRow key={project.id}>
+      <TableCell>{project.name}</TableCell>
+      <TableCell>{project.description}</TableCell>
+      <TableCell>{project.tasks_count}</TableCell>
+      <TableCell>{project.deadline || "No deadline"}</TableCell>
+      <TableCell>{formatShortDate(project.created_at)}</TableCell>
       <TableCell>
         {/* <DetailsModal
           action={log.action.toLowerCase()}

@@ -70,12 +70,12 @@ export default function ProjectsTable({company_id}: {company_id: string}) {
         </TableHeader>
         <TableBody
           emptyContent="No logs found"
-          items={projects}
+          items={isLoading ? [] : projects}
           isLoading={isLoading}
           loadingContent={<Spinner size="lg" />}
         >
-          {(log) => {
-            return ProjectsTableRow({ log });
+          {(project) => {
+            return ProjectsTableRow({ project });
           }}
         </TableBody>
       </Table>

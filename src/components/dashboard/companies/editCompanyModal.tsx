@@ -180,7 +180,7 @@ export default function EditCompanyModal({ company, isOpen, onOpenChange }: Edit
                             variant="bordered"
                         >
                             {databases.map((db) => (
-                                <SelectItem key={db.id} value={db.id}>
+                                <SelectItem key={db.id}>
                                     {db.name}
                                 </SelectItem>
                             ))}

@@ -5,7 +5,7 @@ import { PlusIcon } from "lucide-react";
 import { useState } from "react"
 
 interface AddProjectModalProps {
-  onCreateProject?: (project: { name: string; description: string; deadline: string }) => Promise<void>
+  onCreateProject?: (project: { name: string; description: string;}) => Promise<void>
 }
 
 export default function AddProjectModal({ onCreateProject }: AddProjectModalProps) {
@@ -18,7 +18,7 @@ export default function AddProjectModal({ onCreateProject }: AddProjectModalProp
   const handleSubmit = async (onClose: () => void) => {
     setIsLoading(true)
     try {
-      await onCreateProject?.({ name, description, deadline })
+      await onCreateProject?.({ name, description })
       onClose()
       setName("")
       setDescription("")
