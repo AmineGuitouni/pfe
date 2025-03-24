@@ -158,6 +158,7 @@ export const useUsers = (companyId: string) => {
     setExcludedUsers,
     selectedGroups,
     setSelectedGroups,
-    GetCvInformations
+    GetCvInformations,
+    excludedUsers
   };
 };

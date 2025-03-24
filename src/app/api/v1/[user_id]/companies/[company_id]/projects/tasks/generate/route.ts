@@ -2,6 +2,7 @@ import { openai } from '@/lib/ai/openai';
 import { projectTasksPrompt } from '@/lib/ai/prompts/cv_prompt';
 import { NextResponse } from 'next/server';
 
+
 export async function POST(req: Request) {
   try {
     const { projectName, projectDescription } = await req.json();
@@ -20,7 +21,10 @@ export async function POST(req: Request) {
 
     const prompt = projectTasksPrompt(projectName, projectDescription);
     const completion = await openai.chat.completions.create({
-      messages: [{ role: 'user', content: prompt }],
+      messages: [{ role: 'user', content: [{
+        type:"text",
+        text:prompt
+      }]}],
       model: 'gemini-2.0-flash',
       response_format: { type: 'json_object' },
     });

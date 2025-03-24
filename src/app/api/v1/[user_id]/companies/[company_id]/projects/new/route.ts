@@ -44,6 +44,7 @@ export async function POST(request: Request, { params:{company_id} }: { params: 
         title: task.title,
         description: task.description,
         project_id: addedProject.id,
+        difficulty_level: task.difficultyLevel
     })))
     .select("id, title");
 

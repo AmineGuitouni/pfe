@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useMemo, useRef, useState } from 'react';
-import useTasks from '../../hooks/useTasks';
+import useTasksGeneration from '../../hooks/useTasksGeneration';
 import TaskItem from './TaskItem';
 import TaskItemSkeleton from './TaskItemSkeleton';
 import { Button, Input, useDisclosure } from '@heroui/react';
@@ -19,7 +19,7 @@ interface TaskListProps {
 }
 
 export default function TaskList({ companyId, projectName, projectDescription }: TaskListProps) {
-  const {isLoading, tasks, deleteTask, regenerateTasks, editTask, addTask} = useTasks({companyId, projectName, projectDescription});
+  const {isLoading, tasks, deleteTask, regenerateTasks, editTask, addTask} = useTasksGeneration({companyId, projectName, projectDescription});
   const taskRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [highlightedTaskIndex, setHighlightedTaskIndex] = useState<number | null>(null);
 
