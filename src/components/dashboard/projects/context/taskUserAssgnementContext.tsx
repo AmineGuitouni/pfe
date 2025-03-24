@@ -89,6 +89,19 @@ export default function TaskUserAssgnementProvider({children, company_id, projec
             setUnLinkedTasks(items);
         }
 
+        if(props.source.droppableId.startsWith("user:") && props.destination.droppableId.startsWith("user:")){
+            removeTaskUserLink({
+                taskId: props.draggableId,
+                userId: props.source.droppableId.split(":")[1]
+            })
+            
+            addTaskUserLink({
+                taskId: props.draggableId,
+                userId: props.destination.droppableId.split(":")[1],
+                index: props.destination.index
+            })
+        }
+
         if(props.source.droppableId === "users" && props.destination.droppableId === "users"){
             const items = Array.from(usersList);
             const [removed] = items.splice(props.source.index, 1);

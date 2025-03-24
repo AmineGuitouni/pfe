@@ -57,7 +57,7 @@ export default function UserCardContainer({company_id}: {company_id: string}){
                 <div className="text-white/50 text-center py-10 w-full">
                     No Users found.
                 </div> :
-                <Droppable droppableId="users" isDropDisabled={usersDisableDrop}>
+                <Droppable  droppableId="users" isDropDisabled={usersDisableDrop}>
                 {
                     (provided)=>(
                         <div
