@@ -63,5 +63,24 @@ export default function useProjects({
         fetchProjects(3)
     },[fetchProjects]);
 
-    return {projects, isLoading, error, currentPage, setCurrentPage, totalPages, searchText, setSearchText, sortDescriptor, setSortDescriptor}
+    const deleteProject = useCallback(async (projectId: string) => {
+        try {
+          const response = await fetch(`/api/v1/${session?.user.id}/companies/${company_id}/projects/${projectId}/delete`, {
+            method: "DELETE"
+          })
+
+          if(!response.ok){
+            return false
+          }
+
+          setProjects(prevProjects => prevProjects.filter(project => project.id !== projectId))
+          return true
+        }
+        catch (error) {
+            console.log(error)
+            return false
+        }
+    },[session?.user.id, company_id])
+
+    return {projects, isLoading, error, currentPage, setCurrentPage, totalPages, searchText, setSearchText, sortDescriptor, setSortDescriptor, deleteProject}
 }

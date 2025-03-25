@@ -1,10 +1,28 @@
 "use client";
 
-import { Spinner, Table, TableBody, TableColumn, TableHeader } from "@heroui/react";
+import {
+  Spinner,
+  Table,
+  TableBody,
+  TableColumn,
+  TableHeader,
+  TableRow,
+  TableCell,
+  Dropdown,
+  DropdownMenu,
+  DropdownItem,
+  DropdownTrigger,
+  Button,
+  useDisclosure
+} from "@heroui/react";
 import { TablePagination } from "./tablePagination";
-import { ProjectsTableRow } from "./tableRow";
 import useProjects from "../../hooks/useProjects";
 import { TableFilters } from "./tableFilters";
+import { formatShortDate } from "@/lib/utils";
+import { usePathname, useRouter } from "next/navigation";
+import { FaEllipsisVertical } from "react-icons/fa6";
+import ProjectDeleteConfirmation from "../modals/ProjectDeleteConfirmationModal";
+import { toast } from "react-toastify";
 
 const columns = [
   { name: "Name", uid: "name", sortable: true },
@@ -16,6 +34,10 @@ const columns = [
 ]
 
 export default function ProjectsTable({company_id}: {company_id: string}) {
+  const router = useRouter();
+  const pathName = usePathname();
+  const {isOpen: isOpenDelete, onOpen: onOpenDelete, onOpenChange: onOpenChangeDelete} = useDisclosure()
+  
   const {
     projects,
     isLoading,
@@ -25,7 +47,8 @@ export default function ProjectsTable({company_id}: {company_id: string}) {
     searchText,
     setSearchText,
     sortDescriptor,
-    setSortDescriptor
+    setSortDescriptor,
+    deleteProject
   } = useProjects({
     company_id,
   });
@@ -69,14 +92,64 @@ export default function ProjectsTable({company_id}: {company_id: string}) {
           }
         </TableHeader>
         <TableBody
-          emptyContent="No logs found"
-          items={isLoading ? [] : projects}
+          emptyContent="No projects found"
+          items={isLoading ? [] : projects.map(project => ({
+            key: project.id,
+            data: project,
+            actions: {deleteProject}
+          }))}
           isLoading={isLoading}
           loadingContent={<Spinner size="lg" />}
         >
-          {(project) => {
-            return ProjectsTableRow({ project });
-          }}
+          {(item) => (
+            <TableRow key={item.key}>
+              <TableCell>{item.data.name}</TableCell>
+              <TableCell>{item.data.description}</TableCell>
+              <TableCell>{item.data.tasks_count}</TableCell>
+              <TableCell>{item.data.deadline || "No deadline"}</TableCell>
+              <TableCell>{formatShortDate(item.data.created_at)}</TableCell>
+              <TableCell>
+                <Dropdown>
+                  <DropdownTrigger>
+                    <Button variant="light" size="sm" isIconOnly>
+                      <FaEllipsisVertical size={20}/>
+                    </Button>
+                  </DropdownTrigger>
+                  <DropdownMenu aria-label="Dynamic Actions">
+                    <DropdownItem
+                      key="view"
+                      onPress={()=>{
+                        router.push(`${pathName}/${item.data.id}/assign-workers`)
+                      }}
+                    >
+                      View
+                    </DropdownItem>
+                    <DropdownItem
+                      key="Delete"
+                      onPress={onOpenDelete}
+                      color="danger"
+                      variant="flat"
+                    >
+                      Delete
+                    </DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
+                <ProjectDeleteConfirmation 
+                  projectName={item.data.name} 
+                  onConfirmDelete={async ()=>{
+                    if(await deleteProject(item.data.id)){
+                      toast.success("Project deleted successfully");
+                    }
+                    else{
+                      toast.error("Failed to delete project");
+                    }
+                  }} 
+                  isOpen={isOpenDelete} 
+                  onOpenChange={onOpenChangeDelete}
+                />
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </div>
