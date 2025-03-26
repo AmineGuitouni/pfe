@@ -33,7 +33,8 @@ interface TaskUserAssgnementContextType {
     unLinkedTasks: string[],
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>,
     isOpen: boolean,
-    userCardDisableDrop: boolean
+    userCardDisableDrop: boolean,
+    loadingTaskUserLinks: boolean
 }
 
 interface TaskUserAssgnementProviderProps {
@@ -53,8 +54,9 @@ export default function TaskUserAssgnementProvider({children, company_id, projec
         romoveAllTaskForUser,
         taskUserLinks,
         usersList,
-        setUsersList
-    } = useUsersTaskLink();
+        setUsersList,
+        loading: loadingTaskUserLinks
+    } = useUsersTaskLink({company_id, project_id, setUnLinkedTasks, isTaskLoaded: !isLoadingTasks});
 
     const [usersDisableDrop, setUsersDisableDrop] = useState(false);
     const [tasksDisableDrop, setTasksDisableDrop] = useState(false);
@@ -143,7 +145,8 @@ export default function TaskUserAssgnementProvider({children, company_id, projec
             unLinkedTasks,
             setIsOpen,
             isOpen,
-            userCardDisableDrop
+            userCardDisableDrop,
+            loadingTaskUserLinks
         }}>
             <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
                 {children}

@@ -7,25 +7,40 @@ interface params {
     project_id: string;
 }
 
-export async function GET(req: Request, {params: {company_id}}: {params: params}){
+export async function POST(req: Request, {params: {company_id, project_id}}: {params: params}){
     try{
+        const {taskUserLinks, deadline}: {taskUserLinks: Record<string, string[] | undefined>, deadline: string} = await req.json();
+        
         const supabase = await getServerDBfromCompanyId(company_id);
         if (!supabase) {
             return NextResponse.json({ error: "Failed to connect to database" }, { status: 500 });
         }
 
-        const {data: availbleUsers, error: usersError} = await supabase.from("users")
-        .select("cv:cv_informations(*)")
+        const {error: projectUpdateError} = await supabase
+        .from("projects")
+        .update({deadline})
+        .eq("id", project_id)
         .eq("company_id", company_id)
 
-        if(usersError){
-            console.log(usersError);
-            return NextResponse.json({error: "Failed to get users"}, {status: 500})
+        if(projectUpdateError){
+            console.log(projectUpdateError);
+            return NextResponse.json({error: projectUpdateError.message}, {status: 500})
         }
 
-        console.log(availbleUsers);
+        const flatendLinkls = Object.keys(taskUserLinks)
+        .map((key) => taskUserLinks[key] ? taskUserLinks[key].map(
+            (task_id)=>({task_id, user_id: key})
+        ) : []).flat();
 
-        return NextResponse.json({})
+        const {error} = await supabase.from("project_user_tasks")
+        .upsert(flatendLinkls)
+
+        if(error){
+            console.log(error);
+            return NextResponse.json({error: error.message}, {status: 500})
+        }
+
+        return NextResponse.json({data: true}, {status: 200})
     }
     catch(error){
         console.log(error);

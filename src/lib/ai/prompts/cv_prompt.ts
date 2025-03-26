@@ -81,3 +81,57 @@ Please analyze this project and generate a list of tasks in a structured JSON fo
 Be comprehensive in your analysis and make sure that the difficulty level is a number between 1 and 5.
 `
 }
+
+export const assignUsersToTasksPrompt = (cvData: string, projectTasks: string) => {
+return `
+You are an expert project manager and talent matcher. Your task is to assign users to project tasks based on their CV information and the task requirements.
+
+CV Data:
+${cvData}
+
+Project Tasks:
+${projectTasks}
+
+Please analyze the CV data and project tasks, then assign the best matching users to each task based on:
+1. Skill match (both technical and soft skills)
+2. Experience level
+3. Task difficulty level
+4. Availability (if information is provided)
+5. Any other relevant factors from the CV
+
+For each task, provide:
+1. The best matching user
+2. A confidence score (1-100) indicating how well they match
+3. Reasons for the assignment (specific skills/experience that match)
+4. Any potential concerns or gaps
+5. Only one user per task
+6. Make sure to well distribute tasks among users in an efficient way
+7. Make sure the ids are correct
+
+Return your assignments in a structured JSON format following this structure:
+{
+  "assignments": [
+    {
+      "taskId": "",
+      "taskTitle": "",
+      "assignedUsers": {
+        "userId": "",
+        "userEmail": "",
+        "confidenceScore": 0,
+        "matchingSkills": [""],
+        "matchingExperience": [""],
+        "potentialConcerns": [""]
+      }
+    }
+  ],
+  "unassignedUsers": [
+    {
+      "userId": "",
+      "reason": ""
+    }
+  ]
+}
+
+Be thorough in your analysis and provide clear justifications for each assignment. If no suitable match is found for a task or user, include them in the appropriate unassigned section with reasons.
+`
+}

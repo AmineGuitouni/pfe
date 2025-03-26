@@ -8,7 +8,7 @@ import TaskItem from './showTaskItem';
 import { Draggable, Droppable } from 'react-beautiful-dnd';
 
 export default function ProjectTaskList() {
-  const {tasks, isLoadingTasks:isLoading, unLinkedTasks} = useTaskUserAssgnementContext()
+  const {tasks, isLoadingTasks:isLoading, unLinkedTasks, tasksDisableDrop} = useTaskUserAssgnementContext()
   const [searchText, setSearchText] = useState('');
 
   const filteredTasks = useMemo(()=>{
@@ -39,16 +39,16 @@ export default function ProjectTaskList() {
             <TaskItemSkeleton key={index} index={index} />
           ))
         ) 
-        : filteredTasks.length === 0 ? (
-          <div className='flex flex-col gap-4 h-[calc(100vh-200px)] overflow-y-auto items-center justify-center text-white/50'>
-            <h3 className='text-lg font-semibold'>No tasks found</h3>
-          </div>
-        )
         : (
-          <Droppable droppableId="tasks">
+          <Droppable droppableId="tasks" isDropDisabled={tasksDisableDrop}>
             {(provided) => (
               <div className='flex flex-col' {...provided.droppableProps} ref={provided.innerRef}>
                 {
+                    filteredTasks.length === 0 ? (
+                      <div className='flex flex-col gap-4 h-[calc(100vh-200px)] overflow-y-auto items-center justify-center text-white/50'>
+                        <h3 className='text-lg font-semibold'>No tasks found</h3>
+                      </div>
+                    ) :
                     filteredTasks.map((task, idx) => (
                         <Draggable key={task.id} draggableId={task.id} index={idx} >
                             {(provided) => (

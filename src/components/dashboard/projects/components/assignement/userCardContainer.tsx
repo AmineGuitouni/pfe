@@ -5,8 +5,9 @@ import { IoSearchOutline } from "react-icons/io5";
 import { useState } from "react";
 import AddUserButton from "./AddUserButton";
 import { useTaskUserAssgnementContext } from "../../context/taskUserAssgnementContext";
-import { UserCard } from "./usersCard";
+import { UserCard, UserCardSkeleton } from "./usersCard";
 import { Draggable, Droppable } from "react-beautiful-dnd";
+import SaveAssignementButton from "./saveAssignementButton";
 
 const containerVariants = {
     closed: {
@@ -17,9 +18,9 @@ const containerVariants = {
     },
 }
 
-export default function UserCardContainer({company_id}: {company_id: string}){
+export default function UserCardContainer({company_id, project_id}: {company_id: string, project_id: string}){
     const [searchTerm, setSearchTerm] = useState('');
-    const {usersList, usersDisableDrop} = useTaskUserAssgnementContext()
+    const {usersList, usersDisableDrop, loadingTaskUserLinks} = useTaskUserAssgnementContext()
 
     const filteredUsers = usersList.filter(user => 
         user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -36,19 +37,30 @@ export default function UserCardContainer({company_id}: {company_id: string}){
             // animate={isOpen ? "closed" : "open"}
             transition={{ duration: 0.5 }}
         >
-            <div className="w-[384px] flex gap-5 rounded-r-lg backdrop-blur z-10">
-                <AddUserButton company_id={company_id}/>
-                <Input
-                    placeholder="Search User..."
-                    size="sm"
-                    className="w-full max-w-[300px] dark text-white"
-                    value={searchTerm}
-                    onValueChange={setSearchTerm}
-                    endContent={<IoSearchOutline className="text-light_blue-500/70" />}
-                    variant="bordered"
-                />
+            <div className="w-full flex justify-between gap-5 rounded-r-lg backdrop-blur z-10">
+                <div className="w-[384px] flex items-center gap-3">
+                    <AddUserButton company_id={company_id}/>
+                    <Input
+                        placeholder="Search User..."
+                        size="sm"
+                        className="w-full max-w-[300px] dark text-white"
+                        value={searchTerm}
+                        onValueChange={setSearchTerm}
+                        endContent={<IoSearchOutline className="text-light_blue-500/70" />}
+                        variant="bordered"
+                    />
+                </div>
+                <SaveAssignementButton company_id={company_id} project_id={project_id}/>
             </div>
             {
+                loadingTaskUserLinks ? 
+                <div className="text-white/50 text-center py-10 w-full flex flex-col gap-4">
+                    {
+                        Array.from({ length: 3 }).map((_, index) => (
+                            <UserCardSkeleton key={index} />
+                        ))
+                    }
+                </div> :
                 usersList.length === 0 ? 
                 <div className="text-white/50 text-center py-10 w-full">
                     No Users found.

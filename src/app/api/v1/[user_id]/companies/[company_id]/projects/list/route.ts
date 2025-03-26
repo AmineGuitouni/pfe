@@ -25,7 +25,7 @@ export async function GET(request: Request, { params: { company_id } }: { params
 
     const { data, error } = await supabase
     .from("projects")
-    .select("id, name, description, company_id, created_at, tasks:project_tasks(count)")
+    .select("id, name, description, company_id, created_at, tasks:project_tasks(count), deadline")
     .eq("company_id", company_id)
     .order("created_at", { ascending: true });
 
@@ -35,11 +35,13 @@ export async function GET(request: Request, { params: { company_id } }: { params
     }
 
     return NextResponse.json({data: data.map((project)=>({
-        id: project.id,
-        name: project.name,
-        description: project.description,
-        company_id: project.company_id,
-        created_at: project.created_at,
-        tasks_count: project.tasks[0].count
-    }))});
+            id: project.id,
+            name: project.name,
+            description: project.description,
+            company_id: project.company_id,
+            deadline: project.deadline,
+            created_at: project.created_at,
+            tasks_count: project.tasks[0].count
+        })
+    )});
 }
