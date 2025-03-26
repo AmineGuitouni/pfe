@@ -49,7 +49,7 @@ export default function CompanySideBar({companyId,session}:{companyId: string,se
                     <Link href={`/dashboard/${companyId}/projects`} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
                         Projects
                     </Link>
-                    <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
+                    <Link href={`/dashboard/${companyId}/to-do`} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
                         TO-DO
                     </Link>
                 </div>

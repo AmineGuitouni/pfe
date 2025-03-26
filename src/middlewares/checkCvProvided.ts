@@ -13,7 +13,7 @@ export default function checkCvProvided({path, token, request}:EmailVerification
     }
     if(token.role === "worker") {
         const workerCompanyId = token.company_id;
-        const cv_informations = token.cv_informations !== null 
+        const cv_informations = token.cv_informations === true
 
         const isHome = path === "/";
         const provide_cv_path = path === `/provide_cv`;

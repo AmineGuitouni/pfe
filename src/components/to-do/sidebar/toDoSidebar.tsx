@@ -1,0 +1,25 @@
+"use client"
+import { Button, cn } from "@heroui/react";
+import { motion } from "framer-motion";
+import { useState } from "react";
+import { IoIosArrowForward } from "react-icons/io";
+import SideBarBody from "./sideBarBody";
+export default function ToDoSidebar() {
+
+    const [open, setOpen] = useState(false);
+
+    return (
+        <motion.div
+        variants={{
+            open: { width: 300 },
+            closed: { width: 20}
+        }}
+        animate={open ? "open" : "closed"}
+        transition={{ duration: 0.2 }}
+         className="relative h-full w-5 border-l-1 border-l-white/20">
+            <Button onPress={() => setOpen(!open)} size="sm" startContent={<IoIosArrowForward className={cn("text-white",!open ? "rotate-180" : "")} size={12} />} isIconOnly className={cn("absolute  right-1 top-2 bg-dark_blue   border-1 border-white/20 rounded-full ",open ? "translate-x-[-200px] rounded-sm" : "")}></Button>
+            <SideBarBody isOpen={open} />
+        </motion.div>
+    )
+
+}

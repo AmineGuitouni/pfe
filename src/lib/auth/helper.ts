@@ -25,9 +25,20 @@ export async function getUser(credentials:{
             throw new Error(error.message)
         }
 
+        const {data:cvData, error:cvError} = await localSupabase
+        .from("cv_informations")
+        .select("user_id")
+        .eq("user_id", data.id)
+        .single()
+
+        if(cvError){
+            console.log(cvError)
+            throw new Error(cvError.message)
+        }
+
 
         return {
-            ...data, role : "worker",email_verified : true,
+            ...data, role : "worker",email_verified : true, cv_informations : cvData.user_id ? true : false
         }
     }
     else{
