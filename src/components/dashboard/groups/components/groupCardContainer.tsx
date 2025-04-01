@@ -50,7 +50,9 @@ export default function GroupCardContainer(){
             >
                 {
                     loadingGroups ? (
-                        <Spinner color='default' size="lg"/>
+                        <div className="w-full h-32 flex items-center justify-center">
+                            <Spinner color='default' size="lg"/>
+                        </div>
                     ) :
                     groups.length === 0 ? 
                     <div className="text-white/50 text-center py-10 w-full">

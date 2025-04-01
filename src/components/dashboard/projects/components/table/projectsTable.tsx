@@ -119,7 +119,7 @@ export default function ProjectsTable({company_id}: {company_id: string}) {
                     <DropdownItem
                       key="view"
                       onPress={()=>{
-                        router.push(`${pathName}/${item.data.id}/assign-workers`)
+                        router.push(`${pathName}/${item.data.id}`)
                       }}
                     >
                       View

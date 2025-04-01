@@ -1,5 +1,4 @@
 import Header from "@/components/dashboard/header";
-import CompanyProvider from "@/components/dashboard/companies/contexts/useCompanies";
 import SideBarProvider from "@/components/dashboard/sidebar/contexts/sideBarContext";
 import CompanySideBar from "@/components/dashboard/sidebar/companySideBar";
 import { getServerSession } from "next-auth";
@@ -22,11 +21,11 @@ export default async function CompanyLayout({
       <SideBarProvider>
       <CompanySideBar companyId={company} session={session}/>
       <div className="flex flex-col w-full">
-        <div className="-z-50 w-[700px] h-[700px] fixed left-[40%] translate-y-[20%] blur-3xl bg-light_blue-500/5 rounded-full"></div>
+        <div className="w-[700px] h-[700px] fixed left-[40%] translate-y-[20%] blur-3xl bg-light_blue-500/5 rounded-full"></div>
         <Header/>
-        <CompanyProvider>
-          {children}
-        </CompanyProvider>
+        <div className="w-full relative">
+            {children}
+        </div>
       </div>
       </SideBarProvider>
     </main>

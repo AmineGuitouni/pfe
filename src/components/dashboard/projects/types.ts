@@ -3,7 +3,7 @@ export interface Task {
   title: string;
   description: string;
   dependencies: string[];
-  task_status: TaskStatusType;
+  task_status?: TaskStatusType;
   difficultyLevel: number;
 }
 

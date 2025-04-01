@@ -30,7 +30,7 @@
 
 @font-face {
   font-family: 'Helvetica';
-  src: url('/fonts/Helvetica.woff') format('woff');
+  src: url('./fonts/Helvetica.woff') format('woff');
   font-weight: 400;
   font-style: normal;
 }

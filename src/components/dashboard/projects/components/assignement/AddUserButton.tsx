@@ -48,7 +48,7 @@ export default function AddUserButton({company_id}: {company_id: string}) {
                 {(onClose) => (
                     <>
                     <ModalHeader className="flex flex-col gap-1 text-light_blue-500">
-                    Add New Project
+                        Add Users
                     </ModalHeader>
     
                     <ModalBody className="flex flex-col gap-4 text-white">
@@ -90,7 +90,7 @@ export default function AddUserButton({company_id}: {company_id: string}) {
                         isDisabled={loading}
                         className="bg-light_blue-500 text-dark_blue hover:bg-light_blue"
                     >
-                        Create Project
+                        Submit
                     </Button>
                     </ModalFooter>
                     </>

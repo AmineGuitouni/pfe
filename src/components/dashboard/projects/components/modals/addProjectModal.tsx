@@ -12,7 +12,6 @@ export default function AddProjectModal({ onCreateProject }: AddProjectModalProp
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
-  const [deadline, setDeadline] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (onClose: () => void) => {
@@ -22,7 +21,6 @@ export default function AddProjectModal({ onCreateProject }: AddProjectModalProp
       onClose()
       setName("")
       setDescription("")
-      setDeadline("")
     } catch (error) {
       console.error("Error creating project:", error)
     } finally {
@@ -73,16 +71,6 @@ export default function AddProjectModal({ onCreateProject }: AddProjectModalProp
                   label="Description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  isRequired
-                />
-
-                <Input
-                  variant="bordered"
-                  className="w-full text-white dark"
-                  type="date"
-                  label="Deadline"
-                  value={deadline}
-                  onChange={(e) => setDeadline(e.target.value)}
                   isRequired
                 />
               </ModalBody>

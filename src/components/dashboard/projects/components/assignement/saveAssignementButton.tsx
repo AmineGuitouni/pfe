@@ -73,7 +73,7 @@ export default function SaveAssignementButton({company_id, project_id}: {company
                 {(onClose) => (
                     <>
                     <ModalHeader className="flex flex-col gap-1 text-light_blue-500">
-                        Add Tasks to Users
+                        Save Assignments
                     </ModalHeader>
                     <form onSubmit={(e)=>onSubmit(e, onClose)}>
                     <ModalBody className="flex flex-col gap-4 text-white">

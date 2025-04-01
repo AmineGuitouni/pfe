@@ -87,7 +87,7 @@ export default async function DataBaseInfoPage({params:{id}}:{params:{id:string}
         const totalTableSize = dbStats.tableSizes.reduce((acc, tableSize) => acc + tableSize.size_bytes, 0);
         const totalBucketSize = dbStats.bucketSizes.reduce((acc, bucketSize) => acc + bucketSize.size_bytes, 0);
         return (
-          <div className="w-full text-white">
+          <div className="w-full text-white relative">
             <div className="mx-auto w-full max-w-[1200px] py-6 px-4 md:px-6 lg:px-14 xl:px-24 2xl:px-28 space-y-4">
                 <h1 className="font-bold text-2xl ">Database Analytics</h1>
                 <div className="flex gap-4 justify-between mb-4 flex-wrap">
