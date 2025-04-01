@@ -1,9 +1,12 @@
-import ToDoContainer from "@/components/to-do/toDoContainer";
+import ToDoContainer from "@/components/to-do/components/toDoContainer";
+import ColumnsProvider from "@/components/to-do/context/columnsContext";
 
-export default function ToDoPage() {
+export default function ToDoPage({params: {company}}: {params: {company: string}}) {    
     return (
         <div className="w-full h-full flex flex-col gap-5">
-            <ToDoContainer/>
+            <ColumnsProvider companyId={company}>
+                <ToDoContainer />
+            </ColumnsProvider>
         </div>
     );
 }
