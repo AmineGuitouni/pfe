@@ -5,7 +5,7 @@ import { SearchIcon } from 'lucide-react';
 import TaskItemSkeleton from '../tasks/TaskItemSkeleton';
 import { useTaskUserAssgnementContext } from '../../context/taskUserAssgnementContext';
 import TaskItem from './showTaskItem';
-import { Draggable, Droppable } from 'react-beautiful-dnd';
+import { Draggable, Droppable } from '@hello-pangea/dnd';
 
 export default function ProjectTaskList() {
   const {tasks, isLoadingTasks:isLoading, unLinkedTasks, tasksDisableDrop} = useTaskUserAssgnementContext()

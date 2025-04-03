@@ -87,7 +87,7 @@ export default function CompanyCard({company}:{company:CompanyType}) {
             <div className="w-full flex items-start justify-between">
                 <div className="flex flex-col">
                     <h1 className="text-light_blue text-md font-[400] uppercase">{company.name}</h1>
-                    <h1 className="text-white/50 text-sm">?? workers</h1>
+                    <h1 className="text-white/50 text-sm">{company.workers} workers</h1>
                 </div>
                 
                 <div className="flex items-center">

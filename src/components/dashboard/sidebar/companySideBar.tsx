@@ -59,8 +59,8 @@ export default function CompanySideBar({companyId,session}:{companyId: string,se
                     <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
                         AI
                     </Link>
-                    <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
-                        Docs
+                    <Link href={`/dashboard/${companyId}/files`} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
+                        Files
                     </Link>
                     <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
                         CLI

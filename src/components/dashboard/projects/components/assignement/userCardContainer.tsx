@@ -6,7 +6,7 @@ import { useState } from "react";
 import AddUserButton from "./AddUserButton";
 import { useTaskUserAssgnementContext } from "../../context/taskUserAssgnementContext";
 import { UserCard, UserCardSkeleton } from "./usersCard";
-import { Draggable, Droppable } from "react-beautiful-dnd";
+import { Draggable, Droppable } from "@hello-pangea/dnd";
 import SaveAssignementButton from "./saveAssignementButton";
 
 const containerVariants = {

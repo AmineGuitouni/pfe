@@ -1,6 +1,6 @@
 import { User as UserType } from "@/components/users/types/types";
 import { User, Card, CardBody, Skeleton } from "@heroui/react";
-import { Draggable, Droppable } from "react-beautiful-dnd";
+import { Draggable, Droppable } from "@hello-pangea/dnd";
 import { useTaskUserAssgnementContext } from "../../context/taskUserAssgnementContext";
 import { useMemo } from "react";
 import TaskItem from "./showTaskItem";

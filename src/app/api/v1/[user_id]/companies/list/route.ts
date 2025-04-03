@@ -1,3 +1,4 @@
+import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase";
 import { supabase } from "@/lib/database/supabase";
 import { NextResponse } from "next/server";
 
@@ -14,6 +15,7 @@ export interface CompanyType {
         created_at: string;
     } | null
     created_at: string,
+    workers: number
 }
 
 export interface CompaniesListResponse {
@@ -31,5 +33,30 @@ export async function GET(req: Request, {params: {user_id}}: {params: Params}) {
         return NextResponse.json({data:[], error: error.message});
     }
 
-    return NextResponse.json({data});
+    const companies = await Promise.all(data.map(async (company) => {
+        const loaclSupabase = await getServerDBfromCompanyId(company.id)
+        if(!loaclSupabase){
+            return {
+                ...company,
+                workers: 0
+            }
+        }
+        const {count, error: workersError} = await loaclSupabase.from("users")
+        .select("", {count: "exact"})
+        .eq("company_id", company.id)
+
+        if(workersError){
+            return {
+                ...company,
+                workers: 0
+            }
+        }
+
+        return {
+            ...company,
+            workers:count
+        }
+    }))
+
+    return NextResponse.json({data: companies});
 }

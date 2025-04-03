@@ -5,7 +5,7 @@ import { Task } from "../types"
 import useTasks from "../hooks/useTasks"
 import useUsersTaskLink from "../hooks/useUsersTaskLink"
 import { User } from "@/components/users/types/types"
-import {DragDropContext, DragStart, DropResult} from 'react-beautiful-dnd'
+import {DragDropContext, DragStart, DropResult} from '@hello-pangea/dnd'
 
 const TaskUserAssgnementContext = createContext<TaskUserAssgnementContextType | undefined>(undefined)
 
