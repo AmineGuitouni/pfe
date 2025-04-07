@@ -38,13 +38,33 @@ export async function POST(request: Request, { params:{company_id} }: { params: 
         return NextResponse.json({error: `Failed to add project: ${projectError.message}`}, {status: 500});
     }
 
+    const {data:addColData, error: colError} = await supabase
+    .from("columns")
+    .insert([
+    {
+        name: "To Do",
+        task_status: "To Do",
+    } as any ,
+    {
+        name:"Done",
+        task_status: "Completed"
+    } as any
+    ]) 
+    .select("id");
+
+    if(colError) {
+        console.log(colError);
+        return NextResponse.json({error: `Failed to add columns: ${colError.message}`}, {status: 500});
+    }
+
     const {data:addedTasks, error: tasksError} = await supabase
     .from("project_tasks")
     .insert(tasks.map((task) => ({
         title: task.title,
         description: task.description,
         project_id: addedProject.id,
-        difficulty_level: task.difficultyLevel
+        difficulty_level: task.difficultyLevel,
+        column_id : addColData[0].id
     })))
     .select("id, title");
 

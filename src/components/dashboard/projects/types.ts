@@ -15,7 +15,7 @@ export interface GeneratedTask {
 }
 
 export type ProjectStatusType = "Not Started" | "In Progress" | "Completed" | "Cancelled";
-export type TaskStatusType = "To Do" | "In Progress" | "Blocked" | "Completed";
+export type TaskStatusType = "To Do" | "In Progress" | "All" | "Completed";
 
 export interface Project {
   id: string;

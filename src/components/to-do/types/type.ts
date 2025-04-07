@@ -5,7 +5,7 @@ export type toDoProject = {
     columns: { [key: string]: Column },
 };
 
-export type statusForCol = "To Do" | "Completed" | "All"
+export type statusForCol = "To Do" | "Completed" | "All" | "In Progress";
 export interface Column {
     id: string;
     name: string;

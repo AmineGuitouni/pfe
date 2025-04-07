@@ -3,7 +3,7 @@ import TaskItem from "./taskItem";
 import { Draggable, Droppable } from "@hello-pangea/dnd";
 import { Column } from "../../types/type";
 
-export default function TaskContainer({column}:{column : Column}) {
+export default function TaskContainer({column,project_id}:{column : Column,project_id : string}) {
     return (
         <Droppable type="task" droppableId={column.id}>
             {(provided) => (
@@ -27,7 +27,7 @@ export default function TaskContainer({column}:{column : Column}) {
                                         {...provided.dragHandleProps}
                                         ref={provided.innerRef}
                                     >
-                                        <TaskItem task={task} />
+                                        <TaskItem task={task} project_id={project_id} column_id={column.id}/>
                                     </div>
                                 )}
                             </Draggable>
