@@ -23,7 +23,7 @@ export default async function CompanyLayout({
       <div className="flex flex-col w-full">
         <div className="w-[700px] h-[700px] fixed left-[40%] translate-y-[20%] blur-3xl bg-light_blue-500/5 rounded-full"></div>
         <Header/>
-        <div className="w-full relative">
+        <div className="w-full min-h-[calc(100vh-64px)] relative">
             {children}
         </div>
       </div>

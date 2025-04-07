@@ -21,7 +21,7 @@ export async function PUT(req: NextRequest, {params : { company_id, project_id }
     }
 
     // Extract request body data
-    const { status, task_id } = await req.json();
+    const { status, task_id ,column_id } = await req.json();
     
     // Validate request body
     if (!status || !task_id) {
@@ -41,7 +41,10 @@ export async function PUT(req: NextRequest, {params : { company_id, project_id }
     // Update task status in database
     const { error } = await client
         .from("project_tasks")
-        .update({ status: status })
+        .update({ 
+            status: status,
+            column_id
+        })
         .eq("project_id", project_id)
         .eq("id", task_id);
 

@@ -7,15 +7,17 @@ import { toast } from "react-toastify";
 
 type ColumnsContextType = {
   projects: TaskBoard | undefined;
+  setProjects: React.Dispatch<React.SetStateAction<TaskBoard | undefined>>;
   isLoading: boolean;
   search: string;
   setSearch: (value: string) => void;
-  updateStatus: (task_id: string, status: string, project_id: string) => Promise<void>;
+  updateStatus: (task_id: string, status: string, project_id: string, column_id: string) => Promise<void>;
   dragDropTask: (task_id: string, newStatus: string, source_column_id: string, destination_column_id: string, activeProjectId: string) => void;
 };
 
 const columnsContext = createContext<ColumnsContextType>({
   projects: undefined,
+  setProjects: () => {},
   isLoading: true,
   search: "",
   setSearch: () => {},
@@ -88,7 +90,7 @@ function ColumnsProvider({
   }, [fetchProjects]);
 
 
-  const updateStatus = useCallback(async (task_id: string, status: string, project_id: string) => {
+  const updateStatus = useCallback(async (task_id: string, status: string, project_id: string,column_id: string) => {
     if (!userId) return;
     
     try {
@@ -96,7 +98,7 @@ function ColumnsProvider({
         `/api/v1/${userId}/companies/${companyId}/to-do/${project_id}/update-task-status`, 
         {
           method: "PUT",
-          body: JSON.stringify({ task_id, status }),
+          body: JSON.stringify({ task_id, status,column_id }),
           headers: {
             "Content-Type": "application/json"
           }
@@ -165,7 +167,7 @@ function ColumnsProvider({
       };
     });
     
-    updateStatus(task_id, newStatus, activeProjectId);
+    updateStatus(task_id, newStatus, activeProjectId, destination_column_id);
   }, [projects, updateStatus]);
 
   const contextValue = useMemo(() => ({
@@ -174,7 +176,8 @@ function ColumnsProvider({
     search,
     setSearch,
     updateStatus,
-    dragDropTask
+    dragDropTask,
+    setProjects
   }), [projects, isLoading, search, setSearch, updateStatus, dragDropTask]);
 
   return (
