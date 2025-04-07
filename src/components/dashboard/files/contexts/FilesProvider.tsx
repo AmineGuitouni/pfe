@@ -1,7 +1,17 @@
 'use client';
 
-import React, { createContext, useState, useMemo, ReactNode, useCallback } from 'react';
-import { FileItem, FilesContextType } from '../types/filesTypes';
+import React, { createContext, useState, useMemo, ReactNode } from 'react';
+import useFiles from '../hooks/useFiles';
+import { FileItem, FolderItem } from '../types/filesTypes';
+
+export interface FilesContextType {
+  files: FileItem[],
+  folders: FolderItem[],
+  isLoading: boolean,
+  searchTerm: string,
+  setSearchTerm: React.Dispatch<React.SetStateAction<string>>
+}
+
 const FilesContext = createContext<FilesContextType | undefined>(undefined);
 
 interface FilesProviderProps {
@@ -9,39 +19,17 @@ interface FilesProviderProps {
 }
 
 export const FilesProvider: React.FC<FilesProviderProps> = ({ children }) => {
-  const [files, setFiles] = useState<FileItem[]>([]);
-  const [selectedFile, setSelectedFile] = useState<FileItem | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [searchTerm, setSearchTermState] = useState<string>('');
-  const [currentPath, setCurrentPath] = useState<string>('/');
-
-  const selectFile = useCallback((file: FileItem | null) => {
-    setSelectedFile(file);
-  }, []);
-
-  const setSearchTerm = useCallback((term: string) => {
-    setSearchTermState(term);
-  }, []);
-
-  const navigateToPath = useCallback((path: string) => {
-    console.log("Navigating to:", path);
-    setCurrentPath(path);
-    setSearchTermState('');
-  }, []);
-
+  const {files, folders, error, isLoading} = useFiles()
+  const [searchTerm, setSearchTerm] = useState('');
 
   const contextValue = useMemo(() => ({
     files,
-    selectedFile,
     isLoading,
     error,
+    folders,
     searchTerm,
-    currentPath,
-    selectFile,
     setSearchTerm,
-    navigateToPath,
-  }), [files, selectedFile, isLoading, error, searchTerm, currentPath, selectFile, setSearchTerm, navigateToPath]);
+  }), [error, files, folders, isLoading, searchTerm]);
 
   return (
     <FilesContext.Provider value={contextValue}>

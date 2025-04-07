@@ -1,14 +1,15 @@
 'use client';
 
-import React from 'react'; // Remove useState import
-import { FaSearch } from 'react-icons/fa';
-import { useFiles } from './hooks/useFiles'; // Import useFiles hook
+import React from 'react';
+import { Input } from "@heroui/react"; // Import Input from heroui
+import { IoSearchOutline } from "react-icons/io5"; // Use IoSearchOutline icon
+import { useFilesContext } from './hooks/useFilesContext';
 import AddFileButton from './components/AddFileButton';
 import AddFolderButton from './components/AddFolderButton';
 import FileCardContainer from './components/FileCardContainer';
 
 const FilesDashboard: React.FC = () => {
-  const { searchTerm, setSearchTerm } = useFiles(); // Get state and setter from context
+  const { searchTerm, setSearchTerm } = useFilesContext(); // Get state and setter from context
 
   return (
     <div className="flex flex-col min-h-screen bg-dark_blue text-white p-6 md:p-8 lg:p-10">
@@ -16,15 +17,17 @@ const FilesDashboard: React.FC = () => {
         <div className="flex flex-wrap justify-between items-center gap-4 mb-8 pb-4 border-b border-light_blue-500/10">
           <h1 className="text-2xl font-semibold text-light_blue">Company Files</h1>
 
-          <div className="relative flex-grow max-w-xs sm:max-w-sm md:max-w-md order-last sm:order-none">
-            <input
-              type="text"
+          {/* Use HeroUI Input component */}
+          <div className="flex-grow max-w-xs sm:max-w-sm md:max-w-md order-last sm:order-none">
+            <Input
               placeholder="Search files and folders..."
+              size="sm"
+              className="w-full dark text-white" // Apply styles from groupCardContainer
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-md bg-modal_bg/70 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-light_blue-500/50 border border-transparent focus:border-light_blue-500/30"
+              onValueChange={setSearchTerm} // Use onValueChange
+              endContent={<IoSearchOutline className="text-light_blue-500/70" />} // Use IoSearchOutline
+              variant="bordered" // Apply variant
             />
-            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           </div>
 
           <div className="flex items-center space-x-3">
