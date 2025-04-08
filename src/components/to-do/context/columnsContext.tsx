@@ -62,9 +62,8 @@ function ColumnsProvider({
       
       const { data } = await response.json();
       
-      setProjects(prev => 
-        JSON.stringify(prev) !== JSON.stringify(data) ? data : prev
-      );
+      setProjects(data);
+      console.log(data);
     } catch (error) {
       toast.error("Error fetching projects");
       console.error(error);
