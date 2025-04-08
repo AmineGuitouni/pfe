@@ -6,7 +6,9 @@ import { FileItem, FolderItem } from '../types/filesTypes';
 
 export interface FilesContextType {
   files: FileItem[],
+  setFiles : React.Dispatch<React.SetStateAction<FileItem[]>>,
   folders: FolderItem[],
+  setFolders: React.Dispatch<React.SetStateAction<FolderItem[]>>,
   isLoading: boolean,
   searchTerm: string,
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>
@@ -19,7 +21,7 @@ interface FilesProviderProps {
 }
 
 export const FilesProvider: React.FC<FilesProviderProps> = ({ children }) => {
-  const {files, folders, error, isLoading} = useFiles()
+  const {files, folders, error, isLoading,setFolders,setFiles} = useFiles()
   const [searchTerm, setSearchTerm] = useState('');
 
   const contextValue = useMemo(() => ({
@@ -29,7 +31,9 @@ export const FilesProvider: React.FC<FilesProviderProps> = ({ children }) => {
     folders,
     searchTerm,
     setSearchTerm,
-  }), [error, files, folders, isLoading, searchTerm]);
+    setFolders,
+    setFiles
+  }), [error, files, folders, isLoading, searchTerm, setFiles, setFolders]);
 
   return (
     <FilesContext.Provider value={contextValue}>

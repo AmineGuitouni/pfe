@@ -23,10 +23,13 @@ import {
   DropdownMenu,
   DropdownTrigger,
   Skeleton,
+  useDisclosure,
 } from '@heroui/react';
 import { FileItem } from '../types/filesTypes';
 import { formatShortDate } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/formatBytes';
+import EditModal from './editModal';
+import DeleteModal from './deleteModal';
 
 const variants = {
     initial: {
@@ -48,34 +51,40 @@ function getIcon(type: string, size?: number, className?: string) {
 
 export default function FileComponent({ file, index }: { file: FileItem; index: number }) {
 
+    const { isOpen : isOpenEdit , onOpen : onOpenEdit , onOpenChange : onOpenChangeEdit } = useDisclosure();
+    const { isOpen : isOpenDelete , onOpen : onOpenDelete , onOpenChange : onOpenChangeDelete } = useDisclosure();
+
     return (
         <>
+            <EditModal isOpen={isOpenEdit} onOpenChange={onOpenChangeEdit} object={file} />
+            <DeleteModal isOpen={isOpenDelete} onOpenChange={onOpenChangeDelete}  object={file} />
+
             <motion.div
                 variants={variants}
                 initial={index < 3 ? "visible" : "initial"}
                 animate="visible"
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="p-4 h-[170px] sm:w-[300px] w-full rounded-xl border border-light_blue-500/20 shadow-lg flex-shrink-0 cursor-pointer bg-white/5 hover:bg-white/10 transition-all duration-200"
+                className="p-4 h-[170px] col-span-1 w-full rounded-xl border border-light_blue-500/20 shadow-lg flex-shrink-0 cursor-pointer bg-white/5 hover:bg-white/10 transition-all duration-200"
             >
                 <div className="flex justify-between items-center w-full mb-5 flex-shrink-0">
-                    {getIcon(file.type, 35, "text-light_blue-500")}
+                    {getIcon(file.type, 35, "text-light_blue")}
                     <Dropdown>
                         <DropdownTrigger>
-                            <Button isIconOnly size="sm" variant="light" color="default">
+                            <Button isIconOnly size="sm" variant="light" color="default" >
                                 <HiOutlineDotsVertical size={20} className="text-light_blue-500" />
                             </Button>
                         </DropdownTrigger>
                         <DropdownMenu aria-label="actions">
-                            <DropdownItem key="edit" startContent={<CiEdit size={20} />} >
+                            <DropdownItem key="edit" startContent={<CiEdit size={20} />} onPress={onOpenEdit} >
                                 Edit File
                             </DropdownItem>
-                            <DropdownItem key="delete" startContent={<MdDelete size={20} />} className="text-danger" color="danger">
+                            <DropdownItem key="delete" startContent={<MdDelete size={20} />} className="text-danger" color="danger" onPress={onOpenDelete}>
                                 Delete File
                             </DropdownItem>
                         </DropdownMenu>
                     </Dropdown>
                 </div>
-                <p className="text-sm font-semibold text-light_blue-500 line-clamp-2">{file.name}</p>
+                <p className="text-sm font-semibold text-light_blue line-clamp-2">{file.name}</p>
                 <hr className="my-3" />
                 <div className='flex justify-between items-end'>
                     <p className="text-sm font-semibold text-gray-300 mb-2">{formatShortDate(file.created_at)}</p>

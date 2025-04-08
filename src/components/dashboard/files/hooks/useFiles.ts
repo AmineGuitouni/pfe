@@ -19,8 +19,8 @@ const dummyFiles: FileItem[] = [
 
 
 export default function useFiles() {
-    const [folders] = useState<FolderItem[]>(dummyFolders); // Removed setFolder
-    const [files] = useState<FileItem[]>(dummyFiles); // Removed setFiles
+    const [folders,setFolders] = useState<FolderItem[]>(dummyFolders); // Removed setFolder
+    const [files,setFiles] = useState<FileItem[]>(dummyFiles); // Removed setFiles
 
     const [isLoading] = useState(false); // Keep isLoading, might be useful later. Removed setIsLoading
     const [error] = useState<string | null>(null); // Keep error state. Removed setError
@@ -30,6 +30,8 @@ export default function useFiles() {
         folders,
         files,
         isLoading,
-        error
+        error,
+        setFolders,
+        setFiles
     }
 }

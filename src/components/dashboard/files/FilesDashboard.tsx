@@ -15,7 +15,7 @@ const FilesDashboard: React.FC = () => {
     <div className="flex flex-col min-h-screen bg-dark_blue text-white p-6 md:p-8 lg:p-10">
         {/* Header: Adjust layout for search bar */}
         <div className="flex flex-wrap justify-between items-center gap-4 mb-8 pb-4 border-b border-light_blue-500/10">
-          <h1 className="text-2xl font-semibold text-light_blue">Company Files</h1>
+          <h1 className="text-2xl font-semibold text-light_blue-500">Company Files</h1>
 
           {/* Use HeroUI Input component */}
           <div className="flex-grow max-w-xs sm:max-w-sm md:max-w-md order-last sm:order-none">
@@ -37,7 +37,7 @@ const FilesDashboard: React.FC = () => {
         </div>
 
         <div className="flex flex-grow overflow-hidden space-x-6">
-          <div className="flex-grow bg-dark_blue p-5 rounded-lg overflow-y-auto custom-scrollbar">
+          <div className="flex-grow bg-dark_blue  rounded-lg overflow-y-auto custom-scrollbar">
             <FileCardContainer />
           </div>
 

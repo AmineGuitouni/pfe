@@ -5,17 +5,16 @@ import {
   ModalHeader,
   ModalBody,
   Button,
-  useDisclosure,
   Input,
 } from "@heroui/react";
-import { FolderPlus } from "lucide-react";
 import { useState } from "react";
-import { FolderItem } from "../types/filesTypes";
+import { FileItem, FolderItem } from "../types/filesTypes";
 import { useFilesContext } from "../hooks/useFilesContext";
 
-export default function App() {
-  const {setFolders,folders} = useFilesContext();
-  const {isOpen, onOpen, onOpenChange} = useDisclosure();
+export default function EditModal({isOpen, onOpenChange,object}:{isOpen: boolean, onOpenChange: () => void,object : FolderItem | FileItem}) {
+
+  const {setFolders,setFiles} = useFilesContext();
+
   const [name,setName] = useState("");
   const [error,setError] = useState("");
   const [isLoading,setIsLoading] = useState(false);
@@ -25,9 +24,8 @@ export default function App() {
     setError("");
   }
 
-  console.log(folders);
-
-  const handleAddFolder = (e : any) => {
+  const handleEdit = (e : any) => {
+    
     e.preventDefault();
 
     if(name === "") {
@@ -47,9 +45,14 @@ export default function App() {
 
     setIsLoading(true);
 
-    const newFolder = { type: 'folder', id: 'folder1', name: name, parent_id: null, created_at: new Date().toISOString(), owner_id: 'user1' } as FolderItem;
+    if(object.type === "file") {
+      setFiles((prevFiles) => prevFiles.map((file) => file.id === object.id ? {...file,name:name} : file));
+    }
 
-    setFolders((prevFolders) => [...prevFolders, newFolder]);
+    if(object.type === "folder") {
+      setFolders((prevFolders) => prevFolders.map((folder) => folder.id === object.id ? {...folder,name:name} : folder));
+    }
+
     onOpenChange();
     setIsLoading(false);
     
@@ -57,15 +60,6 @@ export default function App() {
 
   return (
     <>
-      <Button
-      size="sm"
-      className="dark bg-light_blue-500/10 hover:bg-light_blue-500/20 w-fit flex-shrink-0" // Apply styles from AddGroupButton
-      startContent={<FolderPlus className="w-4 h-4" />} // Use FolderPlus icon
-      onPress={onOpen}
-      title="Create New Folder"
-    >
-      Create Folder
-    </Button>
       <Modal isOpen={isOpen} 
                 radius="sm" 
                 classNames={{
@@ -78,9 +72,9 @@ export default function App() {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">Create Folder</ModalHeader>
+              <ModalHeader className="flex flex-col gap-1">Edit {object.type}</ModalHeader>
               <ModalBody>
-              <form onSubmit={(e : any) => {handleAddFolder(e)}} className="flex flex-col gap-4">
+              <form onSubmit={(e : any) => {handleEdit(e)}} className="flex flex-col gap-4">
                 <Input
                     isRequired
                     variant="bordered"
@@ -107,7 +101,7 @@ export default function App() {
                     type="submit" 
                     className="bg-light_blue-500 text-dark_blue hover:bg-light_blue"
                 >
-                    Create
+                    Edit
                 </Button>
                 </div>
               </form>
