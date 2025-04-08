@@ -63,9 +63,9 @@ export default function App() {
       startContent={<FolderPlus className="w-4 h-4" />} // Use FolderPlus icon
       onPress={onOpen}
       title="Create New Folder"
-    >
-      Create Folder
-    </Button>
+      >
+        Create Folder
+      </Button>
       <Modal isOpen={isOpen} 
                 radius="sm" 
                 classNames={{
