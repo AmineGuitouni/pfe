@@ -29,7 +29,7 @@ export default function AddColumnButton() {
             const newColumn: Column = {
                 id: newColumnId,
                 name: "New Column",
-                tasks: {},
+                tasks: [], // Initialize with an empty array
                 tasksStatus: "To Do" as statusForCol
             };
             

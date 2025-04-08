@@ -4,87 +4,9 @@ import TaskContainer from "./TaskContainer";
 import { DragDropContext, DropResult } from "@hello-pangea/dnd";
 import { toDoProject } from "../../types/type";
 import AddColumnButton from "../columnsComponents/addColumnButton";
-import { sortTasks } from "@/components/dashboard/projects/utils/taskSorter";
-import { Task } from "@/components/dashboard/projects/types";
-import { useEffect } from "react";
 
 export default function Container({isLoading, activeProject}:{isLoading: boolean, activeProject: toDoProject | undefined}) {
     const { dragDropTask, setProjects } = UseColumns();
-
-    // Convert tasks from Record to array for sorting
-    const convertTasksToArray = (tasks: Record<string, Task>) => {
-        return Object.entries(tasks).map(([id, task]) => ({
-            ...task,
-            id
-        }));
-    };
-
-    // Convert sorted array back to Record
-    const convertArrayToTasks = (taskArray: Task[]) => {
-        return taskArray.reduce((acc, task) => {
-            acc[task.id] = task;
-            return acc;
-        }, {} as Record<string, Task>);
-    };
-
-    // Apply sorting to tasks in a column
-    const applySortingToColumn = (columnTasks: Record<string, Task>) => {
-        if (!columnTasks || Object.keys(columnTasks).length === 0) return columnTasks;
-
-        try {
-            // Convert to array format compatible with sortTasks
-            const tasksArray = convertTasksToArray(columnTasks).map(task => ({
-                title: task.title,
-                dependencies: task.dependencies || [],
-                difficultyLevel: task.difficultyLevel || 1,
-                id: task.id
-            }));
-
-            // Sort the tasks
-            const sortedTasks = sortTasks(tasksArray);
-
-            // Convert back to record format
-            return convertArrayToTasks(sortedTasks.map(sortedTask => {
-                // Find the original task to keep all properties
-                const originalTask = columnTasks[sortedTask.id];
-                return originalTask;
-            }));
-        } catch (error) {
-            console.error("Error sorting tasks:", error);
-            return columnTasks; // Return original tasks if sorting fails
-        }
-    };
-
-    // Apply sorting to all columns on initial load
-    useEffect(() => {
-        if (!activeProject) return;
-
-        setProjects(prevProjects => {
-            if (!prevProjects) return prevProjects;
-
-            const projectId = activeProject.projectData.id;
-            if (!prevProjects[projectId]) return prevProjects;
-
-            // Create a new project with sorted columns
-            const sortedColumns = { ...activeProject.columns };
-            
-            // Sort tasks in each column
-            Object.keys(sortedColumns).forEach(columnId => {
-                sortedColumns[columnId] = {
-                    ...sortedColumns[columnId],
-                    tasks: applySortingToColumn(sortedColumns[columnId].tasks)
-                };
-            });
-
-            return {
-                ...prevProjects,
-                [projectId]: {
-                    ...prevProjects[projectId],
-                    columns: sortedColumns
-                }
-            };
-        });
-    }, [activeProject?.projectData.id, setProjects]);
 
     const handleDragEnd = (result: DropResult) => {
         if(!activeProject) return;
@@ -114,7 +36,9 @@ export default function Container({isLoading, activeProject}:{isLoading: boolean
                 destColumn.tasksStatus, 
                 source.droppableId, 
                 destination.droppableId,
-                activeProject.projectData.id
+                activeProject.projectData.id,
+                source.index,
+                destination.index
             );
 
             // After the drag operation, sort the tasks in the destination column
@@ -127,10 +51,7 @@ export default function Container({isLoading, activeProject}:{isLoading: boolean
                     
                     if (!project) return prevProjects;
                     
-                    const updatedColumn = {
-                        ...project.columns[destination.droppableId],
-                        tasks: applySortingToColumn(project.columns[destination.droppableId].tasks)
-                    };
+                    const updatedColumn = project.columns[destination.droppableId];
                     
                     return {
                         ...prevProjects,
@@ -158,12 +79,7 @@ export default function Container({isLoading, activeProject}:{isLoading: boolean
             
             if (!project) return prevProjects;
             
-            const sortedTasks = applySortingToColumn(project.columns[source.droppableId].tasks);
-            
-            const updatedColumn = {
-                ...project.columns[source.droppableId],
-                tasks: sortedTasks
-            };
+            const updatedColumn = project.columns[source.droppableId]
             
             return {
                 ...prevProjects,

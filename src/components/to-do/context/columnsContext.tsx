@@ -12,7 +12,7 @@ type ColumnsContextType = {
   search: string;
   setSearch: (value: string) => void;
   updateStatus: (task_id: string, status: string, project_id: string, column_id: string) => Promise<void>;
-  dragDropTask: (task_id: string, newStatus: string, source_column_id: string, destination_column_id: string, activeProjectId: string) => void;
+  dragDropTask: (task_id: string, newStatus: string, source_column_id: string, destination_column_id: string, activeProjectId: string, sourceIndex: number, destinationIndex: number) => void;
 };
 
 const columnsContext = createContext<ColumnsContextType>({
@@ -118,7 +118,9 @@ function ColumnsProvider({
     newStatus: string, 
     source_column_id: string, 
     destination_column_id: string,
-    activeProjectId: string
+    activeProjectId: string,
+    sourceIndex: number,
+    destinationIndex: number
   ) => {
     if (!activeProjectId || !projects) return;
 
@@ -130,7 +132,7 @@ function ColumnsProvider({
     
     if (!sourceColumn.tasks || !destColumn.tasks) return;
     
-    const taskToMove = sourceColumn.tasks[task_id];
+    const taskToMove = sourceColumn.tasks.find(task => task.id === task_id);
     if (!taskToMove) return;
     
     const updatedTask: Task = {
@@ -141,11 +143,8 @@ function ColumnsProvider({
     setProjects(prevProjects => {
       if (!prevProjects) return prevProjects;
       
-      const newSourceTasks = { ...sourceColumn.tasks };
-      const newDestTasks = { ...destColumn.tasks };
-
-      delete newSourceTasks[task_id];
-      newDestTasks[task_id] = updatedTask;
+      const newSourceTasks = sourceColumn.tasks.filter(task => task.id !== task_id);
+      const newDestTasks = [...destColumn.tasks.slice(0, destinationIndex), updatedTask, ...destColumn.tasks.slice(destinationIndex, destColumn.tasks.length)];
       
       return {
         ...prevProjects,
