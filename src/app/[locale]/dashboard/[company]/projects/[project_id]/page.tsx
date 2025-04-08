@@ -70,7 +70,7 @@ interface ApiResponse {
     tasksData: Task[];
 }
 
-export default async function ProjectPage({ params: { locale, company, project_id }, searchParams: { filter } }: { params: Params, searchParams: searchParams, baseUrl: string }) {
+export default async function ProjectPage({ params: { locale, company, project_id }, searchParams: { filter } }: { params: Params, searchParams: searchParams }) {
     const session = await getServerSession(authOptions);
     const user_id = session?.user?.id;
 

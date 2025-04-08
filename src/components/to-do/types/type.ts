@@ -9,7 +9,7 @@ export type statusForCol = "To Do" | "Completed" | "All" | "In Progress";
 export interface Column {
     id: string;
     name: string;
-    tasks: Record<string, Task> | undefined
+    tasks: Task[];
     tasksStatus : statusForCol
 }
 

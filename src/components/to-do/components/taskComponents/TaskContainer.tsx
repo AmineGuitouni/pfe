@@ -19,8 +19,8 @@ export default function TaskContainer({column,project_id}:{column : Column,proje
                         </span>
                     </p>
                     <div className="w-full flex flex-col gap-2 mb-1">
-                        {column.tasks && Object.entries(column.tasks).map(([taskId, task], index) => (
-                            <Draggable key={taskId} draggableId={taskId} index={index}>
+                        {column.tasks && column.tasks.map((task, index) => (
+                            <Draggable key={task.id} draggableId={task.id} index={index}>
                                 {(provided) => (
                                     <div
                                         {...provided.draggableProps}

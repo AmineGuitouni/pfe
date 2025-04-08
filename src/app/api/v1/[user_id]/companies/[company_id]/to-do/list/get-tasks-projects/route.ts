@@ -1,7 +1,6 @@
 import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase";
 import { NextRequest, NextResponse } from "next/server";
 import { Column, TaskBoard, toDoProject } from "@/components/to-do/types/type";
-import { Task } from "@/components/dashboard/projects/types";
 
 export async function GET(req: NextRequest, {params: {company_id, user_id}}: {params: { company_id: string, user_id: string}}) {
   const { searchParams } = new URL(req.url);
@@ -60,48 +59,31 @@ export async function GET(req: NextRequest, {params: {company_id, user_id}}: {pa
     }, {} as any) || {};
 
     // Convert tasks to the Task type with Record structure
-    const processedTasks: Record<string, Task> = {};
     const columns: Record<string, Column> = columnsData.filter((col: any) => col.project_id === project.id).reduce((acc: any, col: any) => {
       return {
         ...acc,
         [col.id]: {
           id: col.id,
           name: col.name,
-          tasks: {},
+          tasks: [],
           tasksStatus: col.task_status,
         }
       };
     }, {});	
-
-    console.log({columns});
     
     Object.values(tasksMap).forEach((task: any) => {
       if(task.column_id){
         columns[task.column_id] = {
           ...columns[task.column_id],
-          tasks: {
-            ...(columns[task.column_id]?.tasks || {}),
-            [task.id]: task
-          }
+          tasks: [
+            ...(columns[task.column_id]?.tasks || []),
+            task
+          ]
         };
       }
-
-      // Get dependency titles
-      const dependencyTitles = task.dependencies.map((depId: string) => {
-        const dependentTask = tasksMap[depId];
-        return dependentTask ? dependentTask.title : `Unknown Task (${depId})`;
-      });
-
-      // Create the processed task
-      processedTasks[task.id] = {
-        id: task.id,
-        title: task.title,
-        description: task.description,
-        task_status: task.status,
-        dependencies: dependencyTitles,
-        difficultyLevel: task.difficulty_level
-      };
     });
+
+    console.log({columns});
 
     // Create the toDoProject structure
     const toDoProject: toDoProject = {
@@ -110,7 +92,7 @@ export async function GET(req: NextRequest, {params: {company_id, user_id}}: {pa
         name: project.name,
         description: project.description,
         deadline: project.deadline,
-        tasks_count: Object.keys(processedTasks).length,
+        tasks_count: Object.keys(tasksMap).length,
         project_status: project.status || "In Progress",
         created_at: project.created_at
       },

@@ -102,10 +102,11 @@ export default function AddCompanyButton() {
             } : null
 
             const newCompany: CompanyType = {
-                id:data.id, 
+                id:data.id,
                 name,
                 created_at: new Date().toUTCString(),
-                database: databaseData
+                database: databaseData,
+                workers: 0 // Initialize workers count to 0
             }
 
             console.log(newCompany)
