@@ -12,24 +12,31 @@ import { useState } from "react";
 import { FileItem, FolderItem } from "../types/filesTypes";
 import { useFilesContext } from "../hooks/useFilesContext";
 
-export default function DeleteModal({isOpen, onOpenChange , object}:{isOpen: boolean, onOpenChange: (isOpen: boolean) => void, object : FolderItem | FileItem}) {
+export default function DeleteModal({isOpen, onOpenChange , object}:{isOpen: boolean, onOpenChange?: (isOpen: boolean) => void, object : FolderItem | FileItem}) {
 
     const [loading, setLoading] = useState(false);
-    const {setFolders,setFiles} = useFilesContext();
+    const {deleteFolder} = useFilesContext();
+
+    const type: "file" | "folder" = "type" in object ? "file" : "folder"
 
     const handleDelete = async () => {
+        try{
+            setLoading(true);
+            if(type === "file"){
 
-        setLoading(true);
-        
-        if(object.type === "folder"){
-            setFolders((prevFolders) => prevFolders.filter((folder) => folder.id !== object.id));
+            }
+            else {
+                await deleteFolder(object.id);
+            }
+            
+            onOpenChange?.(false);
         }
-        if(object.type === "file"){
-            setFiles((prevFiles) => prevFiles.filter((file) => file.id !== object.id));
+        catch(error){
+            console.error("Error deleting user:", error);
         }
-
-        setLoading(false);
-
+        finally{
+            setLoading(false);
+        }
     }
 
     return (
@@ -54,7 +61,7 @@ export default function DeleteModal({isOpen, onOpenChange , object}:{isOpen: boo
                                     radius="sm" 
                                     color="danger" 
                                     className="dark" 
-                                    description={`Are you sure you want to remove this ${object.type} from the files ?`}
+                                    description={`Are you sure you want to remove this ${type} from the files ?`}
                                     title="Warning" 
                                 />
 
