@@ -10,26 +10,34 @@ import {
 import { useState } from "react";
 import { FileItem, FolderItem } from "../types/filesTypes";
 import { useFilesContext } from "../hooks/useFilesContext";
+import { toast } from "react-toastify";
 
-export default function EditModal({isOpen, onOpenChange,object}:{isOpen: boolean, onOpenChange: () => void,object : FolderItem | FileItem}) {
+export default function EditModal({isOpen, onOpenChange,object}:{isOpen: boolean, onOpenChange?: () => void,object : FolderItem | FileItem}) {
 
-  const {setFolders,setFiles} = useFilesContext();
+  const {editFolder} = useFilesContext();
 
   const [name,setName] = useState("");
   const [error,setError] = useState("");
   const [isLoading,setIsLoading] = useState(false);
+
+  const type: "file" | "folder" = "type" in object ? "file" : "folder"
 
   const handleInputChange = (e : any) => {
     setName(e.target.value);
     setError("");
   }
 
-  const handleEdit = (e : any) => {
+  const handleEdit = async (e : any) => {
     
     e.preventDefault();
 
     if(name === "") {
       setError("Please enter a folder name");
+      return;
+    }
+
+    if(name === object.name) {
+      onOpenChange?.();
       return;
     }
 
@@ -43,18 +51,26 @@ export default function EditModal({isOpen, onOpenChange,object}:{isOpen: boolean
       return;
     }
 
-    setIsLoading(true);
+    try{
+      setIsLoading(true);
 
-    if(object.type === "file") {
-      setFiles((prevFiles) => prevFiles.map((file) => file.id === object.id ? {...file,name:name} : file));
+      if(type === "file") {
+
+      }
+      else {
+        await editFolder(object.id,{folderName:name});
+        toast.success("Folder edited successfully");
+      }
+
+      onOpenChange?.();
     }
-
-    if(object.type === "folder") {
-      setFolders((prevFolders) => prevFolders.map((folder) => folder.id === object.id ? {...folder,name:name} : folder));
+    catch (error) {
+      console.log(error)
+      toast.error("Something went wrong");
     }
-
-    onOpenChange();
-    setIsLoading(false);
+    finally {
+      setIsLoading(false);
+    }
     
   }
 
@@ -72,7 +88,7 @@ export default function EditModal({isOpen, onOpenChange,object}:{isOpen: boolean
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">Edit {object.type}</ModalHeader>
+              <ModalHeader className="flex flex-col gap-1">Edit {type}</ModalHeader>
               <ModalBody>
               <form onSubmit={(e : any) => {handleEdit(e)}} className="flex flex-col gap-4">
                 <Input

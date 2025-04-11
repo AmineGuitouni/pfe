@@ -10,11 +10,11 @@ import {
 } from "@heroui/react";
 import { FolderPlus } from "lucide-react";
 import { useState } from "react";
-import { FolderItem } from "../types/filesTypes";
 import { useFilesContext } from "../hooks/useFilesContext";
+import { toast } from "react-toastify";
 
 export default function App() {
-  const {setFolders,folders} = useFilesContext();
+  const {addFolder,folders, currentFolder} = useFilesContext();
   const {isOpen, onOpen, onOpenChange} = useDisclosure();
   const [name,setName] = useState("");
   const [error,setError] = useState("");
@@ -46,13 +46,18 @@ export default function App() {
     }
 
     setIsLoading(true);
-
-    const newFolder = { type: 'folder', id: 'folder1', name: name, parent_id: null, created_at: new Date().toISOString(), owner_id: 'user1' } as FolderItem;
-
-    setFolders((prevFolders) => [...prevFolders, newFolder]);
-    onOpenChange();
-    setIsLoading(false);
-    
+    addFolder({folderName:name,parentFolderId:currentFolder?.id})
+    .then(()=>{
+      onOpenChange();
+      toast.success("Folder created successfully");
+    })
+    .catch((error : any) => {
+      setError(error.message);
+      toast.error(error.message);
+    })
+    .finally(()=>{
+      setIsLoading(false);
+    })
   }
 
   return (

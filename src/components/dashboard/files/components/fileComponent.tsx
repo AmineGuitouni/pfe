@@ -105,12 +105,16 @@ export function FileSkeleton({ index, loading }: { index: number; loading: boole
             className="p-4 h-[170px] sm:w-[300px] w-full rounded-xl border border-light_blue-500/20 shadow-lg flex-shrink-0 cursor-pointer bg-white/5 hover:bg-white/10 transition-all duration-200"
         >
             <div className="flex justify-between items-center w-full mb-5 flex-shrink-0">
-                <Skeleton className="size-[35px] rounded-lg" />
-                <Skeleton className="size-6 rounded-lg" />
+                <Skeleton className="size-[35px] rounded-lg animate-pulse" />
+                <Skeleton className="size-8 rounded-lg animate-pulse" />
             </div>
-            <Skeleton className="w-16 h-4 rounded-lg" />
-            <hr className="my-4" />
-            <Skeleton className="w-24 h-2 rounded-lg" />
+            <Skeleton className="w-3/4 h-4 rounded-lg mb-1 animate-pulse" />
+            <Skeleton className="w-1/2 h-4 rounded-lg animate-pulse" />
+            <hr className="my-3 border-gray-700" />
+            <div className='flex justify-between items-end'>
+                 <Skeleton className="w-20 h-3 rounded-lg animate-pulse" />
+                 <Skeleton className="w-12 h-3 rounded-lg animate-pulse" />
+            </div>
         </motion.div>
     );
 }
