@@ -25,7 +25,7 @@ export async function GET(req: Request, { params: { company_id, project_id } }: 
                     title,
                     description,
                     difficulty_level,
-                    status,
+                    task_status,
                     dependencies:project_tasks_dependencies_main_task_id_fkey(dependent_task_id)
                 )
             `)
@@ -64,7 +64,7 @@ export async function GET(req: Request, { params: { company_id, project_id } }: 
                     id: task.id,
                     title: task.title,
                     description: task.description,
-                    task_status: task.status,
+                    task_status: task.task_status,
                     dependencies: task.dependencies.map((depId: string) => tasksMap[depId].title),
                     difficultyLevel: task.difficulty_level
                 }

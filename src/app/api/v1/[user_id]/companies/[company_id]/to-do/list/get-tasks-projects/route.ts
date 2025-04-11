@@ -16,7 +16,7 @@ export async function GET(req: NextRequest, {params: {company_id, user_id}}: {pa
   let query = client
     .from('projects')
     .select(`
-       project_tasks(id,difficulty_level,title,description,status,column_id,dependencies:project_tasks_dependencies_main_task_id_fkey(dependent_task_id),project_user_tasks!inner(user_id)),*
+       project_tasks(id,difficulty_level,title,description,task_status,column_id,dependencies:project_tasks_dependencies_main_task_id_fkey(dependent_task_id),project_user_tasks!inner(user_id)),*
     `)
     .eq('project_tasks.project_user_tasks.user_id', user_id)
     .eq('company_id', company_id);
@@ -82,8 +82,6 @@ export async function GET(req: NextRequest, {params: {company_id, user_id}}: {pa
         };
       }
     });
-
-    console.log({columns});
 
     // Create the toDoProject structure
     const toDoProject: toDoProject = {

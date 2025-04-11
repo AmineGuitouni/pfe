@@ -1,14 +1,14 @@
 import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function PUT(req: NextRequest, {params : { company_id, project_id }}: {params: { company_id: string, project_id: string}}) {
+export async function POST(req: NextRequest, {params : { company_id }}: {params: { company_id: string}}) {
     
     
     // Validate params
-    if (!company_id || !project_id) {
+    if (!company_id) {
         return NextResponse.json({ 
             error: "Missing required parameters", 
-            details: { company_id, project_id } 
+            details: { company_id } 
         }, { status: 400 });
     }
 
@@ -21,32 +21,28 @@ export async function PUT(req: NextRequest, {params : { company_id, project_id }
     }
 
     // Extract request body data
-    const { status, task_id ,column_id } = await req.json();
+    const { name,project_id,task_status } = await req.json();
     
     // Validate request body
-    if (!status || !task_id) {
+    if (!name) {
         return NextResponse.json({ 
             error: "Missing required data in request body", 
-            details: { status, task_id } 
+            details: { name } 
         }, { status: 400 });
     }
 
-    console.log({ 
-        status, 
-        task_id, 
-        project_id, 
-        company_id 
-    });
-
     // Update task status in database
-    const { error } = await client
-        .from("project_tasks")
-        .update({ 
-            task_status: status,
-            column_id
+    const { data,error } = await client
+        .from("columns")
+        .insert({
+            project_id,
+            task_status ,
+            name,
+            company_id
         })
-        .eq("project_id", project_id)
-        .eq("id", task_id);
+        .select("id,created_at")
+        .single()
+        
 
     if (error) {
         console.error(error);
@@ -55,5 +51,7 @@ export async function PUT(req: NextRequest, {params : { company_id, project_id }
         }, { status: 500 });
     }
 
-    return NextResponse.json({ ok: true });
+
+
+    return NextResponse.json({ ok: true ,id: data.id, created_at: data.created_at }, { status: 200 });
 }

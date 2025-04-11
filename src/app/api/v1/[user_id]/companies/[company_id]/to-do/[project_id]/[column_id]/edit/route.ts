@@ -1,14 +1,14 @@
 import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function PUT(req: NextRequest, {params : { company_id, project_id }}: {params: { company_id: string, project_id: string}}) {
+export async function PUT(req: NextRequest, {params : { company_id,column_id }}: {params: { company_id: string,column_id : string}}) {
     
     
     // Validate params
-    if (!company_id || !project_id) {
+    if (!company_id) {
         return NextResponse.json({ 
             error: "Missing required parameters", 
-            details: { company_id, project_id } 
+            details: { company_id } 
         }, { status: 400 });
     }
 
@@ -21,32 +21,22 @@ export async function PUT(req: NextRequest, {params : { company_id, project_id }
     }
 
     // Extract request body data
-    const { status, task_id ,column_id } = await req.json();
+    const { name } = await req.json();
     
     // Validate request body
-    if (!status || !task_id) {
+    if (!name) {
         return NextResponse.json({ 
             error: "Missing required data in request body", 
-            details: { status, task_id } 
+            details: { name } 
         }, { status: 400 });
     }
 
-    console.log({ 
-        status, 
-        task_id, 
-        project_id, 
-        company_id 
-    });
-
     // Update task status in database
     const { error } = await client
-        .from("project_tasks")
-        .update({ 
-            task_status: status,
-            column_id
-        })
-        .eq("project_id", project_id)
-        .eq("id", task_id);
+        .from("columns")
+        .update({ name })
+        .eq("id", column_id)
+        
 
     if (error) {
         console.error(error);
@@ -55,5 +45,7 @@ export async function PUT(req: NextRequest, {params : { company_id, project_id }
         }, { status: 500 });
     }
 
-    return NextResponse.json({ ok: true });
+
+
+    return NextResponse.json({ ok: true }, { status: 200 });
 }
