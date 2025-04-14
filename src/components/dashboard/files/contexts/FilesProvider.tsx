@@ -7,18 +7,36 @@ import { CreateFolderRequestBody } from '@/app/api/v1/[user_id]/companies/[compa
 import { useSearchParams } from 'next/navigation';
 
 export interface FilesContextType {
-  files: FileItem[],
-  setFiles : React.Dispatch<React.SetStateAction<FileItem[]>>,
-  folders: FolderItem[],
-  setFolders: React.Dispatch<React.SetStateAction<FolderItem[]>>,
-  isLoading: boolean,
-  searchTerm: string,
-  setSearchTerm: React.Dispatch<React.SetStateAction<string>>,
-  addFolder: ({ folderName, folderColor, parentFolderId }: CreateFolderRequestBody) => Promise<void>,
-  deleteFolder: (folderId: string) => Promise<void>,
-  editFolder: (folderId: string, updates: { folderName?: string, folderColor?: string }) => Promise<void>,
-  company_id: string,
-  currentFolder: {id: string, name: string}|null
+  // State
+  files: FileItem[];
+  folders: FolderItem[];
+  isLoading: boolean; // Combined loading state
+  isLoadingFolders: boolean; // Individual loading state
+  isLoadingFiles: boolean; // Individual loading state
+  error: string | null;
+  searchTerm: string;
+  company_id: string;
+  currentFolder: { id: string; name: string } | null;
+
+  // Setters (Direct state manipulation - use with caution)
+  setFiles: React.Dispatch<React.SetStateAction<FileItem[]>>;
+  setFolders: React.Dispatch<React.SetStateAction<FolderItem[]>>;
+  setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
+
+  // Folder Actions
+  addFolder: ({ folderName, folderColor, parentFolderId }: CreateFolderRequestBody) => Promise<void>;
+  deleteFolder: (folderId: string) => Promise<void>;
+  editFolder: (folderId: string, updates: { folderName?: string; folderColor?: string }) => Promise<void>;
+
+  // File Actions
+  addFile: (file: File, parentFolderId: string | null) => Promise<FileItem>;
+  deleteFile: (fileId: string) => Promise<void>;
+  editFile: (fileId: string, newName: string) => Promise<void>;
+  getFileDownloadLink: (fileId: string) => Promise<string>; // Added
+
+  // Refetch Actions
+  refetchFolders: () => Promise<void>; // Added
+  refetchFiles: () => Promise<void>; // Added
 }
 
 const FilesContext = createContext<FilesContextType | undefined>(undefined);
@@ -29,7 +47,13 @@ interface FilesProviderProps {
 }
 
 export const FilesProvider: React.FC<FilesProviderProps> = ({ children, company_id }) => {
-  const {files, folders, error, isLoading,setFolders,setFiles, addFolder, deleteFolder, editFolder} = useFiles({company_id}) // Destructure editFolder
+  const {
+    files, folders, error, isLoading, isLoadingFolders, isLoadingFiles, // Added individual loading states
+    setFolders, setFiles,
+    addFolder, deleteFolder, editFolder,
+    addFile, deleteFile, editFile, getFileDownloadLink, // Added file actions including get link
+    refetchFolders, refetchFiles // Added refetch actions
+  } = useFiles({ company_id });
   const [searchTerm, setSearchTerm] = useState('');
   const searchParams = useSearchParams();
 
@@ -46,20 +70,44 @@ export const FilesProvider: React.FC<FilesProviderProps> = ({ children, company_
   },[searchParams])
 
   const contextValue = useMemo(() => ({
+    // State
     files,
-    isLoading,
-    error,
     folders,
+    isLoading,
+    isLoadingFolders, // Added
+    isLoadingFiles,   // Added
+    error,
     searchTerm,
+    company_id,
+    currentFolder,
+
+    // Setters
     setSearchTerm,
     setFolders,
     setFiles,
+
+    // Folder Actions
     addFolder,
     deleteFolder,
     editFolder,
-    company_id,
-    currentFolder
-  }), [error, files, folders, isLoading, searchTerm, setFiles, setFolders,addFolder, deleteFolder, editFolder,company_id, currentFolder]);
+
+    // File Actions
+    addFile,
+    deleteFile,
+    editFile,
+    getFileDownloadLink, // Added
+
+    // Refetch Actions
+    refetchFolders, // Added
+    refetchFiles,   // Added
+
+  }), [
+    files, folders, isLoading, isLoadingFolders, isLoadingFiles, error, searchTerm, company_id, currentFolder, // State dependencies
+    setSearchTerm, setFolders, setFiles, // Setter dependencies
+    addFolder, deleteFolder, editFolder, // Folder action dependencies
+    addFile, deleteFile, editFile, getFileDownloadLink, // File action dependencies including get link
+    refetchFolders, refetchFiles // Refetch action dependencies
+  ]);
 
   return (
     <FilesContext.Provider value={contextValue}>

@@ -3,11 +3,17 @@ import React, { useMemo } from 'react';
 import { useFilesContext } from '../hooks/useFilesContext';
 import FileComponent from './fileComponent';
 import FolderComponent, { FolderSkeleton } from './folderComponent';
+import { useSearchParams } from 'next/navigation';
 
 const FileCardContainer: React.FC = () => {
   const { searchTerm, files, folders, isLoading } = useFilesContext();
+  const searchParams = useSearchParams();
 
   const { filteredFiles, filteredFolders} = useMemo(() => {
+    const query = searchParams.get("query");
+    if(query){
+      return { filteredFiles: files, filteredFolders: [] };
+    }
     if (!searchTerm) {
       return { filteredFiles: files, filteredFolders: folders };
     }
@@ -22,7 +28,7 @@ const FileCardContainer: React.FC = () => {
     );
 
     return { filteredFiles, filteredFolders }
-  }, [files, searchTerm, folders]);
+  }, [files, searchTerm, folders, searchParams]);
 
   if(isLoading){
     return (

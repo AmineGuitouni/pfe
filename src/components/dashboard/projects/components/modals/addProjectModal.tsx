@@ -30,7 +30,7 @@ export default function AddProjectModal({ onCreateProject }: AddProjectModalProp
 
   return (
     <>
-      <Button onPress={onOpen} color="primary" className="bg-light_blue-500 text-black">
+      <Button onPress={onOpen} color="primary" radius="sm" size="sm" className="bg-light_blue text-black font-semibold">
         <PlusIcon size={20} /> Add Project
       </Button>
 

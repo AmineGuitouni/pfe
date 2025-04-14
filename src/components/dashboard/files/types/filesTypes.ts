@@ -10,12 +10,13 @@ export interface FolderItem {
 }
 
 export interface FileItem {
-  type: 'file';
+  type: string;
   id: string;
   name: string;
   folder_id: string | null;
   size: number;
   created_at: string;
+  updated_at: string; // Added updated_at field
   owner_id: string;
 }
 

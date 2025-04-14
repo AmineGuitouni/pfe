@@ -13,7 +13,8 @@ import {
   DropdownItem,
   DropdownTrigger,
   Button,
-  useDisclosure
+  useDisclosure,
+  cn
 } from "@heroui/react";
 import { TablePagination } from "./tablePagination";
 import useProjects from "../../hooks/useProjects";
@@ -23,15 +24,32 @@ import { usePathname, useRouter } from "next/navigation";
 import { FaEllipsisVertical } from "react-icons/fa6";
 import ProjectDeleteConfirmation from "../modals/ProjectDeleteConfirmationModal";
 import { toast } from "react-toastify";
+import { ProjectStatusType } from "../../types";
 
 const columns = [
   { name: "Name", uid: "name", sortable: true },
-  { name: "Description", uid: "description", sortable: false },
   { name: "Tasks", uid: "tasks", sortable: false },
+  { name: "Status", uid: "project_status", sortable: true },
   { name: "Dedline", uid: "dedline", sortable: true },
   { name: "Created At", uid: "created_at", sortable: true },
   { name: "Actions", uid: "actions", sortable: false },
 ]
+
+
+const getStatusColor = (status: ProjectStatusType): string => {
+    switch (status) {
+        case "Not Started":
+            return "bg-gray-500";
+        case "In Progress":
+            return "bg-yellow-600";
+        case "Completed":
+            return "bg-green-600";
+        case "Cancelled":
+            return "bg-red-600";
+        default:
+            return "bg-gray-500";
+    }
+};
 
 export default function ProjectsTable({company_id}: {company_id: string}) {
   const router = useRouter();
@@ -60,13 +78,13 @@ export default function ProjectsTable({company_id}: {company_id: string}) {
         sortDescriptor={sortDescriptor}
         onSortChange={setSortDescriptor}
         classNames={{
-          base: "w-full",
+          base: "w-full ",
           table: "w-full",
-          thead: "rounded-none",
-          tr: "border-b border-white/20 hover:bg-white/5",
-          th: "bg-white/10 text-default-500 border-b border-divider rounded-none",
+          thead: "rounded-md",
+          tr: "hover:bg-white/5",
+          th: "bg-white/10 text-default-500 ",
           td: "p-3",
-          wrapper: "bg-modal_bg/50",
+          wrapper: "bg-white/5 rounded-lg",
         }}
         bottomContent={
           <TablePagination
@@ -103,9 +121,21 @@ export default function ProjectsTable({company_id}: {company_id: string}) {
         >
           {(item) => (
             <TableRow key={item.key}>
-              <TableCell>{item.data.name}</TableCell>
-              <TableCell>{item.data.description}</TableCell>
+              <TableCell>
+                <h2 className="max-w-[200px]">
+                  {item.data.name}
+                </h2>
+              </TableCell>
               <TableCell>{item.data.tasks_count}</TableCell>
+              <TableCell>
+                <div 
+                  className={cn(`status-badge w-fit px-3 py-1.5 rounded-full text-sm font-semibold text-white shadow-md transition-transform duration-300 hover:-translate-y-0.5`,
+                    getStatusColor(item.data.project_status)
+                  )}
+                >
+                        {item.data.project_status}
+                  </div>
+              </TableCell>
               <TableCell>{item.data.deadline || "No deadline"}</TableCell>
               <TableCell>{formatShortDate(item.data.created_at)}</TableCell>
               <TableCell>

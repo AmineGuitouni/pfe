@@ -14,7 +14,7 @@ import { toast } from "react-toastify";
 
 export default function EditModal({isOpen, onOpenChange,object}:{isOpen: boolean, onOpenChange?: () => void,object : FolderItem | FileItem}) {
 
-  const {editFolder} = useFilesContext();
+  const { editFolder, editFile } = useFilesContext(); // Destructure editFile
 
   const [name,setName] = useState("");
   const [error,setError] = useState("");
@@ -32,7 +32,7 @@ export default function EditModal({isOpen, onOpenChange,object}:{isOpen: boolean
     e.preventDefault();
 
     if(name === "") {
-      setError("Please enter a folder name");
+      setError(`Please enter a ${type} name`); // Generic message
       return;
     }
 
@@ -42,20 +42,21 @@ export default function EditModal({isOpen, onOpenChange,object}:{isOpen: boolean
     }
 
     if(name.length <= 2) {
-      setError("Folder name must be at least 2 characters long");
+      setError(`${type.charAt(0).toUpperCase() + type.slice(1)} name must be at least 2 characters long`); // Generic message
       return;
     }
 
     if(name.length > 50) {
-      setError("Folder name cannot exceed 50 characters");
+      setError(`${type.charAt(0).toUpperCase() + type.slice(1)} name cannot exceed 50 characters`); // Generic message
       return;
     }
 
     try{
       setIsLoading(true);
 
-      if(type === "file") {
-
+      if (type === "file") {
+        await editFile(object.id, name); // Call editFile
+        toast.success("File edited successfully");
       }
       else {
         await editFolder(object.id,{folderName:name});
@@ -95,8 +96,8 @@ export default function EditModal({isOpen, onOpenChange,object}:{isOpen: boolean
                     isRequired
                     variant="bordered"
                     className="w-full text-white dark"
-                    placeholder="Enter the folder name"
-                    label="Folder Name"
+                    placeholder={`Enter the ${type} name`} // Generic placeholder
+                    label={`${type.charAt(0).toUpperCase() + type.slice(1)} Name`} // Generic label
                     value={name}
                     onChange={handleInputChange}
                     type="text"

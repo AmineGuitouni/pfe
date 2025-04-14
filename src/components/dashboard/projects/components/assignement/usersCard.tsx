@@ -5,6 +5,7 @@ import { useTaskUserAssgnementContext } from "../../context/taskUserAssgnementCo
 import { useMemo } from "react";
 import TaskItem from "./showTaskItem";
 import TaskItemSkeleton from "../tasks/TaskItemSkeleton";
+import { IoMdCloseCircle } from "react-icons/io";
 
 interface UserCardProps {
     worker: UserType;
@@ -14,7 +15,7 @@ interface UserCardProps {
 }
 
 export function UserCard({ worker }:UserCardProps) {
-    const {taskUserLinks, tasks, userCardDisableDrop} = useTaskUserAssgnementContext()
+    const {taskUserLinks, tasks, userCardDisableDrop, removeUsers} = useTaskUserAssgnementContext()
     const workerTasks = useMemo(()=>{
         const tasksids = taskUserLinks[worker.id] || []
 
@@ -45,6 +46,13 @@ export function UserCard({ worker }:UserCardProps) {
                             classNames={{
                               name: "text-white line-clamp-1",
                               description: "text-white/80"
+                            }}
+                        />
+                        <IoMdCloseCircle 
+                            className="text-light_blue-500 hover:text-left_blue cursor-pointer" 
+                            size={20}
+                            onClick={()=>{
+                                removeUsers([worker.id])
                             }}
                         />
                     </div>
