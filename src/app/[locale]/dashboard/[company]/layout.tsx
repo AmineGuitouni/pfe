@@ -3,6 +3,7 @@ import SideBarProvider from "@/components/dashboard/sidebar/contexts/sideBarCont
 import CompanySideBar from "@/components/dashboard/sidebar/companySideBar";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/authOptions";
+import CompanyProvider from "@/providers/companyIdProvider";
 
 export default async function CompanyLayout({
   children,
@@ -18,6 +19,7 @@ export default async function CompanyLayout({
       <main
       className='bg-dark_blue relative flex w-full max-w-full'
     >
+      <CompanyProvider company_id={company}>
       <SideBarProvider>
       <CompanySideBar companyId={company} session={session}/>
       <div className="flex flex-col w-full">
@@ -28,6 +30,7 @@ export default async function CompanyLayout({
         </div>
       </div>
       </SideBarProvider>
+      </CompanyProvider>
     </main>
   );
 }

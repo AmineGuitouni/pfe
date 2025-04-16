@@ -1,4 +1,4 @@
-import { Spinner } from "@heroui/react";
+// Removed Spinner import as it's no longer used
 import { UseColumns } from "../../context/columnsContext";
 import TaskContainer from "./TaskContainer";
 import { DragDropContext, DropResult } from "@hello-pangea/dnd";
@@ -94,32 +94,46 @@ export default function Container({isLoading, activeProject}:{isLoading: boolean
         });
     };
 
-    if (!activeProject) {
-        return (
-            <div className="w-full h-full flex items-center justify-center">
-                <p className="text-white/40">Select a project to view tasks</p>
-            </div>
-        );
-    }
-
+    // Removed the early return for !activeProject
     return (
-        <div className="w-full h-full p-5">
+        <div className="w-full h-full p-5 flex overflow-x-auto">
             {isLoading ? (
-                <div className="w-full h-full flex items-center justify-center">
-                    <Spinner size="lg" color="white" className="mb-10"/>
+                // Skeleton Loader for Columns - Render this first if loading
+                <div className="h-full flex w-full gap-5 animate-pulse">
+                    {Array(4).fill(0).map((_, index) => (
+                        <div key={index} className="flex-shrink-0 w-[280px] h-[50%] bg-white/5 rounded-lg p-3 flex flex-col justify-between ">
+                            <div className="w-full flex flex-col ">
+                                {/* Skeleton Column Header */}
+                                <div className="h-6 bg-gray-600/50 rounded mb-4 w-3/4"></div>
+                                {/* Skeleton Task Items */}
+                                <div className="space-y-2">
+                                    <div className="h-10 bg-gray-600/50 rounded-lg"></div>
+                                    <div className="h-10 bg-gray-600/50 rounded-lg"></div>
+                                    <div className="h-10 bg-gray-600/50 rounded-lg"></div>
+                                </div>
+                            </div>
+                            <div className={`bg-gray-600/50 rounded-md w-32 h-4`}></div>
+                        </div>
+                    ))}
                 </div>
-            ) : (
+            ) : activeProject ? (
+                // If not loading AND activeProject exists, render columns
                 <DragDropContext onDragEnd={handleDragEnd}>
-                    <div className="w-full h-full flex ">
-                        {Object.entries(activeProject.columns).map(([key, column], index) => (
+                    <div className="h-full flex gap-5"> {/* Removed fixed width */}
+                        {Object.entries(activeProject.columns).map(([key, column]) => (
                             <div key={key} className="flex">
                                 <TaskContainer column={column} project_id={activeProject.projectData.id} />
-                                {index !== Object.keys(activeProject.columns).length - 1 && <AddColumnButton/>}
                             </div>
                         ))}
                     </div>
+                    <AddColumnButton/>
                 </DragDropContext>
+            ) : (
+                 // If not loading AND no activeProject, render message
+                <div className="w-full h-full flex items-center justify-center">
+                    <p className="text-white/40">Select a project to view tasks</p>
+                </div>
             )}
-        </div>  
+        </div> 
     )
 }

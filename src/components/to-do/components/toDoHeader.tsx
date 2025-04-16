@@ -1,4 +1,4 @@
-import { Popover, PopoverContent, PopoverTrigger, Spinner } from "@heroui/react";
+import { Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
 import { toDoProject } from "../types/type";
 import { FaCalendarAlt } from "react-icons/fa";
 
@@ -48,8 +48,20 @@ export default function ToDoHeader({ project, isLoading }: { project: toDoProjec
   return (
     <div className="w-full h-[50px] border-b-1 border-white/20 px-5 flex-shrink-0">
       {isLoading ? (
-        <div className="w-full h-full flex items-center justify-center">
-          <Spinner color="white" size="sm"/>
+        <div className="w-full h-full flex justify-between gap-3 items-center animate-pulse">
+          {/* Skeleton for Project Name and Details */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="h-4 bg-gray-600 rounded w-12"></div> {/* "Project :" */}
+            <div className="h-5 bg-gray-500 rounded w-32"></div> {/* Project Name */}
+            <div className="h-3 bg-gray-600 rounded w-16"></div> {/* "See details" */}
+          </div>
+          {/* Skeleton for Deadline */}
+          <div className="flex items-center gap-2 flex-shrink-0 mr-2">
+             <div className="h-4 bg-gray-600 rounded w-4"></div> {/* Icon */}
+             <div className="h-4 bg-gray-600 rounded w-14"></div> {/* "Deadline :" */}
+             <div className="h-4 bg-gray-500 rounded w-24"></div> {/* Date */}
+             <div className="h-3 bg-gray-600 rounded w-28"></div> {/* Remaining time */}
+          </div>
         </div>
       ) : project ? (
         <div className="w-full h-full flex justify-between gap-3 items-center">

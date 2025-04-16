@@ -7,10 +7,14 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import { cn } from "@heroui/react";
 import ColoneSettings from "../columnsComponents/coloneSettings";
+import { useSession } from "next-auth/react";
 
 export default function TaskContainer({ column, project_id }: { column: Column; project_id: string }) {
     const { deleteColumn } = UseColumns();
     const [isDeleted, setIsDeleted] = useState(false);
+    const {data : session } = useSession()
+
+    const myTasks = column.tasks.filter((task)=> task.user_id === session?.user.id)
 
     const handleDelete = async () => {
         try {
@@ -25,14 +29,16 @@ export default function TaskContainer({ column, project_id }: { column: Column; 
 
     const getColorByStatus = (status: string) => {
         switch (status) {
-            case "To Do":
+            case "Blocked":
                 return "text-red-600";
             case "In Progress":
                 return "text-yellow-600";
             case "Completed":
                 return "text-green-600";
+            case "All":
+                return "text-gray-500";
             default:
-                return "text-gray-600";
+                return "text-light_blue-500";
         }
     };
 
@@ -65,7 +71,7 @@ export default function TaskContainer({ column, project_id }: { column: Column; 
                     </div>
                     <div className={"w-full flex flex-col gap-2  transition-all ease-linear min-w-2"}>
                         {column.tasks &&
-                            column.tasks.map((task, index) => (
+                            myTasks.map((task, index) => (
                                 <Draggable key={task.id} draggableId={task.id} index={index}>
                                     {(provided) => (
                                         <div
@@ -76,7 +82,7 @@ export default function TaskContainer({ column, project_id }: { column: Column; 
                                             <TaskItem
                                                 task={task}
                                                 project_id={project_id}
-                                                column_id={column.id}
+                                                allTasks={column.tasks}
                                             />
                                         </div>
                                     )}

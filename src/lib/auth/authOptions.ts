@@ -19,6 +19,8 @@ export const authOptions:AuthOptions = {
                     throw new Error("invalid credentials")
                 }
 
+                console.log({credentials})
+
                 const user = await getUser(credentials)
 
                 if(!user || !user.password_hash){

@@ -2,7 +2,7 @@ import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase"
 import { NextRequest, NextResponse } from "next/server";
 import { Column, TaskBoard, toDoProject } from "@/components/to-do/types/type";
 
-export async function GET(req: NextRequest, {params: {company_id, user_id}}: {params: { company_id: string, user_id: string}}) {
+export async function GET(req: NextRequest, {params: {company_id}}: {params: { company_id: string}}) {
   const { searchParams } = new URL(req.url);
   const search = searchParams.get("search") || "";
 
@@ -16,9 +16,9 @@ export async function GET(req: NextRequest, {params: {company_id, user_id}}: {pa
   let query = client
     .from('projects')
     .select(`
-       project_tasks(id,difficulty_level,title,description,task_status,column_id,dependencies:project_tasks_dependencies_main_task_id_fkey(dependent_task_id),project_user_tasks!inner(user_id)),*
+       project_tasks(id,difficulty_level,title,description,task_status,checked,column_id,dependencies:project_tasks_dependencies_main_task_id_fkey(dependent_task_id),project_user_tasks!inner(user_id)),*
     `)
-    .eq('project_tasks.project_user_tasks.user_id', user_id)
+    // .eq('project_tasks.project_user_tasks.user_id', user_id)
     .eq('company_id', company_id);
 
   if (search) {
@@ -53,7 +53,9 @@ export async function GET(req: NextRequest, {params: {company_id, user_id}}: {pa
         ...acc,
         [task.id]: {
           ...task,
-          dependencies: task.dependencies.map((dep: any) => dep.dependent_task_id)
+          dependencies: task.dependencies.map((dep: any) => dep.dependent_task_id),
+          difficultyLevel : task.difficulty_level,
+          user_id : task.project_user_tasks[0].user_id
         }
       };
     }, {} as any) || {};

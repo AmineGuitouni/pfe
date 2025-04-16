@@ -5,6 +5,8 @@ export interface Task {
   dependencies: string[];
   task_status?: TaskStatusType;
   difficultyLevel: number;
+  user_id? : string
+  checked : boolean
 }
 
 export interface GeneratedTask {

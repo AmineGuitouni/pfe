@@ -16,6 +16,7 @@ type ColumnsContextType = {
   AddColumn : (name: string, projectId: string ,onClose :() => void,task_status: string) => Promise<void>;
   deleteColumn : (columnId: string, projectId: string) => Promise<void>;
   editColumn : ({columnId, newName, projectId}: {columnId: string, newName: string, projectId: string}) => Promise<void>; // Updated type signature
+  checkTask : (task_id: string, project_id: string,checked : boolean) => Promise<void>;
 };
 
 const columnsContext = createContext<ColumnsContextType>({
@@ -29,6 +30,7 @@ const columnsContext = createContext<ColumnsContextType>({
   AddColumn: async () => {},
   deleteColumn: async () => {},
   editColumn: async () => {},
+  checkTask: async () => {},
 
 });
 
@@ -261,8 +263,92 @@ function ColumnsProvider({
           toast.error("An unexpected error occurred while updating the column.");
       }
     }
-  }, [userId, companyId, setProjects]); // Added setProjects to dependencies, assuming it might change
-  // --- End of Corrected editColumn ---
+  }, [userId, companyId, setProjects]); 
+
+  const checkTask = useCallback(async (task_id: string, project_id: string,checked : boolean) => {
+    if(!userId) return;
+    if (!task_id || !project_id) {
+        console.error("Missing required IDs for checking task");
+        toast.error("Cannot check task: Missing information.");
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `/api/v1/${userId}/companies/${companyId}/to-do/${project_id}/check-task`,
+            {
+                method: "PUT",
+                body: JSON.stringify({ task_id, checked }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // Optimistic UI update or update based on response if needed
+        // The current logic updates the state immediately
+
+        setProjects((currentProjects: TaskBoard | undefined) => {
+          if (!currentProjects) return currentProjects;
+
+          const projectToUpdate = currentProjects[project_id];
+          // Check if project or columns exist before proceeding
+          if (!projectToUpdate || !projectToUpdate.columns) {
+              console.warn(`Project with ID ${project_id} or its columns not found.`);
+              return currentProjects;
+          }
+
+          // Create a deep copy to avoid mutating the original state directly
+          // Using structuredClone for better performance and handling of complex objects if available,
+          // otherwise fallback to JSON parse/stringify. Consider browser compatibility.
+          let updatedProjects;
+          try {
+            updatedProjects = structuredClone(currentProjects);
+          } catch {
+            console.warn("structuredClone not available, falling back to JSON.parse(JSON.stringify). This might be less performant or accurate for complex types.");
+            updatedProjects = JSON.parse(JSON.stringify(currentProjects));
+          }
+
+          const updatedProject = updatedProjects[project_id];
+
+          // Find the task and update its checked status
+          let taskFound = false;
+          for (const columnId in updatedProject.columns) {
+            // Ensure the column exists and has a tasks array
+            if (updatedProject.columns.hasOwnProperty(columnId) && Array.isArray(updatedProject.columns[columnId].tasks)) {
+                const column = updatedProject.columns[columnId];
+                // Use findIndex for efficiency
+                const taskIndex = column.tasks.findIndex((task: Task) => task.id === task_id); // Assuming Task type has 'id'
+
+                if (taskIndex !== -1) {
+                  // Update the checked status of the found task
+                  // Ensure the task object exists before updating
+                  if (column.tasks[taskIndex]) {
+                      column.tasks[taskIndex].checked = checked; // Assuming Task type has 'checked'
+                      taskFound = true;
+                      break; // Exit the inner loop once the task is found and updated in its column
+                  }
+                }
+            }
+          }
+
+          if (!taskFound) {
+            console.warn(`Task with ID ${task_id} not found in project ${project_id} for checking.`);
+            return currentProjects; // Return original state if task not found
+          }
+
+          return updatedProjects; // Return the modified state
+        })
+      }
+      catch{
+        toast.error("Error checking task");
+      }
+  
+  },[userId,companyId]);
 
   const updateStatus = useCallback(async (task_id: string, status: string, project_id: string,column_id: string) => {
     if (!userId) return;
@@ -526,7 +612,8 @@ function ColumnsProvider({
     AddColumn,
     deleteColumn,
     editColumn, // Ensure editColumn is included here
-  }), [projects, isLoading, search, setSearch, updateStatus, dragDropTask, setProjects, AddColumn, deleteColumn, editColumn]); // Add editColumn to dependencies
+    checkTask,
+  }), [projects, isLoading, search, setSearch, updateStatus, dragDropTask, AddColumn, deleteColumn, editColumn, checkTask]); // Add editColumn to dependencies
 
   return (
     <columnsContext.Provider value={contextValue}>
