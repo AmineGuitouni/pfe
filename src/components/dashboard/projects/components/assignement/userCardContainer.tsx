@@ -1,6 +1,6 @@
 "use client"
 import { motion } from "framer-motion";
-import { Input } from "@heroui/react";
+import { Button, Input } from "@heroui/react";
 import { IoSearchOutline } from "react-icons/io5";
 import { useState } from "react";
 import AddUserButton from "./AddUserButton";
@@ -8,6 +8,7 @@ import { useTaskUserAssgnementContext } from "../../context/taskUserAssgnementCo
 import { UserCard, UserCardSkeleton } from "./usersCard";
 import { Draggable, Droppable } from "@hello-pangea/dnd";
 import SaveAssignementButton from "./saveAssignementButton";
+import { RiGeminiLine } from "react-icons/ri";
 
 const containerVariants = {
     closed: {
@@ -20,7 +21,7 @@ const containerVariants = {
 
 export default function UserCardContainer({company_id, project_id}: {company_id: string, project_id: string}){
     const [searchTerm, setSearchTerm] = useState('');
-    const {usersList, usersDisableDrop, loadingTaskUserLinks} = useTaskUserAssgnementContext()
+    const {usersList, usersDisableDrop, loadingTaskUserLinks, getAiTaskLinks} = useTaskUserAssgnementContext()
 
     const filteredUsers = usersList.filter(user => 
         user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -39,6 +40,16 @@ export default function UserCardContainer({company_id, project_id}: {company_id:
         >
             <div className="w-full flex justify-between gap-5 rounded-r-lg backdrop-blur z-10">
                 <div className="w-[384px] flex items-center gap-3">
+                    <Button
+                        size="sm"
+                        className="dark bg-light_blue-500/10 hover:bg-light_blue-500/20 w-fit flex-shrink-0"
+                        startContent={<RiGeminiLine className="w-4 h-4" />}
+                        onPress={()=>{
+                            getAiTaskLinks();
+                        }}
+                    >
+                        Ai Generate
+                    </Button>
                     <AddUserButton company_id={company_id}/>
                     <Input
                         placeholder="Search User..."

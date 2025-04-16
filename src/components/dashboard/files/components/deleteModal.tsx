@@ -11,28 +11,32 @@ import {
 import { useState } from "react";
 import { FileItem, FolderItem } from "../types/filesTypes";
 import { useFilesContext } from "../hooks/useFilesContext";
+import { toast } from "react-toastify"; // Import toast
 
 export default function DeleteModal({isOpen, onOpenChange , object}:{isOpen: boolean, onOpenChange?: (isOpen: boolean) => void, object : FolderItem | FileItem}) {
 
     const [loading, setLoading] = useState(false);
-    const {deleteFolder} = useFilesContext();
+    const { deleteFolder, deleteFile } = useFilesContext(); // Destructure deleteFile
 
     const type: "file" | "folder" = "type" in object ? "file" : "folder"
 
     const handleDelete = async () => {
         try{
             setLoading(true);
-            if(type === "file"){
-
+            if (type === "file") {
+                await deleteFile(object.id); // Call deleteFile
+                toast.success("File deleted successfully");
             }
             else {
                 await deleteFolder(object.id);
+                toast.success("Folder deleted successfully");
             }
             
             onOpenChange?.(false);
         }
         catch(error){
-            console.error("Error deleting user:", error);
+            console.error(`Error deleting ${type}:`, error);
+            toast.error(`Failed to delete ${type}: ${error instanceof Error ? error.message : 'Unknown error'}`); // Add error toast
         }
         finally{
             setLoading(false);
@@ -84,7 +88,7 @@ export default function DeleteModal({isOpen, onOpenChange , object}:{isOpen: boo
                                     variant="solid" 
                                     className="text-danger-500 bg-danger-500/30 font-semibold"
                                 >
-                                    Delete {object.name}
+                                    Confirm Delete {/* Changed button text */}
                                 </Button>
                             </ModalFooter>
                         </>

@@ -52,15 +52,7 @@ const ReplyComponent = React.forwardRef<HTMLDivElement, ReplyComponentProps>(
                      className="w-full border border-light_blue-500/20 bg-white/5 text-white placeholder-gray-400 rounded-lg shadow-sm focus:border-light_blue-500 focus:ring-light_blue-500 sm:text-sm p-2 mb-2"
                      rows={2} // Smaller text area for replies
                  />
-                 <div className="flex justify-end gap-2">
-                     <Button
-                         variant="light"
-                         size="sm"
-                         onPress={() => setIsReplying(false)} // Cancel button
-                         className="text-light_blue/80 hover:text-light_blue px-3 py-1"
-                     >
-                         Cancel
-                     </Button>
+                 <div className="flex justify-end">
                      <Button
                          size="sm"
                          isLoading={loading}

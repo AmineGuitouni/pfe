@@ -12,7 +12,6 @@ import { FormEvent, useRef, useCallback, useState, ChangeEvent } from "react";
 import { FolderPlus, Upload, X, FileText } from "lucide-react";
 import { useFilesContext } from "../hooks/useFilesContext";
 import { toast } from "react-toastify";
-import { FileItem } from "../types/filesTypes";
 
 interface FileWithPreview {
   file: File;
@@ -21,15 +20,10 @@ interface FileWithPreview {
   type: string;
 }
 
-const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
-const ACCEPTED_FILE_TYPES = [
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-];
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 export default function AddFileButton() {
-  const { setFiles } = useFilesContext();
+  const { addFile, currentFolder } = useFilesContext();
   const [selectedFiles, setSelectedFiles] = useState<FileWithPreview[]>([]);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -39,11 +33,6 @@ export default function AddFileButton() {
   const validateFile = (file: File): boolean => {
     if (file.size > MAX_FILE_SIZE) {
       toast.error(`File ${file.name} exceeds 100MB limit`);
-      return false;
-    }
-
-    if (!ACCEPTED_FILE_TYPES.includes(file.type)) {
-      toast.error(`File ${file.name} is not a supported format`);
       return false;
     }
 
@@ -95,21 +84,48 @@ export default function AddFileButton() {
     }
 
     setLoading(true);
+    const parentFolderId = currentFolder?.id || null; // Get current folder ID from context
+    let uploadSuccess = true;
+    let errorCount = 0;
 
-    const newFiles = selectedFiles.map((fileData, index) => ({
-      type: 'file',
-      id: `file-${Date.now()}-${index}`,
-      name: fileData.name,
-      folder_id: 'folder1',
-      size: fileData.size,
-      created_at: new Date().toISOString(),
-      owner_id: 'user1'
-    } as FileItem));
+    // Use Promise.all to upload files concurrently (or sequentially if preferred)
+    const uploadPromises = selectedFiles.map(fileData =>
+      addFile(fileData.file, parentFolderId)
+        .catch(err => {
+          console.error(`Failed to upload ${fileData.name}:`, err);
+          toast.error(`Failed to upload ${fileData.name}: ${err.message || 'Unknown error'}`);
+          uploadSuccess = false;
+          errorCount++;
+          return null;
+        })
+    );
 
-    setFiles(prev => prev ? [...prev, ...newFiles] : newFiles);
-    setSelectedFiles([]);
-    setLoading(false);
-    onClose();
+    try {
+      await Promise.all(uploadPromises);
+
+      if (uploadSuccess) {
+        toast.success(`${selectedFiles.length} file(s) uploaded successfully!`);
+        setSelectedFiles([]); // Clear selection on complete success
+        onClose(); // Close modal on complete success
+      } else {
+         // Handle partial success scenario
+         toast.warn(`Uploaded ${selectedFiles.length - errorCount} out of ${selectedFiles.length} files. Some uploads failed.`);
+         // Optionally, keep the modal open or clear only successfully uploaded files
+         // For simplicity here, we'll clear selection and close modal even on partial success
+         // A more robust implementation might filter `selectedFiles` based on success/failure
+         setSelectedFiles([]);
+         onClose();
+      }
+
+    } catch (error) {
+      // This catch block might not be strictly necessary if individual errors are caught above,
+      // but it's good practice for unexpected errors in Promise.all itself.
+      console.error("An unexpected error occurred during uploads:", error);
+      toast.error("An unexpected error occurred during the upload process.");
+      // Decide whether to close the modal or keep it open
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -155,7 +171,6 @@ export default function AddFileButton() {
                     className="hidden" 
                     ref={fileInputRef}
                     onChange={handleFileChange}
-                    accept={ACCEPTED_FILE_TYPES.join(',')}
                     multiple
                   />
                   

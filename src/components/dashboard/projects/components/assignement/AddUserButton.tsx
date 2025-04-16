@@ -5,10 +5,11 @@ import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader
 import { Plus } from "lucide-react";
 import { IoSearchOutline } from "react-icons/io5";
 import { useTaskUserAssgnementContext } from "../../context/taskUserAssgnementContext";
+import { useEffect } from "react";
 
 export default function AddUserButton({company_id}: {company_id: string}) {
     const { isOpen, onOpen, onOpenChange } = useDisclosure()
-    const {addUsers} = useTaskUserAssgnementContext()
+    const {addUsers, usersList} = useTaskUserAssgnementContext()
     const {
         loading, 
         users,
@@ -18,7 +19,17 @@ export default function AddUserButton({company_id}: {company_id: string}) {
         setSearchText:setSearchTerm
     } = useUsers(company_id);
 
+    useEffect(()=>{
+        setExcludedUsers(prev =>{
+            const userIds = usersList.map(user => user.id);
+            const excluded = userIds.filter(id => !prev.includes(id));
+            return [...prev, ...excluded]
+        })
+    },[setExcludedUsers, usersList])
+
     const onUserAdd = (userId:string) => {
+        if(usersList.find(user => user.id === userId)) return;
+        
         addUsers([users.find(user => user.id === userId)!]);
         setExcludedUsers(prev=> [...prev, userId]);
     }

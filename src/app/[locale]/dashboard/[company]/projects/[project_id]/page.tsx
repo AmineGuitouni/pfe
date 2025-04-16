@@ -83,7 +83,7 @@ export default async function ProjectPage({ params: { locale, company, project_i
     let fetchError: string | null = null;
 
     try {
-        const baseUrl = process.env.VERCEL_URL ? (`https://${process.env.VERCEL_URL}`) : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
         const apiUrl = `${baseUrl}/api/v1/${user_id}/companies/${company}/projects/${project_id}/get`;
         const res = await fetch(apiUrl, { cache: 'no-store' });
 

@@ -48,17 +48,17 @@ export async function POST(request: Request, { params:{company_id} }: { params: 
         company_id 
     } as any ,
     {
-        name:"Done",
-        task_status: "Completed",
-        project_id : addedProject.id,
-        company_id
-    } as any ,
-    {
         name:"In Progress",
         task_status: "In Progress",
         project_id : addedProject.id,
         company_id
     } as any,
+    {
+        name:"Done",
+        task_status: "Completed",
+        project_id : addedProject.id,
+        company_id
+    } as any ,
     {
         name:"Blocked",
         task_status: "Blocked",
