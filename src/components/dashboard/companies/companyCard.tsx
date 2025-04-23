@@ -1,7 +1,7 @@
 "use client"
 import { formatShortDate } from "@/lib/utils";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button, cn, useDisclosure } from "@heroui/react";
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button, cn, useDisclosure, Avatar } from "@heroui/react"; // Import Avatar
 import { Key, useState } from "react";
 import { toast } from "react-toastify";
 import { useSession } from "next-auth/react";
@@ -84,12 +84,20 @@ export default function CompanyCard({company}:{company:CompanyType}) {
 
     return (
         <div className={cn("w-96 h-48 border-1 cursor-pointer group hover:scale-[101%] border-white/20 p-5 bg-white/5 hover:bg-white/10 transition-all ease-linear rounded-lg flex flex-col justify-between", isDeleteing && "pointer-events-none opacity-50 animate-pulse")}>
-            <div className="w-full flex items-start justify-between">
-                <div className="flex flex-col">
-                    <h1 className="text-light_blue text-md font-[400] uppercase">{company.name}</h1>
-                    <h1 className="text-white/50 text-sm">{company.workers} workers</h1>
+            <div className="w-full flex items-start justify-between"> 
+                <div className="flex items-center gap-3">
+                    <Avatar
+                        src={company.logo || undefined}
+                        name={company.name}
+                        size="lg"
+                        className="flex-shrink-0 bg-gradient-to-br from-light_blue to-light_blue-500 text-dark_blue" 
+                    />
+                    <div className="flex flex-col">
+                        <h1 className="text-light_blue text-md font-[400] uppercase">{company.name}</h1>
+                        {company.industry && <span className="text-white/60 text-xs">{company.industry}</span>}
+                        <h1 className="text-white/50 text-sm mt-1">{company.workers} workers</h1> 
+                    </div>
                 </div>
-                
                 <div className="flex items-center">
                     <Dropdown>
                         <DropdownTrigger>

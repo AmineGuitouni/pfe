@@ -18,7 +18,7 @@ export default function checkCvProvided({path, token, request}:EmailVerification
         const isHome = path === "/";
         const provide_cv_path = path === `/provide_cv`;
         const isWorkerCompanyDashboard = path === `/dashboard/${workerCompanyId}` || 
-                                        path.startsWith(`/dashboard/${workerCompanyId}/`);
+                                        path.startsWith(`/dashboard/${workerCompanyId}/`) || path.startsWith("/update-email")
 
         if(!isHome && !provide_cv_path && !isWorkerCompanyDashboard){
             if(!cv_informations){

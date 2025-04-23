@@ -15,7 +15,7 @@ interface ReplyComponentProps {
 }
 
 const ReplyComponent = React.forwardRef<HTMLDivElement, ReplyComponentProps>(
-  ({ setIsReplying, comment,addReply ,replies , editFunction,deleteFunction, LikeDislikeComment }, ref) => { 
+  ({ comment , addReply , replies , editFunction , deleteFunction , LikeDislikeComment }, ref) => { 
     
     const [replyBody, setReplyBody] = useState<string>("");
     const [loading, setLoading] = useState(false);

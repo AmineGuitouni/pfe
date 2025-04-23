@@ -55,6 +55,8 @@ export default function CompanyProvider({ children }: { children: React.ReactNod
         fetchCompanies(3);
     }, [fetchCompanies]);
 
+    console.log(companies)
+
     
 
     return (

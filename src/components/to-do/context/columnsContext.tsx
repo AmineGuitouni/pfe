@@ -122,7 +122,6 @@ function ColumnsProvider({
             const activeProject = prevProjects[projectId];
             if (!activeProject || !activeProject.columns) return prevProjects;
 
-            // Create a new column with a unique ID
             const newColumn: Column = {
                 id: newColumnId,
                 name: name,
@@ -130,50 +129,14 @@ function ColumnsProvider({
                 tasksStatus : task_status as statusForCol
             };
 
-            // Create a new columns object that preserves order:
-            // 1. To Do column first
-            // 2. All other columns in the middle
-            // 3. Done column last
-            const newColumns: Record<string, Column> = {};
-
-            // Find the todo and done columns
-            const todoColumnEntry = Object.entries(activeProject.columns)
-                .find(([_, column]) => column.tasksStatus === "To Do");
-
-            const doneColumnEntry = Object.entries(activeProject.columns)
-                .find(([_, column]) => column.tasksStatus === "Completed");
-
-            // Add todo column first if it exists
-            if (todoColumnEntry) {
-                const [todoId, todoColumn] = todoColumnEntry;
-                newColumns[todoId] = todoColumn;
-            }
-
-            // Add all other columns except todo and done
-            Object.entries(activeProject.columns).forEach(([columnId, column]) => {
-                if (
-                    (!todoColumnEntry || columnId !== todoColumnEntry[0]) &&
-                    (!doneColumnEntry || columnId !== doneColumnEntry[0])
-                ) {
-                    newColumns[columnId] = column;
-                }
-            });
-
-            // Add the new column
-            newColumns[newColumnId] = newColumn;
-
-            // Add done column last if it exists
-            if (doneColumnEntry) {
-                const [doneId, doneColumn] = doneColumnEntry;
-                newColumns[doneId] = doneColumn;
-            }
-
-            // Return the updated projects state
             return {
                 ...prevProjects,
                 [projectId]: {
                     ...activeProject,
-                    columns: newColumns
+                    columns: {
+                      ...prevProjects[projectId].columns,
+                      [newColumnId]: newColumn
+                    }
                 }
             };
         });

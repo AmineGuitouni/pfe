@@ -57,6 +57,7 @@ export const authOptions:AuthOptions = {
             session.user.first_name = token.first_name as string
             session.user.last_name = token.last_name as string
             session.user.email_verified = token.email_verified as boolean
+            session.user.image = token.image as string
             session.user.country = token.country as string
             session.user.phone_number = token.phone_number as string
             session.user.company_id = token.company_id as string
@@ -85,7 +86,8 @@ export const authOptions:AuthOptions = {
 
             if(!user){
                 if(trigger === "update"){
-                    user = await getUser({email: token.email as string})
+                    console.log("updating token")
+                    user = await getUser({email: token.email as string,company: token.company_id as string})
                 }
                 else{
                     return token
@@ -105,6 +107,7 @@ export const authOptions:AuthOptions = {
             token.country = user.country
             token.phone_number = user.phone_number
             token.company_id = user.company_id
+            token.image = user.image
             token.cv_informations = user.cv_informations
 
             return token

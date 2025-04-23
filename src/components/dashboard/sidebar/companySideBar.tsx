@@ -56,8 +56,8 @@ export default function CompanySideBar({companyId,session}:{companyId: string,se
 
                 <div className="w-full border-b border-b-white/20 flex flex-col justify-start gap-4 py-5 px-5">
                     <h1 className="text-white/50 text-sm">Tools & Utilities</h1>
-                    <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
-                        AI
+                    <Link href={`/dashboard/${companyId}/preferences`} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
+                        Preferences
                     </Link>
                     <Link href={`/dashboard/${companyId}/files`} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
                         Files

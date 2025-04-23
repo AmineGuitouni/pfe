@@ -40,7 +40,7 @@ export default async function Nav({session}:{session : Session | null}){
                 <>
                     <LoginButton/>
                     <Button as={Link} href="/register" variant="bordered" className="border-light_blue/70 text-light_blue  rounded-xl text-sm md:text-md font-semibold">Sign up</Button>
-                </>: <DropDownMenu/>
+                </>: <DropDownMenu session={session}/>
                 }
 
             </div>

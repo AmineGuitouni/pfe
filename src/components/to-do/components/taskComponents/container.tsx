@@ -6,6 +6,7 @@ import { toDoProject } from "../../types/type";
 import AddColumnButton from "../columnsComponents/addColumnButton";
 
 export default function Container({isLoading, activeProject}:{isLoading: boolean, activeProject: toDoProject | undefined}) {
+    
     const { dragDropTask, setProjects } = UseColumns();
 
     const handleDragEnd = (result: DropResult) => {
@@ -119,14 +120,14 @@ export default function Container({isLoading, activeProject}:{isLoading: boolean
             ) : activeProject ? (
                 // If not loading AND activeProject exists, render columns
                 <DragDropContext onDragEnd={handleDragEnd}>
-                    <div className="h-full flex gap-5"> {/* Removed fixed width */}
-                        {Object.entries(activeProject.columns).map(([key, column]) => (
-                            <div key={key} className="flex">
+                    <div className="h-full flex gap-5 w-[500px]"> {/* Removed fixed width */}
+                        {Object.entries(activeProject.columns).map(([key, column], index) => (
+                            <div key={key} className="flex ">
                                 <TaskContainer column={column} project_id={activeProject.projectData.id} />
+                                {index === Object.keys(activeProject.columns).length - 1 && <AddColumnButton/>}
                             </div>
                         ))}
                     </div>
-                    <AddColumnButton/>
                 </DragDropContext>
             ) : (
                  // If not loading AND no activeProject, render message
