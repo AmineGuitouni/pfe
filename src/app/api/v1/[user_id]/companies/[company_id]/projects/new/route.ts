@@ -16,10 +16,10 @@ interface ProjectPostRequestBody {
     tasks: GeneratedTask[]
 }
 
-export async function POST(request: Request, { params:{company_id} }: { params: params }) {
+export async function POST(request: Request, { params:{company_id,user_id} }: { params: params }) {
     const {project, tasks} = await request.json() as ProjectPostRequestBody;
     
-    const supabase = await getServerDBfromCompanyId(company_id)
+    const supabase = await getServerDBfromCompanyId(company_id,user_id)
     if(!supabase) return NextResponse.json({error: "Failed to connect to database"}, {status: 500});
 
     const {data: addedProject, error: projectError} = await supabase

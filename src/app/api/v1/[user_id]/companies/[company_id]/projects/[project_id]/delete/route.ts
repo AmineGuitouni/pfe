@@ -11,9 +11,9 @@ export interface DeleteProjectResponseBody {
     data: boolean
 }
 
-export async function DELETE(req: Request, {params: {company_id, project_id}}: {params: params}) {
+export async function DELETE(req: Request, {params: {company_id, project_id , user_id}}: {params: params}) {
     try{
-        const supabase = await getServerDBfromCompanyId(company_id);
+        const supabase = await getServerDBfromCompanyId(company_id,user_id);
         if(!supabase){
             return NextResponse.json({error:"Failed to connect to database"}, {status: 500})
         }

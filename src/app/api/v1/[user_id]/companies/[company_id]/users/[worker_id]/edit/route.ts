@@ -3,10 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function PUT(
     req: NextRequest, 
-    {params: {company_id}}: {params: { company_id: string}}
+    {params: {company_id,user_id}}: {params: { company_id: string,user_id:string}}
   ) {
     try {
-      const client = await getServerDBfromCompanyId(company_id);
+      const client = await getServerDBfromCompanyId(company_id,user_id);
   
       if (!client) {
         return NextResponse.json({ 

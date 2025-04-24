@@ -36,7 +36,7 @@ export default function CompanySideBar({companyId,session}:{companyId: string,se
                     <Link href={`/dashboard/${companyId}/groups`} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
                         Groups
                     </Link>
-                    <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
+                    <Link href={`/dashboard/${companyId}/audit-logs`} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
                         Audit Logs
                     </Link>
                     {session?.user.role === "owner" && <Link href={"/dashboard/account"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">

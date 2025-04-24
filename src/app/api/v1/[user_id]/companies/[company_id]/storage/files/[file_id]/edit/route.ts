@@ -17,9 +17,9 @@ export interface EditFileResponseBody {
     error?: string;
 }
 
-export async function PATCH(req: Request, { params: { company_id, file_id } }: { params: Params }) {
+export async function PATCH(req: Request, { params: { company_id, file_id ,user_id} }: { params: Params }) {
     try {
-        const supabase = await getServerDBfromCompanyId(company_id);
+        const supabase = await getServerDBfromCompanyId(company_id,user_id);
         if (!supabase) {
             return NextResponse.json<EditFileResponseBody>({ error: "Failed to connect to database" }, { status: 500 });
         }

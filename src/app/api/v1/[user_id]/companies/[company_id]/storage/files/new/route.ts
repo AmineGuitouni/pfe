@@ -22,7 +22,7 @@ export interface CreateFileResponseBody {
 export async function POST(request: Request, { params: { user_id, company_id } }: { params: Params }) {
     try {
         
-        const supabase = await getServerDBfromCompanyId(company_id);
+        const supabase = await getServerDBfromCompanyId(company_id,user_id);
         if (!supabase) {
             return NextResponse.json({ error: "Failed to connect to database" }, { status: 500 });
         }

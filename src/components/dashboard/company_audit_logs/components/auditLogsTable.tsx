@@ -1,11 +1,11 @@
 "use client";
-import { useAuditLogs } from "./hooks/useAuditLogs";
-import { AuditLogFilters } from "./components/AuditLogFilters";
-import { AuditLogPagination } from "./components/AuditLogPagination";
+import { useAuditLogs } from "../hooks/useAuditLogs";
+import { AuditLogFilters } from "../components/AuditLogFilters";
+import { AuditLogPagination } from "../components/AuditLogPagination";
 import { Spinner, Table, TableBody, TableColumn, TableHeader } from "@heroui/react";
-import { AuditLogRow } from "./components/AuditLogRow";
+import { AuditLogRow } from "../components/AuditLogRow";
 
-export default function AuditLogTable() {
+export default function AuditLogTable({company_id}: {company_id: string}) {
   const {
     logs,
     totalCount,
@@ -20,7 +20,7 @@ export default function AuditLogTable() {
     setCurrentPage,
     rowsPerPage,
     setRowsPerPage,
-  } = useAuditLogs();
+  } = useAuditLogs(company_id);
 
   const totalPages = Math.ceil(totalCount / rowsPerPage);
 
@@ -31,13 +31,13 @@ export default function AuditLogTable() {
         sortDescriptor={sortDescriptor}
         onSortChange={setSortDescriptor}
         classNames={{
-          base: "w-full ",
-          table: "w-full",
-          thead: "rounded-md",
-          tr: "hover:bg-white/5",
-          th: "bg-white/10 text-default-500 ",
-          td: "p-3",
-          wrapper: "bg-white/5 rounded-lg",
+            base: "w-full ",
+            table: "w-full",
+            thead: "rounded-md",
+            tr: "hover:bg-white/5",
+            th: "bg-white/10 text-default-500 ",
+            td: "p-3",
+            wrapper: "bg-white/5 rounded-lg",
         }}
         bottomContent={
           <AuditLogPagination

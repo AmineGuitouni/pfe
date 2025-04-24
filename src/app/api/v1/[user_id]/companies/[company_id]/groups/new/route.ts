@@ -19,7 +19,7 @@ export interface CreateGroupResponseBody {
 }
 
 export async function POST(request: Request, { params }: { params: params }) {
-  const { company_id } = params
+  const { company_id , user_id } = params
 
   if (!company_id) {
     return NextResponse.json(
@@ -38,7 +38,7 @@ export async function POST(request: Request, { params }: { params: params }) {
       )
     }
 
-    const supabase = await getServerDBfromCompanyId(company_id)
+    const supabase = await getServerDBfromCompanyId(company_id,user_id)
     if (!supabase) {
       return NextResponse.json(
         { error: 'Failed to connect to database' },

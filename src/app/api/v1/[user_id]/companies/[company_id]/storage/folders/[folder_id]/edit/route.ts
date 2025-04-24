@@ -17,9 +17,9 @@ export interface EditFolderResponseBody {
     error?: string;
 }
 
-export async function PATCH(req: Request, { params: { company_id, folder_id } }: { params: params }) {
+export async function PATCH(req: Request, { params: { company_id, folder_id ,user_id } }: { params: params }) {
     try {
-        const supabase = await getServerDBfromCompanyId(company_id);
+        const supabase = await getServerDBfromCompanyId(company_id,user_id);
         if (!supabase) {
             return NextResponse.json<EditFolderResponseBody>({ error: "Failed to connect to database" }, { status: 500 });
         }

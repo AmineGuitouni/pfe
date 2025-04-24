@@ -26,8 +26,11 @@ export default function CompanyOverview({ company_id }: { company_id: string }) 
     );
   }
 
-  if (error || !company) {
-    return <Alert color="danger" title="Error Loading Company" description={error || "Company data could not be found."} />;
+ if((error || !company  ) && !loading) {
+    return <div className=" w-full h-[100px] ">
+              <Alert color="danger" title="Error Loading Company"  description={"Company data could not be found."} />;
+           </div>
+    
   }
 
   return (
@@ -37,15 +40,15 @@ export default function CompanyOverview({ company_id }: { company_id: string }) 
       {/* Header Section styled like section1.tsx */}
       <div className="flex flex-col items-center text-center gap-4 mb-8">
         <Avatar
-          src={company.logo || undefined}
-          name={company.name}
+          src={company?.logo || undefined}
+          name={company?.name}
           size="lg" // Changed back from "xl" to "lg" to fix TS error
           className="flex-shrink-0 bg-gradient-to-br from-light_blue to-light_blue-500 text-dark_blue border-4 border-white/20 shadow-lg w-28 h-28 mb-4" // Kept adjusted size and margin via className
         />
         <div className="text-4xl sm:text-6xl font-semibold h-[45px] sm:h-[70px] text-center bg-gradient-to-r from-light_blue via-light_blue-500 to-white bg-clip-text text-transparent">
-            {company.name}
+            {company?.name}
           </div>
-        {company.industry && (
+        {company?.industry && (
           <p className="text-white/70 sm:text-lg text-medium w-[70%] sm:w-[50%] text-center flex items-center justify-center gap-2">
             <BuildingOffice2Icon className="h-5 w-5 text-white/50" />
             {company.industry}
@@ -54,8 +57,8 @@ export default function CompanyOverview({ company_id }: { company_id: string }) 
       </div>
 
       {/* About Section Re-added and Styled */}
-      {company.description && (
-        <div className="w-full  bg-white/5 p-6 rounded-lg border border-white/10 shadow-md mt-6 mb-10">
+      {company?.description && (
+        <div className="w-full hover:scale-105 transition-all ease-linear  bg-white/5 p-6 rounded-lg border border-white/10 shadow-md mt-6 mb-10">
           <h2 className="text-xl font-semibold text-light_blue-500 flex items-center gap-2.5 mb-4">
             <InformationCircleIcon className="h-6 w-6 " />
             About {company.name}
@@ -73,7 +76,7 @@ export default function CompanyOverview({ company_id }: { company_id: string }) 
              <UserGroupIcon className="h-6 w-6  mr-2" />
              Workers
            </h2>
-           <p className="text-white/90 text-lg">{company.workers > 0 ? company.workers > 1 ? `${company.workers} workers` : `${company.workers} worker` : "No workers"}</p>
+           <p className="text-white/90 text-lg">{company && company.workers > 0 ? company.workers > 1 ? `${company.workers} workers` : `${company.workers} worker` : "No workers"}</p>
          </div>
 
          {/* Created On Card - Adjusted min-height and gap */}
@@ -82,7 +85,7 @@ export default function CompanyOverview({ company_id }: { company_id: string }) 
             <CalendarDaysIcon fontSize={20} className=" h-6 w-6  mr-2" />
             Created On
            </h2>
-           <p className="text-white/90 text-base">{formatShortDate(company.created_at)}</p>
+           <p className="text-white/90 text-base">{company?.created_at ? formatShortDate(company?.created_at) : ""}</p>
          </div>
 
          {/* Database Card - Adjusted min-height and gap */}
@@ -93,7 +96,7 @@ export default function CompanyOverview({ company_id }: { company_id: string }) 
             Database
            </h2>
            <div className="text-white/90 text-base">
-             {company.database ? (
+             {company?.database ? (
                <Link target="_blank" href={session?.user?.role === "admin" ? "/dashboard/account/databases" : "#"} size="sm" className="text-light_blue hover:underline font-medium flex items-center text-lg gap-2">
                  <span>{company.database.name}</span>
                  <span className="text-xs text-white/60 mt-1">Created: {formatShortDate(company.database.created_at)}</span>

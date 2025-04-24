@@ -9,10 +9,10 @@ interface Params {
 
 export async function DELETE(reqest: Request, { params }: { params: Params }) {
     try{
-        const {company_id, group_id} = params;
+        const {company_id, group_id,user_id} = params;
         console.log({ company_id, group_id });
 
-        const supabase = await getServerDBfromCompanyId(company_id);
+        const supabase = await getServerDBfromCompanyId(company_id,user_id);
         if(!supabase){
             return NextResponse.json({error: "Failed to connect to database"}, {status: 500})
         }
