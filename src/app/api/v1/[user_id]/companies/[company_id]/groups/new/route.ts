@@ -1,4 +1,5 @@
 import { getServerDBfromCompanyId } from '@/lib/database/externalServerSupabase'
+import { redis } from '@/lib/database/redis'
 import { NextResponse } from 'next/server'
 
 interface params {
@@ -74,6 +75,10 @@ export async function POST(request: Request, { params }: { params: params }) {
       })))
 
     if (error2) throw error2
+
+    for(const user of body.users){
+      redis.del(`user:${user}-permissions:${company_id}`)
+    }
 
     return NextResponse.json({ data: group })
   } catch (error) {

@@ -12,7 +12,7 @@ export interface DeleteFolderResponseBody {
     error?: string;
 }
 
-export async function DELETE(req: Request, { params: { company_id, folder_id } }: { params: params }) {
+export async function DELETE(req: Request, { params: { company_id, user_id, folder_id } }: { params: params }) { // Added user_id
     try {
         const supabase = await getServerDBfromCompanyId(company_id);
         if (!supabase) {
@@ -24,11 +24,37 @@ export async function DELETE(req: Request, { params: { company_id, folder_id } }
             return NextResponse.json<DeleteFolderResponseBody>({ error: "Folder ID is required" }, { status: 400 });
         }
 
-        // Perform the delete operation
+        // --- Authorization Check ---
+        // Fetch the folder to check ownership before deleting
+        const { data: folderData, error: fetchError } = await supabase
+            .from("storage_folders")
+            .select("owner_id")
+            .eq("id", folder_id)
+            .maybeSingle(); // Use maybeSingle to handle not found gracefully
+
+        if (fetchError) {
+            console.error("Error fetching folder for ownership check (delete):", fetchError);
+            return NextResponse.json<DeleteFolderResponseBody>({ error: "Failed to verify folder ownership before deletion" }, { status: 500 });
+        }
+
+        if (!folderData) {
+            // If folder doesn't exist, it's effectively already deleted from the user's perspective.
+            // Return success or 404? Let's return 404 for consistency.
+            return NextResponse.json<DeleteFolderResponseBody>({ error: "Folder not found" }, { status: 404 });
+        }
+
+        // Check if the requesting user is the owner
+        if (folderData.owner_id !== user_id) {
+            return NextResponse.json<DeleteFolderResponseBody>({ error: "Forbidden: You do not have permission to delete this folder" }, { status: 403 });
+        }
+        // --- End Authorization Check ---
+
+
+        // Perform the delete operation if authorized
         const { error } = await supabase
             .from("storage_folders")
             .delete()
-            .eq("id", folder_id);
+            .eq("id", folder_id); // Ensure we only delete the specific folder
 
         if (error) {
             console.error("Error deleting folder:", error);

@@ -17,7 +17,7 @@ export interface EditFolderResponseBody {
     error?: string;
 }
 
-export async function PATCH(req: Request, { params: { company_id, folder_id } }: { params: params }) {
+export async function PATCH(req: Request, { params: { company_id, user_id, folder_id } }: { params: params }) { // Added user_id
     try {
         const supabase = await getServerDBfromCompanyId(company_id);
         if (!supabase) {
@@ -65,11 +65,35 @@ export async function PATCH(req: Request, { params: { company_id, folder_id } }:
         }
 
 
-        // Perform the update operation
+        // --- Authorization Check ---
+        // Fetch the folder to check ownership before updating
+        const { data: folderData, error: fetchError } = await supabase
+            .from("storage_folders")
+            .select("owner_id")
+            .eq("id", folder_id)
+            .maybeSingle(); // Use maybeSingle to handle not found gracefully
+
+        if (fetchError) {
+            console.error("Error fetching folder for ownership check:", fetchError);
+            return NextResponse.json<EditFolderResponseBody>({ error: "Failed to verify folder ownership" }, { status: 500 });
+        }
+
+        if (!folderData) {
+            return NextResponse.json<EditFolderResponseBody>({ error: "Folder not found" }, { status: 404 });
+        }
+
+        // Check if the requesting user is the owner
+        if (folderData.owner_id !== user_id) {
+            return NextResponse.json<EditFolderResponseBody>({ error: "Forbidden: You do not have permission to edit this folder" }, { status: 403 });
+        }
+        // --- End Authorization Check ---
+
+
+        // Perform the update operation if authorized
         const { error } = await supabase
             .from("storage_folders")
             .update(updateData)
-            .eq("id", folder_id)
+            .eq("id", folder_id) // Ensure we only update the specific folder
             
         if (error) {
             console.error("Error updating folder:", error);

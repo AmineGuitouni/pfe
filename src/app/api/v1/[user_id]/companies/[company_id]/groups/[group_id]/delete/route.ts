@@ -1,4 +1,5 @@
 import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase";
+import { redis } from "@/lib/database/redis";
 import { NextResponse } from "next/server";
 
 interface Params {
@@ -17,15 +18,21 @@ export async function DELETE(reqest: Request, { params }: { params: Params }) {
             return NextResponse.json({error: "Failed to connect to database"}, {status: 500})
         }
 
-        const { error } = await supabase
+        const { data, error } = await supabase
         .from("groups")
         .delete()
         .eq("id", group_id)
         .eq("company_id", company_id)
+        .select("user_groups(user_id)")
+        .single()
 
         if(error){
             console.log(error);
             return NextResponse.json({error: error.message}, {status: 500})
+        }
+
+        for(const user of data.user_groups){
+            redis.del(`user:${user.user_id}-permissions:${company_id}`)
         }
 
         return NextResponse.json({message: "Group updated successfully"}, {status: 200})

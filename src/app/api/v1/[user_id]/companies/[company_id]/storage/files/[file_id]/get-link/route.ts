@@ -54,10 +54,28 @@ export async function GET(req: Request, { params: { company_id, file_id } }: { p
 
         const storagePath = fileData.path;
 
-        // 2. Generate the signed URL
+        // 2. Determine expiry duration from search params or use default
+        const { searchParams } = new URL(req.url);
+        const expiresInParam = searchParams.get('expires_in');
+        let expiryDuration = SIGNED_URL_EXPIRY_SECONDS; // Default
+
+        if (expiresInParam) {
+            const parsedExpiry = parseInt(expiresInParam, 10);
+            // Use custom expiry only if it's a valid positive number
+            if (!isNaN(parsedExpiry) && parsedExpiry > 0) {
+                expiryDuration = parsedExpiry;
+                // Optional: Add logging for debugging
+                // console.log(`Using custom expiry duration: ${expiryDuration} seconds for file ${file_id}`);
+            } else {
+                // Optional: Log a warning if the parameter is invalid
+                // console.warn(`Invalid 'expiresIn' parameter: '${expiresInParam}'. Using default expiry: ${expiryDuration} seconds.`);
+            }
+        }
+
+        // 3. Generate the signed URL using the determined expiry duration
         const { data: signedUrlData, error: signedUrlError } = await supabase.storage
             .from(bucketName)
-            .createSignedUrl(storagePath, SIGNED_URL_EXPIRY_SECONDS);
+            .createSignedUrl(storagePath, expiryDuration); // Use determined expiryDuration
 
         if (signedUrlError) {
             console.error(`Error generating signed URL for ${bucketName}/${storagePath}:`, signedUrlError);
@@ -69,7 +87,7 @@ export async function GET(req: Request, { params: { company_id, file_id } }: { p
              return NextResponse.json<GetSignedUrlResponseBody>({ error: "Failed to generate download link" }, { status: 500 });
         }
 
-        // 3. Return the signed URL
+        // 4. Return the signed URL
         return NextResponse.json<GetSignedUrlResponseBody>({ data: { signedUrl: signedUrlData.signedUrl } }, { status: 200 });
 
     } catch (error) {

@@ -4,8 +4,5 @@ export type pageRequirement = {
     permissions?: string[]
 }
 
-export interface pageRuleType {
-    path: string;
-    requirement: pageRequirement;
-    includeSubPages: boolean
-} 
+// {pagePath: pageRequirement, ... }
+export type pageRuleType = Record<string, pageRequirement>

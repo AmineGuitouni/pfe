@@ -17,7 +17,7 @@ export interface EditFileResponseBody {
     error?: string;
 }
 
-export async function PATCH(req: Request, { params: { company_id, file_id } }: { params: Params }) {
+export async function PATCH(req: Request, { params: { company_id, user_id, file_id } }: { params: Params }) { // Added user_id to params destructuring
     try {
         const supabase = await getServerDBfromCompanyId(company_id);
         if (!supabase) {
@@ -59,7 +59,58 @@ export async function PATCH(req: Request, { params: { company_id, file_id } }: {
         }
 
 
-        // Perform the update operation on storage_file table
+        // --- Authorization Check ---
+        const userRole = req.headers.get("X-user-role");
+
+        // 1. Fetch file owner
+        const { data: fileData, error: fileError } = await supabase
+            .from("storage_file")
+            .select("owner_id")
+            .eq("id", file_id)
+            .maybeSingle(); // Use maybeSingle to handle not found gracefully
+
+        if (fileError) {
+            console.error("Error fetching file owner:", fileError);
+            return NextResponse.json<EditFileResponseBody>({ error: "Failed to verify file ownership" }, { status: 500 });
+        }
+
+        if (!fileData) {
+            return NextResponse.json<EditFileResponseBody>({ error: "File not found" }, { status: 404 });
+        }
+
+        const fileOwnerId = fileData.owner_id;
+        let isAuthorized = false;
+
+        // 2. Check authorization conditions
+        if (userRole === 'owner' || fileOwnerId === user_id) {
+            isAuthorized = true;
+        } else {
+            // 3. Check access table if not owner
+            const { data: accessData, error: accessError } = await supabase
+                .from("storage_file_user_access")
+                .select("access_level")
+                .eq("user_id", user_id)
+                .eq("file_id", file_id)
+                .maybeSingle();
+
+            if (accessError) {
+                console.error("Error fetching file access level:", accessError);
+                return NextResponse.json<EditFileResponseBody>({ error: "Failed to verify file access permissions" }, { status: 500 });
+            }
+
+            if (accessData?.access_level === 'editor') {
+                isAuthorized = true;
+            }
+        }
+
+        // 4. Deny if not authorized
+        if (!isAuthorized) {
+            return NextResponse.json<EditFileResponseBody>({ error: "Forbidden: You do not have permission to edit this file" }, { status: 403 });
+        }
+        // --- End Authorization Check ---
+
+
+        // Perform the update operation on storage_file table if authorized
         const { error } = await supabase
             .from("storage_file") // Target the file table
             .update(updateData)

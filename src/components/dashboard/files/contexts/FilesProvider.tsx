@@ -2,7 +2,7 @@
 
 import React, { createContext, useState, useMemo, ReactNode } from 'react';
 import useFiles from '../hooks/useFiles';
-import { FileItem, FolderItem, StorageSearchParams } from '../types/filesTypes';
+import { FileItem, FolderItem, StorageSearchParams, FileUserAccessItem, AccessLevel } from '../types/filesTypes'; // Added FileUserAccessItem, AccessLevel
 import { CreateFolderRequestBody } from '@/app/api/v1/[user_id]/companies/[company_id]/storage/folders/new/route';
 import { useSearchParams } from 'next/navigation';
 
@@ -32,10 +32,12 @@ export interface FilesContextType {
   addFile: (file: File, parentFolderId: string | null) => Promise<FileItem>;
   deleteFile: (fileId: string) => Promise<void>;
   editFile: (fileId: string, newName: string) => Promise<void>;
-  getFileDownloadLink: (fileId: string) => Promise<string>; // Added
+  getFileDownloadLink: (fileId: string, expiresIn?: number) => Promise<string>;
+  getFileAccessList: (fileId: string) => Promise<FileUserAccessItem[]>;
+  editFileAccess: (fileId: string, userToAdd: { user_id: string; access_level: AccessLevel }[], userToRemove: { user_id: string }[]) => Promise<void>; // Added
 
   // Refetch Actions
-  refetchFolders: () => Promise<void>; // Added
+  refetchFolders: () => Promise<void>;
   refetchFiles: () => Promise<void>; // Added
 }
 
@@ -51,8 +53,8 @@ export const FilesProvider: React.FC<FilesProviderProps> = ({ children, company_
     files, folders, error, isLoading, isLoadingFolders, isLoadingFiles, // Added individual loading states
     setFolders, setFiles,
     addFolder, deleteFolder, editFolder,
-    addFile, deleteFile, editFile, getFileDownloadLink, // Added file actions including get link
-    refetchFolders, refetchFiles // Added refetch actions
+    addFile, deleteFile, editFile, getFileDownloadLink, getFileAccessList, editFileAccess, // Added editFileAccess
+    refetchFolders, refetchFiles
   } = useFiles({ company_id });
   const [searchTerm, setSearchTerm] = useState('');
   const searchParams = useSearchParams();
@@ -95,17 +97,19 @@ export const FilesProvider: React.FC<FilesProviderProps> = ({ children, company_
     addFile,
     deleteFile,
     editFile,
-    getFileDownloadLink, // Added
+    getFileDownloadLink,
+    getFileAccessList,
+    editFileAccess, // Added
 
     // Refetch Actions
-    refetchFolders, // Added
+    refetchFolders,
     refetchFiles,   // Added
 
   }), [
     files, folders, isLoading, isLoadingFolders, isLoadingFiles, error, searchTerm, company_id, currentFolder, // State dependencies
     setSearchTerm, setFolders, setFiles, // Setter dependencies
     addFolder, deleteFolder, editFolder, // Folder action dependencies
-    addFile, deleteFile, editFile, getFileDownloadLink, // File action dependencies including get link
+    addFile, deleteFile, editFile, getFileDownloadLink, getFileAccessList, editFileAccess, // Added editFileAccess
     refetchFolders, refetchFiles // Refetch action dependencies
   ]);
 

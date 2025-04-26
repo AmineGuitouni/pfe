@@ -12,7 +12,7 @@ export interface ListFoldersResponseBody {
     error?: string
 }
 
-export async function GET(req: Request, {params: {company_id}}: {params: params}) {
+export async function GET(req: Request, {params: {company_id, user_id}}: {params: params}) { // Added user_id
     try{
         const supabase = await getServerDBfromCompanyId(company_id);
         if(!supabase){
@@ -24,6 +24,7 @@ export async function GET(req: Request, {params: {company_id}}: {params: params}
 
         const quary = supabase.from("storage_folders")
         .select("id, name, parent_id, created_at, updated_at, owner_id")
+        .eq("owner_id", user_id) // Filter by owner
         .order("updated_at", { ascending: false });
 
         if (parent_id && parent_id !== "null") {

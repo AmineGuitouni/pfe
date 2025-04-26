@@ -1,3 +1,4 @@
+import { redis } from "@/lib/database/redis";
 import { authedSupabase } from "@/lib/database/supabase";
 import { NextResponse } from "next/server";
 
@@ -17,6 +18,8 @@ export async function DELETE(req: Request, {params: {user_id, company_id}}: {par
     .delete()
     .eq("id", company_id)
     .eq("user_id", user_id)
+
+    redis.del(`user:${user_id}-company:${company_id}`)
 
     if(error){
         console.log(error);

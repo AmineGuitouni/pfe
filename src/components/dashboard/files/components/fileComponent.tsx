@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react'; // Import useState
+import { useState } from 'react'; // Import useState and useCallback
 import { motion } from 'framer-motion';
 import {
   BsFiletypeCsv,
@@ -22,10 +22,11 @@ import {
 import {
   FaRegFileImage,
   FaRegFileVideo,
+  FaUserShield, // Added icon for Manage Access
 } from 'react-icons/fa';
 import { FaRegFilePdf } from 'react-icons/fa6';
 import { HiOutlineDotsVertical } from 'react-icons/hi';
-import { MdDelete } from 'react-icons/md';
+import { MdDelete, MdOutlineShare } from 'react-icons/md';
 
 import {
   Button,
@@ -46,6 +47,7 @@ import DeleteModal from './deleteModal';
 import { useFilesContext } from '../hooks/useFilesContext'; // Import context hook
 import { toast } from 'react-toastify'; // Import toast
 import ImageLoader from './imageLoader';
+import ShareLinkModal from './ShareLinkModal';
 
 const variants = {
     initial: {
@@ -84,38 +86,59 @@ function getIcon(type: string, size?: number, className?: string) {
     return <CiFileOn size={size} className={className} />;
 }
 
-export default function FileComponent({ file, index }: { file: FileItem; index: number }) {
+// Removed FileComponentProps interface as companyId comes from context
+
+export default function FileComponent({ file, index, onAccessOpen}: { file: FileItem; index: number, onAccessOpen?: (file: FileItem) => void }) { // Removed companyId from props
 
     const { isOpen: isOpenEdit, onOpen: onOpenEdit, onOpenChange: onOpenChangeEdit } = useDisclosure();
     const { isOpen: isOpenDelete, onOpen: onOpenDelete, onOpenChange: onOpenChangeDelete } = useDisclosure();
-    const { getFileDownloadLink } = useFilesContext(); // Get function from context
-    const [isLinkLoading, setIsLinkLoading] = useState(false); // Add loading state for link fetching
+    const { isOpen: isOpenShare, onOpen: onOpenShare, onOpenChange: onOpenChangeShare } = useDisclosure();
+    const { getFileDownloadLink, company_id } = useFilesContext(); // Get company_id from context
+    const [isLinkLoading, setIsLinkLoading] = useState(false);
+
+    // Add check for company_id from context
+    if (!company_id) {
+        console.error("Company ID (company_id) is missing in FileComponent context.");
+        // Optionally return null or an error message component
+        // return <div>Error: Company context not found.</div>;
+    }
 
     return (
         <>
             <EditModal isOpen={isOpenEdit} onOpenChange={onOpenChangeEdit} object={file} />
-            <DeleteModal isOpen={isOpenDelete} onOpenChange={onOpenChangeDelete}  object={file} />
+            <DeleteModal isOpen={isOpenDelete} onOpenChange={onOpenChangeDelete} object={file} />
+            <ShareLinkModal
+                isOpen={isOpenShare}
+                onOpenChange={onOpenChangeShare}
+                fileId={file.id}
+                fileName={file.name}
+                getFileDownloadLink={getFileDownloadLink}
+            />
 
-            {file.type.startsWith("image") ? 
-                <Tooltip content={<ImageLoader file_id={file.id}/>}>
+            {file.type.startsWith("image") ?
+                <Tooltip content={<ImageLoader file_id={file.id} />}>
                     <FileCard 
                         file={file} 
                         index={index} 
                         isLinkLoading={isLinkLoading} 
                         setIsLinkLoading={setIsLinkLoading} 
                         getFileDownloadLink={getFileDownloadLink} 
-                        onOpenEdit={onOpenEdit} 
+                        onOpenEdit={onOpenEdit}
                         onOpenDelete={onOpenDelete}
+                        onOpenShare={onOpenShare}
+                        onOpenManageAccess={onAccessOpen} // Pass manage access modal opener
                     />
                 </Tooltip> :
-                <FileCard 
-                    file={file} 
-                    index={index} 
-                    isLinkLoading={isLinkLoading} 
-                    setIsLinkLoading={setIsLinkLoading} 
-                    getFileDownloadLink={getFileDownloadLink} 
-                    onOpenEdit={onOpenEdit} 
+                <FileCard
+                    file={file}
+                    index={index}
+                    isLinkLoading={isLinkLoading}
+                    setIsLinkLoading={setIsLinkLoading}
+                    getFileDownloadLink={getFileDownloadLink}
+                    onOpenEdit={onOpenEdit}
                     onOpenDelete={onOpenDelete}
+                    onOpenShare={onOpenShare}
+                    onOpenManageAccess={onAccessOpen} // Pass manage access modal opener
                 />
             }
         </>
@@ -130,15 +153,19 @@ function FileCard({
     setIsLinkLoading,
     getFileDownloadLink,
     onOpenEdit,
-    onOpenDelete
+    onOpenDelete,
+    onOpenShare,
+    onOpenManageAccess // Added prop for manage access modal
 }: {
     file: FileItem;
     index: number;
     isLinkLoading: boolean;
     setIsLinkLoading: React.Dispatch<React.SetStateAction<boolean>>;
-    getFileDownloadLink: (fileId: string) => Promise<string>;
+    getFileDownloadLink: (fileId: string, expiresIn?: number) => Promise<string>; // Keep updated signature
     onOpenEdit: () => void;
     onOpenDelete: () => void;
+    onOpenShare: () => void;
+    onOpenManageAccess?: (file: FileItem) => void; // Added prop type
 }){
     return (
         <motion.div
@@ -169,7 +196,20 @@ function FileCard({
                             <HiOutlineDotsVertical size={20} className="text-light_blue-500" />
                         </Button>
                     </DropdownTrigger>
-                    <DropdownMenu aria-label="actions">
+                    {/* Trigger modals via onAction */}
+                    <DropdownMenu
+                        aria-label="File Actions"
+                        onAction={(key) => {
+                            if (key === 'share') onOpenShare();
+                            if (key === 'access') onOpenManageAccess?.(file);
+                        }}
+                    >
+                        <DropdownItem key="share" startContent={<MdOutlineShare size={20} />} >
+                            Generate Share Link
+                        </DropdownItem>
+                         <DropdownItem key="access" startContent={<FaUserShield size={18} />} >
+                            Manage Access
+                        </DropdownItem>
                         <DropdownItem key="edit" startContent={<CiEdit size={20} />} onPress={onOpenEdit} >
                             Edit File
                         </DropdownItem>
@@ -179,7 +219,14 @@ function FileCard({
                     </DropdownMenu>
                 </Dropdown>
             </div>
-            <p className="text-sm font-semibold text-light_blue line-clamp-2">{file.name}</p>
+            <div className="flex items-center gap-2"> {/* Wrap name and icon */}
+                <p className="text-sm font-semibold text-light_blue line-clamp-2 flex-grow">{file.name}</p>
+                {file.isShared && (
+                    <Tooltip content="Shared with you">
+                        <MdOutlineShare size={16} className="text-gray-400 flex-shrink-0" />
+                    </Tooltip>
+                )}
+            </div>
             <hr className="my-3" />
             <div className='flex justify-between items-end'>
                 <p className="text-sm font-semibold text-gray-300 mb-2">{formatShortDate(file.created_at)}</p>
@@ -202,7 +249,7 @@ export function FileSkeleton({ index, loading }: { index: number; loading: boole
             initial="initial"
             animate={loading ? "visible" : "initial"}
             transition={{ duration: 0.5, delay: index * 0.1 }}
-            className="p-4 h-[170px] sm:w-[300px] w-full rounded-xl border border-light_blue-500/20 shadow-lg flex-shrink-0 cursor-pointer bg-white/5 hover:bg-white/10 transition-all duration-200"
+            className="p-4 h-[170px] w-full rounded-xl border border-light_blue-500/20 shadow-lg flex-shrink-0 cursor-pointer bg-white/5 hover:bg-white/10 transition-all duration-200"
         >
             <div className="flex justify-between items-center w-full mb-5 flex-shrink-0">
                 <Skeleton className="size-[35px] rounded-lg animate-pulse" />

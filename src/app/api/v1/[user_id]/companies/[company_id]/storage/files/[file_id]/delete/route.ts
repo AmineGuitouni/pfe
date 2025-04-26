@@ -2,7 +2,7 @@ import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase"
 import { NextResponse } from "next/server";
 
 interface Params {
-    user_id: string; // Not directly used but part of the route
+    user_id: string;
     company_id: string;
     file_id: string;
 }
@@ -12,7 +12,7 @@ export interface DeleteFileResponseBody {
     error?: string;
 }
 
-export async function DELETE(req: Request, { params: { company_id, file_id } }: { params: Params }) {
+export async function DELETE(req: Request, { params: { company_id, user_id, file_id } }: { params: Params }) { // Added user_id
     try {
         const supabase = await getServerDBfromCompanyId(company_id);
         if (!supabase) {
@@ -26,10 +26,65 @@ export async function DELETE(req: Request, { params: { company_id, file_id } }: 
 
         const bucketName = "storage";
 
-        // 1. Fetch the file record to get the storage path
+        // --- Authorization Check ---
+        const userRole = req.headers.get("X-user-role");
+
+        // 1. Fetch file owner
+        const { data: ownerData, error: ownerError } = await supabase
+            .from("storage_file")
+            .select("owner_id")
+            .eq("id", file_id)
+            .maybeSingle();
+
+        if (ownerError) {
+            console.error("Error fetching file owner for delete:", ownerError);
+            return NextResponse.json<DeleteFileResponseBody>({ error: "Failed to verify file ownership before deletion" }, { status: 500 });
+        }
+
+        if (!ownerData) {
+            // File doesn't exist, return 404 (consistent with later check)
+            return NextResponse.json<DeleteFileResponseBody>({ error: "File not found" }, { status: 404 });
+        }
+
+        const fileOwnerId = ownerData.owner_id;
+        let isAuthorized = false;
+
+        // 2. Check authorization conditions
+        if (userRole === 'owner' || fileOwnerId === user_id) {
+            isAuthorized = true;
+        } else {
+            // 3. Check access table if not owner
+            const { data: accessData, error: accessError } = await supabase
+                .from("storage_file_user_access")
+                .select("access_level")
+                .eq("user_id", user_id)
+                .eq("file_id", file_id)
+                .eq("access_level", 'editor')
+                .maybeSingle();
+
+            if (accessError) {
+                console.error("Error fetching file access level for delete:", accessError);
+                return NextResponse.json<DeleteFileResponseBody>({ error: "Failed to verify file access permissions before deletion" }, { status: 500 });
+            }
+
+            if (accessData) { // Check if a record with 'editor' access was found
+                isAuthorized = true;
+            }
+        }
+
+        // 4. Deny if not authorized
+        if (!isAuthorized) {
+            return NextResponse.json<DeleteFileResponseBody>({ error: "Forbidden: You do not have permission to delete this file" }, { status: 403 });
+        }
+        // --- End Authorization Check ---
+
+
+        // Proceed with deletion if authorized
+
+        // 1. Fetch the file record to get the storage path (owner already fetched)
         const { data: fileData, error: fetchError } = await supabase
             .from("storage_file")
-            .select("path")
+            .select("path") // Select path needed for storage deletion
             .eq("id", file_id)
             .single();
 

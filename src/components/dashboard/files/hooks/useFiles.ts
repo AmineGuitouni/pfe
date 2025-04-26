@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { FileItem, FolderItem, StorageSearchParams } from "../types/filesTypes";
+import { FileItem, FolderItem, StorageSearchParams, FileUserAccessItem, AccessLevel } from "../types/filesTypes"; // Added FileUserAccessItem, AccessLevel
 import { useSession } from "next-auth/react";
 import { CreateFolderRequestBody } from "@/app/api/v1/[user_id]/companies/[company_id]/storage/folders/new/route";
+import { GetFileAccessResponseBody } from "@/app/api/v1/[user_id]/companies/[company_id]/storage/files/[file_id]/access/get/route"; // Added GetFileAccessResponseBody
 import { useSearchParams } from "next/navigation";
 
 
@@ -97,6 +98,7 @@ export default function useFiles({company_id}:{company_id:string}){
                 created_at: file.created_at,
                 updated_at: file.updated_at,
                 owner_id: file.owner_id,
+                isShared: file.isShared
             }));
 
             setFiles(formattedFiles);
@@ -343,13 +345,21 @@ export default function useFiles({company_id}:{company_id:string}){
     }, [company_id, session?.user.id]);
 
     // Get File Download Link function
-    const getFileDownloadLink = useCallback(async (fileId: string): Promise<string> => {
+    const getFileDownloadLink = useCallback(async (fileId: string, expiresIn?: number): Promise<string> => {
         if (!session?.user.id) throw new Error("User not authenticated");
         if (!fileId) throw new Error("File ID is required");
 
         try {
             setError(null); // Clear previous errors potentially? Or maybe not for a simple fetch?
-            const response = await fetch(`/api/v1/${session?.user.id}/companies/${company_id}/storage/files/${fileId}/get-link`);
+
+            let apiUrl = `/api/v1/${session?.user.id}/companies/${company_id}/storage/files/${fileId}/get-link`;
+
+            // Append expiresIn search parameter if provided and valid
+            if (expiresIn !== undefined && expiresIn > 0) {
+                apiUrl += `?expires_in=${expiresIn}`;
+            }
+
+            const response = await fetch(apiUrl); // Use the potentially modified URL
 
             if (!response.ok) {
                 const { error: apiError } = await response.json();
@@ -374,6 +384,104 @@ export default function useFiles({company_id}:{company_id:string}){
         }
     }, [company_id, session?.user.id]);
 
+    // Get File Access List function
+    const getFileAccessList = useCallback(async (fileId: string): Promise<FileUserAccessItem[]> => {
+        if (!session?.user.id) throw new Error("User not authenticated");
+        if (!fileId) throw new Error("File ID is required");
+
+        try {
+            setError(null); // Clear previous errors
+
+            const apiUrl = `/api/v1/${session?.user.id}/companies/${company_id}/storage/files/${fileId}/access/get`;
+
+            const response = await fetch(apiUrl);
+
+            if (!response.ok) {
+                const { error: apiError } = await response.json();
+                 if (response.status === 404) {
+                     throw new Error("File not found or access denied"); // Or more specific error
+                 }
+                throw new Error(apiError || `HTTP error! status: ${response.status}`);
+            }
+
+            const { data, error: apiError }: GetFileAccessResponseBody = await response.json();
+
+            if (apiError || !data) {
+                throw new Error(apiError || "Failed to retrieve file access list from API response");
+            }
+
+            return data;
+
+        } catch (err: any) {
+            console.error("Error getting file access list:", err);
+            setError(err.message || "Failed to get file access list"); // Set error state
+            throw err; // Re-throw error for handling in UI
+        }
+    }, [company_id, session?.user.id]);
+
+    // Edit File Access function
+    const editFileAccess = useCallback(async (
+        fileId: string,
+        userToAdd: { user_id: string; access_level: AccessLevel }[],
+        userToRemove: { user_id: string }[]
+    ): Promise<void> => {
+        if (!session?.user.id) throw new Error("User not authenticated");
+        if (!fileId) throw new Error("File ID is required");
+
+        try {
+            setError(null); // Clear previous errors
+
+            const apiUrl = `/api/v1/${session?.user.id}/companies/${company_id}/storage/files/${fileId}/access/edit`;
+
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ userToAdd, userToRemove }),
+            });
+
+            if (!response.ok) {
+                // Attempt to parse error even if response is not ok
+                let apiError = `HTTP error! status: ${response.status}`;
+                try {
+                    const errorBody = await response.json();
+                    apiError = errorBody.error || apiError;
+                } catch (parseError) {
+                    // Ignore if response body is not JSON or empty
+                    console.warn("Error parsing response body:", parseError);
+                }
+
+                if (response.status === 404) {
+                    throw new Error("File not found or you do not have permission to edit access");
+                }
+                throw new Error(apiError);
+            }
+
+            // Check for potential error message in success response (though API seems to return {} on success)
+            try {
+                 const { error: apiError } = await response.json();
+                 if (apiError) {
+                     throw new Error(apiError);
+                 }
+            } catch (e) {
+                 console.warn("Error parsing response body:", e);
+                 // If response is empty or not JSON, assume success based on status code
+                 if (response.status !== 200 && response.status !== 204) {
+                     console.warn("Edit file access response was not empty JSON but status was ok.");
+                 }
+            }
+
+            // Optionally: Could refetch the access list here if needed immediately after edit
+            // await getFileAccessList(fileId);
+
+        } catch (err: any) {
+            console.error("Error editing file access:", err);
+            setError(err.message || "Failed to edit file access"); // Set error state
+            throw err; // Re-throw error for handling in UI
+        }
+    }, [company_id, session?.user.id]);
+
 
     return {
         folders,
@@ -392,7 +500,9 @@ export default function useFiles({company_id}:{company_id:string}){
         addFile,
         deleteFile,
         editFile,
-        getFileDownloadLink, // Added
+        getFileDownloadLink,
+        getFileAccessList,
+        editFileAccess, // Added
         // Refetch triggers (optional, could be useful)
         refetchFolders: fetchFolders,
         refetchFiles: fetchFiles,

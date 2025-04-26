@@ -1,4 +1,5 @@
 import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase";
+import { redis } from "@/lib/database/redis";
 import { NextResponse } from "next/server";
 
 interface Params {
@@ -62,6 +63,20 @@ export async function PUT(reqest: Request, { params }: { params: Params }) {
         if(removedUsersError){
             console.log(removedUsersError);
             return NextResponse.json({error: removedUsersError.message}, {status: 500})
+        }
+
+        const { data: users, error: selectError } = await supabase
+        .from("user_groups")
+        .select("user_id")
+        .eq("group_id", group_id)
+
+        if(selectError){
+            console.log(selectError);
+            return NextResponse.json({error: selectError.message}, {status: 500})
+        }
+
+        for(const user of users){
+            redis.del(`user:${user.user_id}-permissions:${company_id}`)
         }
 
         return NextResponse.json({message: "Group updated successfully"}, {status: 200})
