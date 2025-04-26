@@ -1,13 +1,12 @@
 "use client"
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, User } from "@heroui/react";
-import { signOut, useSession } from "next-auth/react";
+import { signOut} from "next-auth/react";
 import Link from "next/link";
 import { HiOutlineLogout } from "react-icons/hi";
 import { IoMdSettings } from "react-icons/io";
 import {  LuUser } from "react-icons/lu";
 
-export default function DropDownMenu(){
-    const {data:session} = useSession();
+export default function DropDownMenu({session}:{session : any}){
     if(!session || !session.user){
         return null
     }
@@ -18,13 +17,12 @@ export default function DropDownMenu(){
             <User
                 as="button"
                 avatarProps={{
-                    name: session.user.name as string,
-                    //isBordered: true,
-                    src: session.user.image ? session.user.image : undefined,
+                    name: session?.user.name as string,
+                    src: session?.user.image ? session.user.image : undefined,
                 }}
                 className="transition-transform text-light_blue-500 font-semibold"
-                description={session.user.email}
-                name={session.user.name}
+                description={session?.user.email}
+                name={session?.user.name}
                 classNames={
                     {
                         name:"hidden sm:block",

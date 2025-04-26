@@ -12,9 +12,9 @@ export interface DeleteFolderResponseBody {
     error?: string;
 }
 
-export async function DELETE(req: Request, { params: { company_id, user_id, folder_id } }: { params: params }) { // Added user_id
+export async function DELETE(req: Request, { params: { company_id, folder_id ,user_id } }: { params: params }) {
     try {
-        const supabase = await getServerDBfromCompanyId(company_id);
+        const supabase = await getServerDBfromCompanyId(company_id,user_id);
         if (!supabase) {
             return NextResponse.json<DeleteFolderResponseBody>({ error: "Failed to connect to database" }, { status: 500 });
         }

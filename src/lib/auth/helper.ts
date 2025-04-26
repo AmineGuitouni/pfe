@@ -20,6 +20,8 @@ export async function getUser(credentials:{
         .eq("email", credentials.email)
         .single()
 
+        console.log({data})
+
         if(error){
             console.log(error)
             throw new Error(error.message)
@@ -29,7 +31,7 @@ export async function getUser(credentials:{
         .from("cv_informations")
         .select("user_id")
         .eq("user_id", data.id)
-        .single()
+        
 
         if(cvError){
             console.log(cvError)
@@ -38,7 +40,7 @@ export async function getUser(credentials:{
 
 
         return {
-            ...data, role : "worker",email_verified : true, cv_informations : cvData.user_id ? true : false
+            ...data, role : "worker",email_verified : true, cv_informations : cvData.length > 0 ? true : false
         }
     }
     else{

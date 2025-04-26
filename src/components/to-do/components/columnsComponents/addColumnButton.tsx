@@ -8,15 +8,17 @@ export default function AddColumnButton() {
     const {isOpen, onOpen, onOpenChange} = useDisclosure();
     
     return (
-        <div className="hover:w-14 w-5 h-fit bg-transparent transition-all ease-linear group flex justify-center">
+        <div>
             <AddModal isOpen={isOpen} onOpenChange={onOpenChange} />
             <Button 
-                isIconOnly 
+                // isIconOnly 
+                radius="sm"
+                startContent={<GrChapterAdd size={15} />}
                 variant="light" 
-                className="scale-0 group-hover:scale-100 text-white transition-all ease-linear mt-4 mx-1" 
+                className=" text-white hover:scale-105 transition-all ease-linear border-1 mx-4 border-white/30" 
                 onPress={onOpen}
             > 
-                <GrChapterAdd size={20} />
+                Add column
             </Button>
         </div>
     );

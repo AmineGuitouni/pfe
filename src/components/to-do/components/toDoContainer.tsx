@@ -19,7 +19,7 @@ export default function ToDoContainer() {
     
 
     return (
-        <div className="w-full h-full flex">
+        <div className="w-full h-full flex ">
             <div className="w-full h-full flex flex-col">
                 <ToDoHeader project={activeProject || undefined} isLoading={isLoading}/>
                 <Container isLoading={isLoading} activeProject={activeProject}/>

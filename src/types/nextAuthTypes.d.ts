@@ -8,7 +8,6 @@ declare module "next-auth" {
       name: string
       first_name: string
       last_name: string
-      company: string
       email: string
       supabase_token: string
       email_verified: boolean
@@ -27,6 +26,7 @@ declare module "next-auth" {
     last_name: string
     company: string
     country: string
+    image?: string | null
     email: string
     email_verified: boolean
     phone_number: string

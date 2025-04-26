@@ -35,8 +35,25 @@ export const UsersFilters = ({
           value={searchText}
           onClear={() => onSearchChange?.("")}
           onValueChange={onSearchChange}
+          classNames={{
+            base: "w-full h-full dark",
+            input: [
+                "bg-transparent",
+                "text-white/90 ",
+                "placeholder:text-white/90",
+            ],
+            innerWrapper: "bg-transparent text-white",
+            inputWrapper: [
+                "bg-transparent border-white/20",
+                "!cursor-text",
+                "hover:bg-white/5",
+                "group-data-[focus=true]:bg-white/5",
+                "group-data-[hover=true]:bg-white/5",
+
+            ],
+            }}
+          startContent={<SearchIcon className="text-light_blue" />}
           className="flex-grow"
-          startContent={<SearchIcon className="text-default-300" />}
           variant="bordered"
         />
         <RoleFilter 

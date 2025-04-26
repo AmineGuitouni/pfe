@@ -19,9 +19,9 @@ export type EditGroupRequestBody  = {
 export async function PUT(reqest: Request, { params }: { params: Params }) {
     try{
         const body: EditGroupRequestBody = await reqest.json();
-        const {company_id, group_id} = params;
+        const {company_id, group_id ,user_id} = params;
 
-        const supabase = await getServerDBfromCompanyId(company_id);
+        const supabase = await getServerDBfromCompanyId(company_id , user_id);
         if(!supabase){
             return NextResponse.json({error: "Failed to connect to database"}, {status: 500})
         }

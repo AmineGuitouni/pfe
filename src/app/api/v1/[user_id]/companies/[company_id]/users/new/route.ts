@@ -5,7 +5,7 @@ import { resend } from "@/lib/resend";
 import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase";
 import { AddUserToCompanyTemplate } from "@/lib/emailtemplets/addUserToCompanyTemplate";
 
-export async function GET(req: Request, {params: {company_id}}: {params: { company_id: string }}) {
+export async function GET(req: Request, {params: {company_id,user_id}}: {params: { company_id: string ,user_id: string}}) {
     try {
         const url = new URL(req.url);
         const { searchParams } = url;
@@ -33,7 +33,7 @@ export async function GET(req: Request, {params: {company_id}}: {params: { compa
         }
 
         // Get company-specific database client
-        const client = await getServerDBfromCompanyId(company_id);
+        const client = await getServerDBfromCompanyId(company_id,user_id);
           
         if (!client) {
             return NextResponse.json({ 

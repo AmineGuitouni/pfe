@@ -31,13 +31,13 @@ export default function AuditLogTable() {
         sortDescriptor={sortDescriptor}
         onSortChange={setSortDescriptor}
         classNames={{
-          base: "w-full",
+          base: "w-full ",
           table: "w-full",
-          thead: "rounded-none",
-          tr: "border-b border-white/20 hover:bg-white/5",
-          th: "bg-white/10 text-default-500 border-b border-divider rounded-none",
+          thead: "rounded-md",
+          tr: "hover:bg-white/5",
+          th: "bg-white/10 text-default-500 ",
           td: "p-3",
-          wrapper: "bg-modal_bg/50",
+          wrapper: "bg-white/5 rounded-lg",
         }}
         bottomContent={
           <AuditLogPagination
@@ -70,7 +70,7 @@ export default function AuditLogTable() {
           emptyContent="No logs found"
           items={logs}
           isLoading={loading}
-          loadingContent={<Spinner size="lg" />}
+          loadingContent={<Spinner size="lg" color="white" />}
         >
           {(log) => {
             return AuditLogRow({ log });
