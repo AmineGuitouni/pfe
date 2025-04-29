@@ -48,10 +48,6 @@ export async function GET(req: Request, {params: {user_id}}: {params: {user_id: 
             workers: countWorkers
         }
 
-        console.log("Fetched company data:", newData);
-        
-
-
         return NextResponse.json({data:newData}, {status: 200});
     }
     catch (error) {

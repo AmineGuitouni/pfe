@@ -59,10 +59,10 @@ export default function TaskContainer({ column, project_id }: { column: Column; 
                                 {column.name}
                             </p>
                             <p className="text-white/50 text-xs font-normal ml-2">
-                                {column.tasks.length > 0
-                                    ? column.tasks.length === 1
+                                {myTasks.length > 0
+                                    ? myTasks.length === 1
                                         ? "1 Task"
-                                        : column.tasks.length + " Tasks"
+                                        : myTasks.length + " Tasks"
                                     : "No tasks"}
                             </p>
                         </div>

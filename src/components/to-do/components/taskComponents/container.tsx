@@ -9,6 +9,8 @@ export default function Container({isLoading, activeProject}:{isLoading: boolean
     
     const { dragDropTask, setProjects } = UseColumns();
 
+    console.log("activeProject", activeProject);
+
     const handleDragEnd = (result: DropResult) => {
         if(!activeProject) return;
 

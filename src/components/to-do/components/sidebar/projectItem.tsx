@@ -5,11 +5,13 @@ import { GoProject } from "react-icons/go";
 import { toDoProject } from "../../types/type";
 import { useSearchParams } from "next/navigation";
 import { Task } from "@/components/dashboard/projects/types";
+import { useSession } from "next-auth/react";
 
 export default function ProjectItem({project}:{project: toDoProject}) {
     const router = useRouter()
     const pathName = usePathname()
     const params = useSearchParams()
+    const {data : session} = useSession()
 
     // Collect all tasks from all columns
     const getAllTasks = () => {
@@ -45,8 +47,15 @@ export default function ProjectItem({project}:{project: toDoProject}) {
     const status: {status: string, color: string} = deriveProjectStatus(allTasks, project.projectData.deadline);
     
     // Count To Do tasks
-    const toDoTasksCount = project.columns["todo"]?.tasks ? 
-        Object.keys(project.columns["todo"].tasks).length : 0;
+    // Calculate the count of tasks with status "To Do" across all columns
+    // Using 'any' for column and task types for now, replace with specific types if available (e.g., Column, Task)
+    const toDoTasksCount: number = Object.values(project.columns).reduce((count: number, column: any) => {
+        if (column.tasks) {
+            const columnTasksCount = Object.values(column.tasks).filter((task: any) => task.task_status === "To Do" && task.user_id === session?.user.id).length;
+            return count + columnTasksCount;
+        }
+        return count;
+    }, 0);
 
     return (
         <div 
