@@ -68,7 +68,7 @@ export default function CompanySideBar({companyId,session}:{companyId: string,se
                 </div>
                 <div className="w-full border-b border-b-white/20 flex flex-col justify-start gap-4 py-5 px-5">
                     <h1 className="text-white/50 text-sm">Insights & Monitoring</h1>
-                    <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
+                    <Link href={`/dashboard/${companyId}/analytics`} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
                         Analytics
                     </Link>
                 </div>

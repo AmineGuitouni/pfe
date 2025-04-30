@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth/authOptions';
 import { notFound } from 'next/navigation';
+import ShowDiff from '@/components/dashboard/projects/components/assignement/showDiff';
 
 interface Params {
     locale: string;
@@ -211,7 +212,8 @@ export default async function ProjectPage({ params: { locale, company, project_i
             <div className={`${cardBaseClasses} mb-8`}>
                 <h2 className="text-2xl font-semibold mb-5 text-light_blue">Tasks</h2>
 
-                <div className="task-filters flex flex-wrap gap-2 mb-5">
+                <div className="task-filters flex flex-wrap w-full justify-between items-center gap-2 mb-5">
+                    <div className="flex items-center gap-2">
                     {['All Tasks', 'To Do', 'In Progress', 'Blocked', 'Completed'].map((filterName) => (
                          <Link
                             key={filterName}
@@ -225,6 +227,9 @@ export default async function ProjectPage({ params: { locale, company, project_i
                             {filterName}
                         </Link>
                     ))}
+                    </div>
+
+                    <ShowDiff/>
                 </div>
 
                 <div className="task-list grid gap-4">
@@ -234,6 +239,7 @@ export default async function ProjectPage({ params: { locale, company, project_i
                                 key={task.id}
                                 task={task}
                                 isHighlighted={false}
+                                project_id={project_id}
                             />
                         ))
                     ) : (

@@ -31,12 +31,6 @@ export async function PUT(req: NextRequest, {params : { company_id, project_id }
         }, { status: 400 });
     }
 
-    console.log({ 
-        status, 
-        task_id, 
-        project_id, 
-        company_id 
-    });
 
     // Update task status in database
     const { error } = await client
@@ -52,6 +46,20 @@ export async function PUT(req: NextRequest, {params : { company_id, project_id }
         console.error(error);
         return NextResponse.json({ 
             error: error.message 
+        }, { status: 500 });
+    }
+
+    const { error : historyError } = await client
+        .from("project_task_history")
+        .insert({
+            task_id,
+            task_status: status
+        })
+
+    if (historyError) {
+        console.error(historyError);
+        return NextResponse.json({ 
+            error: historyError.message 
         }, { status: 500 });
     }
 

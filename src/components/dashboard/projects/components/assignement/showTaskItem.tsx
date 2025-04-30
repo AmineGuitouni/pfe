@@ -1,10 +1,14 @@
+"use client";
 import { AiOutlineLink } from 'react-icons/ai';
-import { Chip } from '@heroui/react';
+import { Button, Chip, useDisclosure } from '@heroui/react';
 import { Task, TaskStatusType } from '../../types'; // Import TaskStatusType
+import { FaRegCommentDots } from "react-icons/fa6";
+import CommentModal from '../modals/commentModal';
 
 interface TaskItemProps {
   task: Task;
   isHighlighted: boolean;
+  project_id: string; 
 }
 
 const borderColors = ['#2dd4bf', '#60a5fa', '#facc15', '#f87171', '#a855f7'];
@@ -29,9 +33,11 @@ const getTaskStatusColor = (status: TaskStatusType): string => {
 export default function TaskItem({
   task,
   isHighlighted,
+  project_id
 }: TaskItemProps) {
 
   const statusColorClass = task.task_status ? getTaskStatusColor(task.task_status) : null;
+  const {isOpen ,onOpen, onOpenChange} = useDisclosure();
 
   return (
       <div
@@ -40,6 +46,7 @@ export default function TaskItem({
         }`}
         style={{ borderLeftColor: borderColors[task.difficultyLevel - 1] }}
       >
+        <CommentModal isOpen={isOpen} onOpenChange={onOpenChange} task={task} project_id={project_id} />
         <div className="flex items-center justify-between mb-2"> {/* Added mb-2 for spacing */}
           <h3
             className="text-lg font-semibold"
@@ -64,30 +71,32 @@ export default function TaskItem({
         </div>
         <p className="text-gray-300 mt-2">{task.description}</p>
         {/* Dependencies Section - Kept as is, assuming it might be needed later or data structure changes */}
-        <div className="flex items-center mt-3"> {/* Added mt-3 for spacing */}
-          <AiOutlineLink size={16} style={{ color: 'rgb(107 114 128)', marginRight: '0.5rem' }} />
-          <span className="text-sm text-gray-400">Dependencies:</span>
+        <div className="flex items-center mt-3 justify-between"> {/* Added mt-3 for spacing */}
+          <div className='flex items-center gap-1'>
+            <AiOutlineLink size={16} style={{ color: 'rgb(107 114 128)', marginRight: '0.5rem' }} />
+            <span className="text-sm text-gray-400">Dependencies:</span>
           {task.dependencies.length === 0 ? (
             <span className="text-sm text-gray-400 ml-1">None</span>
           ) : (
-            <div className="flex flex-wrap ml-1"> {/* Added ml-1 */}
+            <div className="flex flex-wrap ml-1 "> 
               {task.dependencies.map((dependency, index) => (
                 <Chip
                   key={index}
                   size="sm"
                   variant="flat"
-                  className="ml-1 mb-1" // Keep margin between chips
+                  className="ml-1 mb-1" 
                   classNames={{
                     base: "bg-dark_blue text-light_blue border-light_blue",
                     content: "text-light_blue",
                   }}
-                  // onClick={() => onDependencyClick(dependency)}
                 >
                   {dependency}
                 </Chip>
               ))}
             </div>
           )}
+          </div>
+          <Button isIconOnly startContent={<FaRegCommentDots size={15} />} onPress={onOpen} className='bg-light_blue text-dark_blue rounded-lg text-sm font-semibold' size='sm'></Button>
         </div>
       </div>
   );
