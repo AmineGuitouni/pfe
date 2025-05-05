@@ -8,12 +8,12 @@ const SLIDE_DURATION = 5000;
 
 const slides = [
   {
-    title: "Who We Are",
-    content: "We are a team of innovators dedicated to transforming the way businesses operate. Our AI-powered platform streamlines workflow, enhances productivity, and adapts to your team's unique needs."
+    title: "AI-Powered Company Management",
+    content: "Overcome operational hurdles with a unified platform designed to centralize resources, automate task management, and streamline workflows using intelligent AI."
   },
   {
-    title: "Our Mission",
-    content: "To revolutionize workspaces by integrating smart automation, intelligent analytics, and seamless collaboration tools empowering teams to achieve more with less effort."
+    title: "Efficiency Meets Intelligence",
+    content: "Leverage AI for automated task suggestions based on skills, gain real-time insights through dynamic dashboards, and manage company resources effortlessly."
   }
 ];
 

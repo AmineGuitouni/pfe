@@ -1,77 +1,125 @@
 "use client";
-
-import { useCallback, useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
 import { DatePicker } from './dateSelector';
+import useAnalytics from '../hooks/useAnalytics';
+import SelectDateFilterType from './selectDateFilterType';
+import MultiLineChart from './MultiLineChart';
+import PieChart from './PieChart';
+import UserSelector from './userSelector';
+import { Skeleton } from "@heroui/react";
+import React from 'react';
 
-export const dummyDataList = [
-  {
-    task_id: 'c8b9f6d0-5c5d-4a7e-8a9a-f3d7d8e2c1c9',
-    updated_at: new Date('2024-03-15T09:30:00'),
-    status: 'In Progress',
-    difficulty_level: 3,
-    worker_id: 'a3b4c5d6-e7f8-4923-a456-7890b1c2d3e4'
-  },
-  {
-    task_id: 'd7e8f9a0-b1c2-4d5e-6f7a-8b9c0d1e2f3',
-    updated_at: new Date('2024-03-14T14:45:00'),
-    status: 'Completed',
-    difficulty_level: 5,
-    worker_id: 'f1e2d3c4-b5a6-4879-8e0f-1a2b3c4d5e6f'
-  },
-  {
-    task_id: 'b2a3c4d5-e6f7-4891-a2b3-4c5d6e7f8a9',
-    updated_at: new Date('2024-03-13T16:20:00'),
-    status: 'To Do',
-    difficulty_level: 2,
-    worker_id: 'a3b4c5d6-e7f8-4923-a456-7890b1c2d3e4'
-  },
-  {
-    task_id: 'e9f8a7b6-c5d4-3e2f-1a0b-9c8d7e6f5a4b',
-    updated_at: new Date('2024-03-11T11:10:00'),
-    status: 'Done',
-    difficulty_level: 4,
-    worker_id: '5e6f7a8b-9c0d-1e2f-3a4b-5c6d7e8f9a0b'
-  },
-  {
-    task_id: '1a2b3c4d-5e6f-7890-a1b2-c3d4e5f6a7b8',
-    updated_at: new Date('2024-03-11T08:00:00'),
-    status: 'In Progress',
-    difficulty_level: 1,
-    worker_id: 'f1e2d3c4-b5a6-4879-8e0f-1a2b3c4d5e6f'
-  }
-];
 export default function MainAnalyticsComponent({ company_id }: { company_id: string }) {
+  const { data, setDay, setMonth, setYear, year, month, day, dateType, setDateType,selectedUserId, setSelectedUserId, loading} = useAnalytics({
+    company_id,
+  })
 
-  const {data : session} = useSession();
-  const [birthDate, setBirthDate] = useState<Date | null>(null); // Start with null or new Date()
-
-  // Callback function to update the date
   const handleDateChange = (newDate : Date) => {
-    setBirthDate(newDate);
-    console.log("Selected Date:", newDate); // Log the selected date object
+    setDay(newDate.getDate());
+    setMonth(newDate.getMonth() + 1);
+    setYear(newDate.getFullYear());
+  };
+
+  const ChartSkeleton = () => (
+    <Skeleton className="w-full h-[400px] rounded-lg animate-pulse bg-modal_bg opacity-50" />
+  );
+  const PieSkeleton = () => (
+     <Skeleton className="w-full h-[440px] rounded-lg animate-pulse bg-modal_bg opacity-50 p-4 border border-light_blue-500/20" />
+  )
+
+  const piesData = data ? data.chartData.data[data.chartData.data.length - 1] : undefined;
+  const mockPieData = piesData ? {
+    "To Do": piesData["To Do"],
+    "In Progress": piesData["In Progress"],
+    Completed: piesData["Completed"],
+    Blocked: piesData["Blocked"],
+  } : undefined
+
+  const taskStatusColors = {
+    "To Do": "#7dd5de",
+    "In Progress": "#D69E2E",
+    Completed: "#38A169",
+    Blocked: "#E53E3E",
+    default: "#8884d8",
+  };
+
+  const mockDifficultyData = piesData ? {
+    "Easy": piesData["Easy"],
+    "Medium": piesData["Medium"],
+    "Hard": piesData["Hard"],
+    "Very Hard": piesData["Very Hard"],
+    "Extreme": piesData["Extreme"],
+  } : undefined
+
+  const taskDifficultyColors = {
+    "Easy": "#2dd4bf",
+    "Medium": "#60a5fa",
+    "Hard": "#facc15",
+    "Very Hard": "#f87171",
+    "Extreme": "#a855f7",
   };
 
 
-  const fetchData =useCallback( async () => {
-    
-    const response = await  fetch(`/api/v1/${session?.user.id}/companies/${company_id}/analytics/list/employee-details?day=1&month=1&year=2025`);
-
-    if(!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    const data = await response.json();
-
-    console.log(data);
-
-  },[company_id, session?.user.id])
-
-  useEffect(() => {
-    fetchData();
-
-  },[fetchData])
-
   return (
-    <div>
-      <DatePicker selectedDate={birthDate} onChange={handleDateChange} pickerType='month-year' />
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap gap-4 items-end">
+        <DatePicker selectedDate={new Date(`${year}-${month}-${day || 1}`)} onChange={handleDateChange} pickerType={dateType} />
+        <SelectDateFilterType day={dateType === "day-month-year"} onChange={(val)=>{
+          setDateType(val ? "day-month-year" : "month-year");
+        }}/>
+        <UserSelector
+          company_id={company_id}
+          selectedUserId={selectedUserId}
+          onUserSelect={setSelectedUserId}
+        />
+      </div>
+
+      <div className="mt-4">
+        {loading ? (
+          <div className="flex flex-col gap-4">
+             <ChartSkeleton />
+             <div className="flex flex-col md:flex-row gap-4 w-full">
+                <PieSkeleton />
+                <PieSkeleton />
+             </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            <div className="w-full bg-modal_bg p-4 rounded-lg border border-light_blue-500/20">
+              <h4 className="text-light_blue text-lg font-semibold mb-4">Task Trends</h4>
+              {data && data.chartData && data.chartData.data && data.chartData.data.length > 0 ? (
+                <MultiLineChart chartData={data.chartData.data} dateType={dateType} />
+              ) : (
+                <div className="text-center text-gray-500 py-10 h-[400px] flex items-center justify-center">
+                  No data available for Line Chart.
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-4 w-full">
+                <div className="w-full md:w-1/2 bg-modal_bg p-4 rounded-lg border border-light_blue-500/20">
+                  <h4 className="text-light_blue text-lg font-semibold mb-4">Task Status Distribution</h4>
+                  {mockPieData && Object.values(mockPieData).some(value => value > 0) ? (
+                    <PieChart data={mockPieData} colorMap={taskStatusColors} />
+                  ) : (
+                    <div className="text-center text-gray-500 py-10 h-[440px] flex items-center justify-center">
+                      No data available for Task Status.
+                    </div>
+                  )}
+                </div>
+                <div className="w-full md:w-1/2 bg-modal_bg p-4 rounded-lg border border-light_blue-500/20">
+                   <h4 className="text-light_blue text-lg font-semibold mb-4">Task Difficulty Distribution</h4>
+                   {mockDifficultyData && Object.values(mockDifficultyData).some(value => value > 0) ? (
+                     <PieChart data={mockDifficultyData} colorMap={taskDifficultyColors} />
+                    ) : (
+                      <div className="text-center text-gray-500 py-10 h-[440px] flex items-center justify-center">
+                        No data available for Task Difficulty.
+                      </div>
+                    )}
+                </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

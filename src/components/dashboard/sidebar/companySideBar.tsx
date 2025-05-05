@@ -62,8 +62,8 @@ export default function CompanySideBar({companyId,session}:{companyId: string,se
                     <Link href={`/dashboard/${companyId}/files`} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
                         Files
                     </Link>
-                    <Link href={"#"} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
-                        CLI
+                    <Link href={`/dashboard/${companyId}/command-center`} className="text-white text-medium hover:text-light_blue-500 transition-all ease-linear">
+                        Command Center
                     </Link>
                 </div>
                 <div className="w-full border-b border-b-white/20 flex flex-col justify-start gap-4 py-5 px-5">
