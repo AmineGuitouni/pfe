@@ -7,6 +7,7 @@ import { supabase } from "@/lib/database/supabase";
 import UpdateSession from "./updateSession";
 import ErrorAction from "./content/errorAction";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 function getErrorMessage(errorType: string | null): string {
   switch (errorType) {
@@ -36,7 +37,12 @@ export default async function VerificationContent({ token }: { token: string | n
       }
   
       const session = await getServerSession(authOptions);
-      if (session?.user?.email !== verif.email) {
+      
+      if(!session){
+        redirect(`/login?role=admin&callbackUrl=${encodeURIComponent(`/verify?token=${token}`)}`);
+      }
+
+      if (session.user?.email !== verif.email) {
         throw new Error("EMAIL_MISMATCH");
       }
 
@@ -49,9 +55,16 @@ export default async function VerificationContent({ token }: { token: string | n
       }
   
     } catch (e: any) {
-      console.error(e);
+      // Log the caught error to see if it's NEXT_REDIRECT
+      console.error("Caught error:", e);
+      // Check if the caught error is the specific redirect error
+      if (e.digest?.startsWith('NEXT_REDIRECT')) {
+        // Re-throw the redirect error so Next.js can handle it
+        throw e;
+      }
       verificationStatus = "error";
-      errorType = e.message;
+      // Use e.message for custom errors, or a default
+      errorType = e instanceof Error ? e.message : String(e);
     }
   
     const states = {

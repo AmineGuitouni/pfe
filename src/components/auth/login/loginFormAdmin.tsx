@@ -3,7 +3,7 @@ import { Button, Input, Link } from "@heroui/react";
 import React, { useState } from "react";
 import NextLink from "next/link";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function LoginFormAdmin() {
@@ -15,7 +15,7 @@ export default function LoginFormAdmin() {
     const [isPasswordVisible, setPasswordVisible] = useState(false);
 
     const router = useRouter();
-
+    const searchParams = useSearchParams();
 
     const submitHandler = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -23,12 +23,14 @@ export default function LoginFormAdmin() {
         setError(false);
         setLoading(true);
 
+        const callbackUrl = searchParams.get("callbackUrl") ? decodeURIComponent(searchParams.get("callbackUrl")!) : "/dashboard/account";
+
         signIn("credentials", { email, password, redirect: false })
             .then((callback) => {
                 if (callback?.error) {
                     setError(true); 
                 } else {
-                    router.push("/dashboard/account");
+                    router.push(callbackUrl);
                     router.refresh();
                 }
             })
