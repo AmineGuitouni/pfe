@@ -80,7 +80,7 @@ export default function RegisterForm() {
         }
 
         // Country validation
-        if (!formData.country.trim()) {
+        if (!formData.country.trim() || formData.country.length < 2 || formData.country.length > 50) {
             newErrors.country = "Country is required";
         }
 
