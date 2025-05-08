@@ -19,11 +19,11 @@ export default function Section1() {
           </div>
         </div>
 
-        <p className="text-white/70 sm:text-lg text-medium w-[70%] sm:w-[40%] text-center">Experience the future of work with our revolutionary AI-driven platform that adapts to your team`s unique dynamics.</p>
+        <p className="text-white/70 sm:text-lg text-medium w-[70%] sm:w-[50%] text-center">Experience the future of company management with our revolutionary AI-driven platform. Streamline operations, enhance HR processes, centralize resources, and adapt to your team&amp;apos;s unique dynamics.</p>
 
         <div className="flex gap-5 items-center mb-5">
-          <Button size="lg" as={Link} href="/login?role=admin" className="bg-light_blue-500 text-dark_blue py-4 px-8 rounded-xl text-medium sm:text-xl font-semibold">Get Started</Button>
-          <Button size="lg" variant="bordered" className="border-light_blue-500/70 text-light_blue-500 py-4 px-8 rounded-xl text-medium sm:text-xl font-semibold">See more</Button>
+          <Button as={Link} href="/login?role=admin" className="bg-light_blue-500 text-dark_blue py-4 px-8 rounded-xl text-medium sm:text-xl font-semibold">Get Started</Button>
+          <a href="#features" className="border-light_blue-500/70 text-light_blue-500 py-4 px-8 rounded-xl text-medium sm:text-xl font-semibold border-1 hover:bg-light_blue-500/10 transition-colors">See Features</a>
         </div>
 
         <HomeCards/>

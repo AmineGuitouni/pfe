@@ -37,8 +37,6 @@ export default async function apiMiddleware({path, token}:ApiMiddlewareOptions) 
         return passResponse;
     }
     
-    console.log({pattern, params, rule, path})
-    
     if(!params){
         return NextResponse.json({error: "Bad Request"}, {status: 400});
     }

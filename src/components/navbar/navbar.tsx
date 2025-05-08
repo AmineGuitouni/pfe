@@ -6,7 +6,6 @@ import { Session } from "next-auth";
 import DropDownMenu from "./content/dropDownMenu";
 
 export const menuItems = [
-    {name : "About" , href : "/about"},
     {name : "Pricing" , href : "/pricing"},
     {name : "Contact us" , href : "/contact"},
   ];

@@ -1,33 +1,43 @@
 import { useSession } from "next-auth/react";
 import { useState, useEffect, useCallback } from "react";
 
-// Define the expected structure of the data items
-interface AnalyticsData {
-    // Define the properties based on the API response structure
-    // Example: task_id: string; updated_at: string; status: string;
-    [key: string]: any; // Use a more specific type if possible
+// Define the structure for status counts
+type StatusCounts = Record<"To Do" | "In Progress" | "Completed" | "Blocked" | 'Easy' | 'Medium' | 'Hard' | 'Very Hard' | 'Extreme', number>;
+
+// Define the structure for data points with hour or day label
+type HourlyDataPoint = StatusCounts & { hour: string };
+type DailyDataPoint = StatusCounts & { day: number };
+
+// Union type for the chart data points
+type ChartDataPoint = HourlyDataPoint | DailyDataPoint;
+
+// Updated AnalyticsData type
+type AnalyticsData = {
+    chartData: {
+        type: "day" | "month"; // Corresponds to hourly ('day') or daily ('month') grouping
+        data: ChartDataPoint[];
+    }
 }
 
 export default function useAnalytics({
     company_id,
-    worker_ids // Optional worker_ids parameter (array of strings)
 }: {
     company_id: string;
-    worker_ids?: string[];
 }) {
-    const [data, setData] = useState<AnalyticsData[]>([]);
+    const [data, setData] = useState<AnalyticsData>();
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
-    // Internal state for month, year, and day
-    const [month, setMonth] = useState<number>(new Date().getMonth() + 1); // Current month (1-12)
-    const [year, setYear] = useState<number>(new Date().getFullYear()); // Current year
-    const [day, setDay] = useState<number | null>(null); // Day state, null means all days
+    const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
+    const [year, setYear] = useState<number>(new Date().getFullYear());
+    const [day, setDay] = useState<number | null>(null);
+
+    const [dateType, setDateType] = useState<'month-year' | 'day-month-year'>('day-month-year');
 
     const { data: session } = useSession();
     const user_id: string | undefined = session?.user.id;
 
-    // Memoize fetchData
     const fetchData = useCallback(async () => {
         if (!user_id || !company_id) {
             setLoading(false);
@@ -43,27 +53,35 @@ export default function useAnalytics({
                 window.location.origin
             );
 
-            // Add required query parameters from state
             apiUrl.searchParams.append('month', String(month));
             apiUrl.searchParams.append('year', String(year));
+            apiUrl.searchParams.append('day', dateType === 'day-month-year' ? String(day) : "null");
+            apiUrl.searchParams.append('worker_id', JSON.stringify([selectedUserId]));
 
-            // Add optional query parameters from state
-            if (day !== null) { // Check if day is set
+            if (day !== null) {
                 apiUrl.searchParams.append('day', String(day));
-            }
-            if (worker_ids && worker_ids.length > 0) {
-                apiUrl.searchParams.append('worker_id', JSON.stringify(worker_ids));
             }
 
             const response = await fetch(apiUrl.toString());
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                try{
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+                catch{
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
             }
 
             const result = await response.json();
-            setData(result.data || []);
+            console.log(result);
+            setData({
+                chartData: {
+                    type: dateType === 'day-month-year' ? 'day' : 'month',
+                    data: result.data.chartData
+                }
+            });
 
         } catch (err: any) {
             console.error("Failed to fetch analytics data:", err);
@@ -71,12 +89,11 @@ export default function useAnalytics({
         } finally {
             setLoading(false);
         }
-    }, [company_id, user_id, month, year, day, worker_ids]); // Dependencies include all states
+    }, [company_id, user_id, month, year, day, dateType, selectedUserId]);
 
     useEffect(() => {
         fetchData();
     }, [fetchData]);
 
-    // Return state and setters
-    return { data, loading, error, month, year, day, setMonth, setYear, setDay, refetch: fetchData };
+    return { data, loading, error, month, year, day, setMonth, setYear, setDay, refetch: fetchData, dateType, setDateType, setSelectedUserId, selectedUserId };
 }

@@ -1,5 +1,6 @@
 import Section1 from "@/components/homePage/section1";
 import Section2 from "@/components/homePage/section2";
+import WhoIsItFor from "@/components/homePage/whoIsItFor"; // Import the new component
 
 export default async function Home() {
 
@@ -8,6 +9,7 @@ export default async function Home() {
       <div className="w-[800px] h-[800px]  fixed -translate-y-[100px] blur-3xl bg-light_blue-500/10 rounded-full"></div>
       <Section1/>
       <Section2/>
+      <WhoIsItFor/> {/* Add the new component */}
     </div>
   );
 }

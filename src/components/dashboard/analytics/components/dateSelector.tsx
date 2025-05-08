@@ -144,11 +144,17 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
 
   return (
-    <div className="relative inline-block text-left w-64" ref={pickerRef}>
+    // Changed from inline-block to block for label layout
+    <div className="relative block text-left w-64" ref={pickerRef}>
+      {/* Label */}
+      <label htmlFor="date-picker-button" className="block text-sm font-medium text-light_blue mb-1">
+        Select Date
+      </label>
       {/* Display Area */}
       <div>
         <button
           type="button"
+          id="date-picker-button" // Added ID for label association
           className="inline-flex justify-between w-full rounded-md border border-gray-600 shadow-sm px-4 py-2 bg-gray-800 text-sm font-medium text-gray-200 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500"
           onClick={togglePicker}
           aria-haspopup="true"
