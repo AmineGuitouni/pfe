@@ -74,8 +74,8 @@ export default function AddUserForm({ token }: { token: string | null }) {
         }
 
         // Country validation
-        if (!formData.country.trim()) {
-            newErrors.country = "Country is required";
+        if (!formData.country.trim() || formData.country.length < 2 || formData.country.length > 50) {
+            newErrors.country = "Country must be between 2 and 50 characters";
         }
 
 

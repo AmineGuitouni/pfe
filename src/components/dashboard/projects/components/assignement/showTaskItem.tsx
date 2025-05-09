@@ -1,14 +1,12 @@
 "use client";
 import { AiOutlineLink } from 'react-icons/ai';
-import { Button, Chip, useDisclosure } from '@heroui/react';
+import { Chip } from '@heroui/react';
 import { Task, TaskStatusType } from '../../types'; // Import TaskStatusType
-import { FaRegCommentDots } from "react-icons/fa6";
-import CommentModal from '../modals/commentModal';
+
 
 interface TaskItemProps {
   task: Task;
   isHighlighted: boolean;
-  project_id: string; 
 }
 
 const borderColors = ['#2dd4bf', '#60a5fa', '#facc15', '#f87171', '#a855f7'];
@@ -33,11 +31,10 @@ const getTaskStatusColor = (status: TaskStatusType): string => {
 export default function TaskItem({
   task,
   isHighlighted,
-  project_id
+  // project_id
 }: TaskItemProps) {
 
   const statusColorClass = task.task_status ? getTaskStatusColor(task.task_status) : null;
-  const {isOpen ,onOpen, onOpenChange} = useDisclosure();
 
   return (
       <div
@@ -46,8 +43,7 @@ export default function TaskItem({
         }`}
         style={{ borderLeftColor: borderColors[task.difficultyLevel - 1] }}
       >
-        <CommentModal isOpen={isOpen} onOpenChange={onOpenChange} task={task} project_id={project_id} />
-        <div className="flex items-center justify-between mb-2"> {/* Added mb-2 for spacing */}
+        <div className="flex items-center justify-between mb-2">
           <h3
             className="text-lg font-semibold"
             style={{ color: borderColors[task.difficultyLevel - 1] }}
@@ -96,7 +92,6 @@ export default function TaskItem({
             </div>
           )}
           </div>
-          <Button isIconOnly startContent={<FaRegCommentDots size={15} />} onPress={onOpen} className='bg-light_blue text-dark_blue rounded-lg text-sm font-semibold' size='sm'></Button>
         </div>
       </div>
   );

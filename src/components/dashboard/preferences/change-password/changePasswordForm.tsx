@@ -101,17 +101,17 @@ export default function ChangePasswordForm({ token }: { token: string | null }) 
 
   const handlePasswordChange = (value: string) => {
     setPassword(value);
-    setPasswordError(validatePassword(value));
+    setPasswordError(null);
     // Update confirm password validation if it's not empty
     if (confirmPass) {
-      setConfirmError(validateConfirmPassword(confirmPass));
+      setConfirmError(null);
     }
     if (error) setError(null);
   };
 
   const handleConfirmPasswordChange = (value: string) => {
     setConfirmPass(value);
-    setConfirmError(validateConfirmPassword(value));
+    setConfirmError(null);
     if (error) setError(null);
   };
 

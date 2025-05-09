@@ -46,6 +46,7 @@ export async function GET(req: Request, {params: {company_id,user_id}}: {params:
             .from("users")
             .select("email")
             .eq("email", email)
+            .eq("company_id", company_id)
             .single();
 
         if (userError && userError.code !== 'PGRST116') {

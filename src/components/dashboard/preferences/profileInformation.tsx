@@ -93,7 +93,7 @@ export default function ProfileInformation({className}:{className?:string}) {
         }
 
         const phoneRegex = /^\+?[1-9]\d{1,14}$/;
-        if (!phoneRegex.test(user.phone_number.trim())) {
+        if (!phoneRegex.test(user.phone_number.trim()) || user.phone_number.trim().length < 10) {
              setError({filed : "phone_number", message : "Invalid phone number format (e.g., +1234567890)"});
              return;
         }
