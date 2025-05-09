@@ -239,7 +239,7 @@ export default async function ProjectPage({ params: { locale, company, project_i
                                 key={task.id}
                                 task={task}
                                 isHighlighted={false}
-                                project_id={project_id}
+                                // project_id={project_id}
                             />
                         ))
                     ) : (

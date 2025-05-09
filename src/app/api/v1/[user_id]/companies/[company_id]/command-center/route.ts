@@ -1,2 +1,5 @@
-// Placeholder file for Command Center API route
-// This file will handle communication with the AI model and potentially execute commands.
+import { NextResponse } from "next/server";
+
+export async function POST() {
+    return NextResponse.json({});
+}
