@@ -4,8 +4,9 @@ import LoginButton from "./content/loginButton";
 import Humburger from "./content/humburger/humburger";
 import { Session } from "next-auth";
 import DropDownMenu from "./content/dropDownMenu";
-
+import Image from "next/image";
 export const menuItems = [
+    {name : "Home" , href : "/"},
     {name : "Pricing" , href : "/pricing"},
     {name : "Contact us" , href : "/contact"},
   ];
@@ -15,8 +16,8 @@ export default async function Nav({session}:{session : Session | null}){
     return (
         <nav  className="bg-white/10 border-white/20 border-1 z-50 sticky top-10 w-[calc(100%-20px)] mx-auto sm:w-[calc(100%-40px)] lg:w-[calc(100%-200px)] max-w-[1920px]  rounded-full h-[60px] sm:mx-[20px] lg:mx-[100px] backdrop-blur flex justify-center items-center mb-20 sm:mb-28 ">
             <div className="relative  flex h-full w-[calc(100%-40px)] justify-between items-center sm:p-[20px] py-5 ">
-            <Link href="/" className="mb-1" >
-                <h1 className="text-xl sm:text-2xl font-semibold text-white">Digi Growing</h1>
+            <Link href="/" className="" >
+                <Image src="/digiGrowingLogo.png" alt="logo" width={100} height={100} className="w-[60px] h-[60px] "/>
             </Link>
 
             <div className="relative gap-6 justify-center items-center hidden md:flex ">

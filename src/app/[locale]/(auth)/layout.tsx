@@ -1,6 +1,7 @@
 import Footer from "@/components/footer";
 import Background from "@/components/homePage/background";
 import Link from "next/link";
+import Image from "next/image";
 
 export default async function RootLayout({
   children,
@@ -15,7 +16,9 @@ export default async function RootLayout({
             <div className="w-full h-full bg-dark_grey flex justify-center items-center">
                 <div className="-z-50 w-[40vw] h-[40vw] max-w-[800px] max-h-[800px] fixed left-1/2 -translate-x-1/2 blur-3xl bg-light_blue-500/10 rounded-full"></div>
                 <div className="w-full h-full flex flex-col gap-8 overflow-x-hidden">
-                    <Link href={"/"} className="text-2xl text-white font-semibold z-10 w-full text-center sm:text-start sm:ml-14 sm:mt-14 mt-8">Digi Growing</Link>
+                    <Link href={"/"} className="text-2xl text-white font-semibold z-10 w-full text-center sm:text-start sm:ml-8 mt-8">
+                      <Image src="/digiGrowingLogo.png" alt="logo" width={100} height={100} className="w-[90px] h-[90px] "/>
+                    </Link>
                     <div className="flex-grow w-full">
                         {children}
                     </div>

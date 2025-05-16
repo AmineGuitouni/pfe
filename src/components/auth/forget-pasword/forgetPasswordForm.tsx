@@ -43,12 +43,12 @@ export default function ForgetPasswordForm() {
 
     return (
         <form onSubmit={submitHandler} className="w-[500px] max-h-[570px] border-1 p-8 px-4 sm:px-8 rounded-lg shadow-md bg-white/10 border-white/20 relative flex flex-col justify-center items-start gap-8 mt-20">
-            <p className="text-white text-center w-full text-2xl">Enter your email or phone number</p>
+            <p className="text-white text-center w-full text-2xl">Enter your email</p>
             <Input
                 isRequired
                 className="w-full"
                 size="sm"
-                label="Email or phone number"
+                label="Email"
                 type="email"
                 value={email}
                 onValueChange={handleEmailChange} 
@@ -66,7 +66,7 @@ export default function ForgetPasswordForm() {
                 isDisabled={loading} 
                 className="bg-light_blue-500 text-dark_blue text-medium font-semibold w-full flex-shrink-0"
                 >
-                    Submit
+                    Send email to reset password
                 </Button> :
                 
                 <Alert description={"Please check your email"} title={"Success"} color="success" />
