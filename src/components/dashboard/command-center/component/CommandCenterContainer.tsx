@@ -31,12 +31,12 @@ const CommandCenterContainer: React.FC = () => {
 
   const handleSendMessage = (text: string) => {
     if (text.trim()) {
-      addMessageToActiveSession('user', text.trim()); // Use context function
+      addMessageToActiveSession(text.trim());
     }
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-150px)] max-h-[800px] w-full max-w-4xl mx-auto bg-dark_blue border border-light_blue-500/20 rounded-lg shadow-xl overflow-hidden">
+    <div className="flex flex-col h-full max-h-[calc(100vh-50px)] w-full mx-auto bg-dark_blue border border-light_blue-500/20 rounded-lg shadow-xl overflow-hidden">
       {/* Header with Mode Toggle Button */}
       <div className="p-4 border-b border-light_blue-500/20 flex justify-between items-center">
         <h2 className="text-lg font-semibold text-light_blue">Command Center</h2>

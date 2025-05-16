@@ -24,7 +24,7 @@ const HistorySidebar: React.FC = () => {
                     animate="open"
                     exit="closed"
                     variants={sidebarVariants}
-                    className="h-[calc(100vh-150px)] max-h-[800px] bg-modal_bg border-l border-light_blue-500/20 flex flex-col flex-shrink-0 overflow-hidden" // Added overflow-hidden, changed border-r to border-l
+                    className="h-full max-h-[calc(100vh-50px)] bg-modal_bg border-l border-light_blue-500/20 flex flex-col flex-shrink-0 overflow-hidden" // Added overflow-hidden, changed border-r to border-l
                 >
                     {/* Header with New Chat Button */}
                     <div className="p-4 border-b border-light_blue-500/20 flex justify-between items-center flex-shrink-0">
