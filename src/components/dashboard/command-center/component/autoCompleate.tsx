@@ -1,9 +1,10 @@
 // src/app/page.tsx (or any other component)
 "use client";
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 // Adjust path if your AutoCompleteTextArea.tsx is in a different location, e.g., '../components/AutoCompleteTextArea'
 import AutoCompleteTextArea, { Command } from './AutoCompleteTextArea'; 
+import { usePathname } from 'next/navigation';
 
 const predefinedCommands: Command[] = [
   {
@@ -37,8 +38,19 @@ const predefinedCommands: Command[] = [
 
 export default function CommandInput() {
   const [textValue, setTextValue] = useState('');
-  const [autocompleteEnabled, setAutocompleteEnabled] = useState(true);
-  const [submissionResult, setSubmissionResult] = useState<string | null>(null);
+  const pathName = usePathname()
+  const mode: "cli" | "chat" | null = useMemo(()=>{
+    const isAgent = pathName.includes('chat')
+    if(isAgent) return 'chat';
+    const isCli = pathName.includes('cli')
+    if(isCli) return 'cli';
+    return null
+  },[pathName])
+  const autocompleteEnabled = useMemo(()=>{
+    if(mode === 'cli') return true;
+    if(mode === 'chat') return false;
+    return textValue.startsWith("@");
+  },[textValue, mode])
 
   const parseCommandString = (
     value: string,
@@ -115,28 +127,13 @@ export default function CommandInput() {
 
     if ('error' in result) {
       console.error("Validation Error:", result.error);
-      setSubmissionResult(`Error: ${result.error}`);
     } else {
       console.log("Parsed Command:", result);
-      setSubmissionResult(`Success: ${JSON.stringify(result, null, 2)}`);
     }
   };
 
   return (
-    <div className="min-h-screen bg-dark_blue p-8 flex flex-col items-center">
-      <h1 className="text-3xl text-light_blue mb-6">Command Input</h1>
-      
-      <div className="w-full max-w-2xl mb-4">
-        <label className="flex items-center space-x-2 text-light_blue mb-2">
-          <input
-            type="checkbox"
-            checked={autocompleteEnabled}
-            onChange={(e) => setAutocompleteEnabled(e.target.checked)}
-            className="form-checkbox h-5 w-5 text-light_blue-500 bg-dark_blue border-light_blue rounded focus:ring-light_blue-500"
-          />
-          <span>Enable Autocomplete</span>
-        </label>
-      </div>
+    <div className="p-8 flex flex-col items-center">
 
       <div className="w-full max-w-2xl">
         <AutoCompleteTextArea
@@ -146,34 +143,14 @@ export default function CommandInput() {
           enableAutocomplete={autocompleteEnabled}
           placeholder="Type @ for commands..."
           rows={8}
-          // The className prop here might override/conflict with internal styles of AutoCompleteTextArea.
-          // It's generally better to rely on the component's own styling or pass specific style props if needed.
-          // For this example, it's kept as provided in the original snippet.
           className="w-full p-3 bg-dark_blue text-white border border-light_blue-500/20 rounded-md focus:ring-2 focus:ring-light_blue-500 focus:border-light_blue-500 outline-none resize-none"
         />
         <button
           onClick={handleSubmit}
-          className="mt-4 w-full bg-light_blue-600 hover:bg-light_blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-          style={{ backgroundColor: '#2563eb', borderColor: '#2563eb' }} // Example Tailwind blue-600
+          className="mt-4 w-full bg-light_blue hover:bg-light_blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         >
           Submit Command
         </button>
-      </div>
-
-      {submissionResult && (
-        <div className="mt-6 p-4 bg-modal_bg rounded-md w-full max-w-2xl">
-          <h2 className="text-light_blue mb-2">Submission Result:</h2>
-          <pre className="text-white whitespace-pre-wrap break-all text-sm">
-            {submissionResult}
-          </pre>
-        </div>
-      )}
-
-      <div className="mt-6 p-4 bg-modal_bg rounded-md w-full max-w-2xl">
-        <h2 className="text-light_blue mb-2">Current Value (for debugging):</h2>
-        <pre className="text-white whitespace-pre-wrap break-all text-sm">
-          {textValue || "Empty"}
-        </pre>
       </div>
     </div>
   );
