@@ -26,6 +26,7 @@ export default function EditDataBaseModal({ database, onOpenChange, isOpen, edit
     supabaseKey: database.connection_config.SUPABASE_KEY,
     jwtSecret: database.connection_config.SUPABASE_JWT_SECRET,
     supabaseAnonKey: database.connection_config.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    connectionString: database.connection_config.CONNECTION_STRING,
   });
   const [error, setError] = useState("");
   const { data: session } = useSession();
@@ -59,6 +60,7 @@ export default function EditDataBaseModal({ database, onOpenChange, isOpen, edit
             SUPABASE_KEY: formData.supabaseKey,
             NEXT_PUBLIC_SUPABASE_ANON_KEY: formData.supabaseAnonKey,
             SUPABASE_JWT_SECRET: formData.jwtSecret,
+            CNMNECTION_STRING: formData.connectionString,
           },
         }),
       });
@@ -80,6 +82,7 @@ export default function EditDataBaseModal({ database, onOpenChange, isOpen, edit
           SUPABASE_KEY: formData.supabaseKey,
           NEXT_PUBLIC_SUPABASE_ANON_KEY: formData.supabaseAnonKey,
           SUPABASE_JWT_SECRET: formData.jwtSecret,
+          CONNECTION_STRING: formData.connectionString,
         },
       });
 
@@ -90,6 +93,7 @@ export default function EditDataBaseModal({ database, onOpenChange, isOpen, edit
         supabaseAnonKey: "",
         supabaseKey: "",
         supabaseUrl: "",
+        connectionString: "",
       });
     } catch (err) {
       console.log(err)
@@ -123,6 +127,18 @@ export default function EditDataBaseModal({ database, onOpenChange, isOpen, edit
                   label="Database Name"
                   value={formData.name}
                   onValueChange={(value) => setFormData({...formData, name: value})}
+                  isRequired
+                  classNames={{
+                    label: "text-white/60",
+                    input: "text-white bg-[#081e25]",
+                    inputWrapper: "bg-[#081e25] border-white/10 hover:border-[#7dd5de] group-focus:border-[#7dd5de]"
+                  }}
+                />
+
+                <Input
+                  label="Connection String"
+                  value={formData.connectionString}
+                  onValueChange={(value) => setFormData({...formData, connectionString: value})}
                   isRequired
                   classNames={{
                     label: "text-white/60",
