@@ -191,7 +191,7 @@ export async function dumpDatabaseSchemaPureNode(connectionString: string): Prom
     // 5. Row Level Security (RLS) for 'public' schema
     console.log(`Fetching RLS configurations for schema ${schemaName}...`);
     let rlsDdlForPublicSchema = '';
-    if (tablesRes.rows.length > 0) { // Iterate over tables fetched for 'public' schema
+    if (tablesRes.rows.length > 0) { 
         for (const tableRow of tablesRes.rows) {
             const tableName = tableRow.table_name;
             let tableRlsStatements = '';
@@ -251,11 +251,11 @@ export async function dumpDatabaseSchemaPureNode(connectionString: string): Prom
         mainDdlStatements += rlsDdlForPublicSchema;
     }
     
-    // 6. Row Level Security (RLS) for 'storage' schema tables (buckets, objects)
+    // 6. Row Level Security (RLS) definitions for 'storage' schema tables (buckets, objects) - COMMENTED OUT
     console.log(`Fetching RLS configurations for 'storage' schema tables (buckets, objects)...`);
     let storageRlsDdl = '';
     const storageSchemaName = 'storage';
-    const storageTablesToProcess = ['buckets', 'objects']; // Tables in 'storage' schema to check for RLS
+    const storageTablesToProcess = ['buckets', 'objects']; 
 
     for (const storageTableName of storageTablesToProcess) {
         const tableExistsRes = await client.query(
@@ -267,61 +267,52 @@ export async function dumpDatabaseSchemaPureNode(connectionString: string): Prom
             continue;
         }
 
-        let tableRlsStatements = '';
-        const rlsStatusRes = await client.query(`
-            SELECT c.relrowsecurity
-            FROM pg_catalog.pg_class c
+        let tablePolicyStatements = '';
+        const policiesRes = await client.query(`
+            SELECT
+                p.polname,
+                p.polcmd,
+                p.polpermissive,
+                pg_catalog.pg_get_expr(p.polqual, p.polrelid, true) AS using_expression,
+                pg_catalog.pg_get_expr(p.polwithcheck, p.polrelid, true) AS check_expression,
+                CASE
+                    WHEN p.polroles = '{0}' THEN ARRAY['PUBLIC']::text[]
+                    ELSE (
+                        SELECT array_agg(r.rolname::text ORDER BY r.rolname)
+                        FROM pg_catalog.pg_roles r
+                        WHERE r.oid = ANY(p.polroles)
+                    )
+                END AS roles
+            FROM pg_catalog.pg_policy p
+            JOIN pg_catalog.pg_class c ON c.oid = p.polrelid
             JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
-            WHERE n.nspname = $1 AND c.relname = $2 AND c.relkind = 'r';
+            WHERE n.nspname = $1 AND c.relname = $2
+            ORDER BY p.polname;
         `, [storageSchemaName, storageTableName]);
 
-        if (rlsStatusRes.rows.length > 0 && rlsStatusRes.rows[0].relrowsecurity) {
-            tableRlsStatements += `\n-- RLS for table "${storageSchemaName}"."${storageTableName}"\n`;
-            tableRlsStatements += `ALTER TABLE "${storageSchemaName}"."${storageTableName}" ENABLE ROW LEVEL SECURITY;\n\n`;
-
-            const policiesRes = await client.query(`
-                SELECT
-                    p.polname,
-                    p.polcmd,
-                    p.polpermissive,
-                    pg_catalog.pg_get_expr(p.polqual, p.polrelid, true) AS using_expression,
-                    pg_catalog.pg_get_expr(p.polwithcheck, p.polrelid, true) AS check_expression,
-                    CASE
-                        WHEN p.polroles = '{0}' THEN ARRAY['PUBLIC']::text[]
-                        ELSE (
-                            SELECT array_agg(r.rolname::text ORDER BY r.rolname)
-                            FROM pg_catalog.pg_roles r
-                            WHERE r.oid = ANY(p.polroles)
-                        )
-                    END AS roles
-                FROM pg_catalog.pg_policy p
-                JOIN pg_catalog.pg_class c ON c.oid = p.polrelid
-                JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
-                WHERE n.nspname = $1 AND c.relname = $2
-                ORDER BY p.polname;
-            `, [storageSchemaName, storageTableName]);
-
-            for (const policy of policiesRes.rows) {
-                let policyDef = `CREATE POLICY "${policy.polname.replace(/"/g, '""')}" ON "${storageSchemaName}"."${storageTableName}"`;
-                policyDef += ` AS ${policy.polpermissive ? 'PERMISSIVE' : 'RESTRICTIVE'}`;
-                const commandMap: { [key: string]: string } = { 'r': 'SELECT', 'a': 'INSERT', 'w': 'UPDATE', 'd': 'DELETE', '*': 'ALL' };
-                policyDef += ` FOR ${commandMap[policy.polcmd] || 'ALL'}`;
-                if (policy.roles && policy.roles.length > 0) {
-                    policyDef += ` TO ${policy.roles.map((r: string) => r === 'PUBLIC' ? 'PUBLIC' : `"${r.replace(/"/g, '""')}"`).join(', ')}`;
-                }
-                if (policy.using_expression) policyDef += `\n    USING (${policy.using_expression})`;
-                if (policy.check_expression) policyDef += `\n    WITH CHECK (${policy.check_expression})`;
-                policyDef += ';\n\n';
-                tableRlsStatements += policyDef;
-            }
+        if (policiesRes.rows.length > 0) {
+            tablePolicyStatements += `\n-- Policies for table "${storageSchemaName}"."${storageTableName}"\n`;
+            tablePolicyStatements += `-- IMPORTANT: These policies for the 'storage' schema are COMMENTED OUT.\n`;
+            tablePolicyStatements += `-- Re-create these policies using the Supabase Dashboard or client libraries.\n\n`;
         }
-        if (tableRlsStatements) storageRlsDdl += tableRlsStatements;
+
+        for (const policy of policiesRes.rows) {
+            let policyDef = `CREATE POLICY "${policy.polname.replace(/"/g, '""')}" ON "${storageSchemaName}"."${storageTableName}"`;
+            policyDef += ` AS ${policy.polpermissive ? 'PERMISSIVE' : 'RESTRICTIVE'}`;
+            const commandMap: { [key: string]: string } = { 'r': 'SELECT', 'a': 'INSERT', 'w': 'UPDATE', 'd': 'DELETE', '*': 'ALL' };
+            policyDef += ` FOR ${commandMap[policy.polcmd] || 'ALL'}`;
+            if (policy.roles && policy.roles.length > 0) {
+                policyDef += ` TO ${policy.roles.map((r: string) => r === 'PUBLIC' ? 'PUBLIC' : `"${r.replace(/"/g, '""')}"`).join(', ')}`;
+            }
+            if (policy.using_expression) policyDef += `\n    USING (${policy.using_expression})`;
+            if (policy.check_expression) policyDef += `\n    WITH CHECK (${policy.check_expression})`;
+            policyDef += ';\n'; 
+            tablePolicyStatements += policyDef.split('\n').map(line => `-- ${line}`).join('\n') + '\n\n';
+        }
+        if (tablePolicyStatements) storageRlsDdl += tablePolicyStatements;
     }
     if (storageRlsDdl) {
-        mainDdlStatements += `\n--\n-- Row Level Security for 'storage' schema tables (buckets, objects)\n--\n`;
-        mainDdlStatements += `-- IMPORTANT: Buckets in the 'storage' schema must be created in the target database\n`;
-        mainDdlStatements += `-- (e.g., via Supabase Studio or client libraries) BEFORE applying these RLS policies.\n`;
-        mainDdlStatements += `-- This script DOES NOT create the buckets themselves or migrate actual file objects.\n\n`;
+        mainDdlStatements += `\n--\n-- Row Level Security Policy Definitions for 'storage' schema tables (buckets, objects)\n--\n`;
         mainDdlStatements += storageRlsDdl;
     }
 
@@ -334,7 +325,7 @@ export async function dumpDatabaseSchemaPureNode(connectionString: string): Prom
         JOIN pg_catalog.pg_attribute a ON a.attrelid = d.refobjid AND a.attnum = d.refobjsubid
         WHERE d.classid = 'pg_class'::regclass AND d.refclassid = 'pg_class'::regclass AND d.deptype = 'a'
           AND seq_c.relkind = 'S' AND seq_ns.nspname = $1;
-    `, [schemaName]); // Only for public schema sequences
+    `, [schemaName]); 
     if (ownedByRes.rows.length > 0) {
       mainDdlStatements += `\n--\n-- Sequence OWNED BY clauses for schema ${schemaName}\n--\n`;
       for (const row of ownedByRes.rows) {
@@ -345,7 +336,7 @@ export async function dumpDatabaseSchemaPureNode(connectionString: string): Prom
     // 8. Indexes (excluding PK constraints) for 'public' schema
     console.log(`Fetching indexes for schema ${schemaName}...`);
     if (tablesRes.rows.length > 0) mainDdlStatements += `\n--\n-- Indexes for schema ${schemaName}\n--\n`;
-    for (const tableRow of tablesRes.rows) { // Iterate over tables fetched for 'public' schema
+    for (const tableRow of tablesRes.rows) { 
         const tableName = tableRow.table_name;
         const indexesRes = await client.query(`
             SELECT indexdef FROM pg_indexes WHERE schemaname = $1 AND tablename = $2
@@ -357,7 +348,34 @@ export async function dumpDatabaseSchemaPureNode(connectionString: string): Prom
         }
     }
 
-    // 9. Get Views in 'public' schema
+    // 9. Foreign Key Constraints for 'public' schema
+    console.log(`Fetching foreign key constraints for schema ${schemaName}...`);
+    const fkRes = await client.query(`
+        SELECT
+            c.conname AS constraint_name,
+            conrelid::regclass::text AS fk_table_fq_name,
+            pg_catalog.pg_get_constraintdef(c.oid, true) AS constraint_definition
+        FROM
+            pg_catalog.pg_constraint c
+        JOIN
+            pg_catalog.pg_class rel ON rel.oid = c.conrelid
+        JOIN
+            pg_catalog.pg_namespace nsp ON nsp.oid = rel.relnamespace
+        WHERE
+            nsp.nspname = $1 
+            AND c.contype = 'f'
+        ORDER BY
+            rel.relname, c.conname;
+    `, [schemaName]);
+
+    if (fkRes.rows.length > 0) {
+        mainDdlStatements += `\n--\n-- Foreign Key Constraints for schema ${schemaName}\n--\n`;
+        for (const fkRow of fkRes.rows) {
+            mainDdlStatements += `ALTER TABLE ${fkRow.fk_table_fq_name} ADD CONSTRAINT "${fkRow.constraint_name.replace(/"/g, '""')}" ${fkRow.constraint_definition};\n\n`;
+        }
+    }
+
+    // 10. Get Views in 'public' schema
     console.log(`Fetching views for schema ${schemaName}...`);
     const viewsRes = await client.query(`SELECT viewname, definition FROM pg_catalog.pg_views WHERE schemaname = $1 ORDER BY viewname;`, [schemaName]);
     if (viewsRes.rows.length > 0) mainDdlStatements += `\n--\n-- Views for schema ${schemaName}\n--\n`;
@@ -367,7 +385,7 @@ export async function dumpDatabaseSchemaPureNode(connectionString: string): Prom
 
     // --- Construct the initial setup SQL based on detected requirements ---
     let initialSetupSQL = '';
-    const searchPathArray = [`"${schemaName}"`]; // 'public'
+    const searchPathArray = [`"${schemaName}"`]; 
 
     if (requiredExtensions.has('vector')) {
         initialSetupSQL += `CREATE SCHEMA IF NOT EXISTS extensions;\n`;
@@ -375,26 +393,16 @@ export async function dumpDatabaseSchemaPureNode(connectionString: string): Prom
         searchPathArray.push('extensions');
     }
     
-    initialSetupSQL += `CREATE SCHEMA IF NOT EXISTS "${schemaName}";\n`; // Ensure 'public' schema exists
-    // Supabase manages the 'storage' schema, so we don't explicitly create it here.
-    // If storage RLS policies reference functions in 'storage' schema without schema qualification,
-    // 'storage' might need to be in search_path. However, pg_get_expr usually qualifies.
-    // For safety, if storage RLS was dumped, we can add 'storage' to search path.
-    if (storageRlsDdl) {
-        if (!searchPathArray.includes('storage')) { // Add storage if not already (e.g. if schemaName was 'storage')
-            searchPathArray.push('storage');
-        }
-    }
+    initialSetupSQL += `CREATE SCHEMA IF NOT EXISTS "${schemaName}";\n`; 
     initialSetupSQL += `\n`;
 
-
-    if (schemaName !== 'public' && !searchPathArray.includes('public')) { // Should not happen if schemaName is 'public'
+    if (schemaName !== 'public' && !searchPathArray.includes('public')) { 
         searchPathArray.push('public');
     }
     
     initialSetupSQL += `SET search_path = ${searchPathArray.join(', ')};\n\n`;
     
-    const headerComment = `-- Schema dump for '${schemaName}' schema (and 'storage' RLS) generated by Node.js script at ${new Date().toISOString()}\n\n`;
+    const headerComment = `-- Schema dump for '${schemaName}' schema (and 'storage' RLS definitions) generated by Node.js script at ${new Date().toISOString()}\n\n`;
     const finalResetSQL = `SET search_path TO "$user", public;\n\n`;
 
     console.log(`Schema dump generation complete.`);

@@ -258,8 +258,9 @@ export default function AddCompanyButton() {
                                 variant="bordered"
                                 className=" w-full text-white dark"
                                 placeholder="Enter the company description"
-                                label="Company Description (optional)"
+                                label="Company Description"
                                 value={description}
+                                required
                                 onChange={(e : any)=> handleDescriptionChange(e)}
                                 isInvalid={error.filed === 'description'}
                                 errorMessage={error.message}
