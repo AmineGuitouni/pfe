@@ -8,6 +8,7 @@ export type DatabasePostRequestBody = {
         SUPABASE_JWT_SECRET: string;
         NEXT_PUBLIC_SUPABASE_URL: string;
         NEXT_PUBLIC_SUPABASE_ANON_KEY: string;
+        CONNECTION_STRING: string;
     };
 }
 
@@ -29,7 +30,8 @@ export async function POST(req:Request, {params:{user_id}}: {params:{user_id: st
       !connection_config.NEXT_PUBLIC_SUPABASE_URL ||
       !connection_config.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
       !connection_config.SUPABASE_KEY ||
-      !connection_config.SUPABASE_JWT_SECRET
+      !connection_config.SUPABASE_JWT_SECRET ||
+      !connection_config.CONNECTION_STRING
     ) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }

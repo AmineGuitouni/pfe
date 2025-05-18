@@ -25,6 +25,7 @@ export default function AddDatabaseButton({addDatabase}:AddDatabaseButtonProps) 
     supabaseKey: "",
     jwtSecret: "",
     supabaseAnonKey: "",
+    connectionString: "",
   });
   const [error, setError] = useState("");
   const { data: session } = useSession();
@@ -53,6 +54,7 @@ export default function AddDatabaseButton({addDatabase}:AddDatabaseButtonProps) 
           SUPABASE_KEY: formData.supabaseKey,
           NEXT_PUBLIC_SUPABASE_ANON_KEY: formData.supabaseAnonKey,
           SUPABASE_JWT_SECRET: formData.jwtSecret,
+          CONNECTION_STRING: formData.connectionString,
         },
       });
 
@@ -71,6 +73,7 @@ export default function AddDatabaseButton({addDatabase}:AddDatabaseButtonProps) 
         supabaseAnonKey: "",
         supabaseKey: "",
         supabaseUrl: "",
+        connectionString: "",
       });
     } catch (err) {
       console.log(err)
@@ -112,6 +115,18 @@ export default function AddDatabaseButton({addDatabase}:AddDatabaseButtonProps) 
                   label="Database Name"
                   value={formData.name}
                   onValueChange={(value) => setFormData({...formData, name: value})}
+                  isRequired
+                  classNames={{
+                    label: "text-white/60",
+                    input: "text-white bg-[#081e25]",
+                    inputWrapper: "bg-[#081e25] border-white/10 hover:border-[#7dd5de] group-focus:border-[#7dd5de]"
+                  }}
+                />
+
+                <Input
+                  label="Connection String"
+                  value={formData.connectionString}
+                  onValueChange={(value) => setFormData({...formData, connectionString: value})}
                   isRequired
                   classNames={{
                     label: "text-white/60",

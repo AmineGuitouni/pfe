@@ -62,10 +62,11 @@ export default function useDataBases() {
                 id:data.id,
                 name: database.name,
                 connection_config: {
-                NEXT_PUBLIC_SUPABASE_URL: database.connection_config.NEXT_PUBLIC_SUPABASE_URL,
-                SUPABASE_KEY: database.connection_config.SUPABASE_KEY,
-                NEXT_PUBLIC_SUPABASE_ANON_KEY: database.connection_config.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-                SUPABASE_JWT_SECRET: database.connection_config.SUPABASE_JWT_SECRET,
+                    NEXT_PUBLIC_SUPABASE_URL: database.connection_config.NEXT_PUBLIC_SUPABASE_URL,
+                    SUPABASE_KEY: database.connection_config.SUPABASE_KEY,
+                    NEXT_PUBLIC_SUPABASE_ANON_KEY: database.connection_config.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+                    SUPABASE_JWT_SECRET: database.connection_config.SUPABASE_JWT_SECRET,
+                    CONNECTION_STRING: database.connection_config.CONNECTION_STRING,
                 },
                 created_at: new Date().toISOString(),
             };
@@ -105,6 +106,7 @@ export default function useDataBases() {
                     SUPABASE_KEY: updatedDatabase.connection_config.SUPABASE_KEY,
                     NEXT_PUBLIC_SUPABASE_ANON_KEY: updatedDatabase.connection_config.NEXT_PUBLIC_SUPABASE_ANON_KEY,
                     SUPABASE_JWT_SECRET: updatedDatabase.connection_config.SUPABASE_JWT_SECRET,
+                    CONNECTION_STRING: updatedDatabase.connection_config.CONNECTION_STRING,
                 },
                 created_at: new Date().toISOString(),
             }
