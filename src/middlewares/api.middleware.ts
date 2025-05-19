@@ -15,6 +15,7 @@ interface ApiMiddlewareOptions {
 export default async function apiMiddleware({path, token}:ApiMiddlewareOptions) {
     // for testing purposes only
     if(!token){
+        console.log("No token found, using default token");
         token = {
             name: 'Mohamed Amine Guitouni',
             email: 'guitouni.medamine@gmail.com',
@@ -38,10 +39,12 @@ export default async function apiMiddleware({path, token}:ApiMiddlewareOptions) 
     }
     
     if(!params){
+        console.log("asdasd aospd kjaos")
         return NextResponse.json({error: "Bad Request"}, {status: 400});
     }
 
     if(!token){
+        console.log("asdasd aospd kjaos")
         return NextResponse.json({error: "Access denied: unauthanticated request"}, {status: 403});
     }
 

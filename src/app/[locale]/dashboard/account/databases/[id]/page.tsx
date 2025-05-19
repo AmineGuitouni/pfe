@@ -37,11 +37,26 @@ async function dbInfo({ dburl, dbkey }: { dburl: string, dbkey: string }) {
         supabaseClient.rpc('get_recent_queries')
     ]);
 
-    if (tableSizesError) throw tableSizesError;
-    if (bucketSizesError) throw bucketSizesError;
-    if (rowCountsError) throw rowCountsError;
-    if (indexStatsError) throw indexStatsError;
-    if (recentQueriesError) throw recentQueriesError;
+    if (tableSizesError) {
+        console.error("Table Sizes Error:", tableSizesError);
+        throw tableSizesError;
+    }
+    if (bucketSizesError) {
+        console.error("Bucket Sizes Error:", bucketSizesError);
+        throw bucketSizesError;
+    }
+    if (rowCountsError) {
+        console.error("Row Counts Error:", rowCountsError);
+        throw rowCountsError;
+    }
+    if (indexStatsError) {
+        console.error("Index Stats Error:", indexStatsError);
+        throw indexStatsError;
+    }
+    if (recentQueriesError) {
+        console.error("Recent Queries Error:", recentQueriesError);
+        throw recentQueriesError;
+    }
 
     return {
         tableSizes: tableSizesData,
@@ -68,7 +83,10 @@ export default async function DataBaseInfoPage({params:{id}}:{params:{id:string}
             redirect("/login")
         }
 
-        const response = await fetch(`${origin}/api/v1/${session.user.id}/databases/${id}/get`)
+        console.log(`http://localhost:3000/api/v1/${session.user.id}/databases/${id}/get`)
+
+        const response = await fetch(`http://localhost:3000/api/v1/${session.user.id}/databases/${id}/get`)
+        console.log(response.ok, response.status)
         if(!response.ok){
             throw new Error("Failed to get database")
         }
