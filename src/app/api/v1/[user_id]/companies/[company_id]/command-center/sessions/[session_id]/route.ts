@@ -86,7 +86,7 @@ function handleUserMessageLast(){
     }, { status: 200 });
 }
 
-export async function handleAiMessageLast(
+async function handleAiMessageLast(
     req: NextRequest,
     existingMessages: any[],
     supabase: SupabaseClient<any, "public", any>,
