@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Message } from '../hooks/useCommandCenter';
+import { SessionMessage } from '../hooks/useCommandCenter';
 import { User, Bot, Wrench } from 'lucide-react'; // Added Wrench for tool results
 import ToolUseDisplay, { ToolCall } from './toolUseDisplay';
 import ToolResultDisplay from './toolResultDisplay'; // Import the new component
@@ -97,7 +97,7 @@ const parseMessageWithToolResult = (text: string): ParsedToolResult | undefined 
 
 
 interface MessageItemProps {
-  message: Message;
+  message: SessionMessage;
 }
 
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
@@ -108,18 +108,18 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   // Memoize parsing results
   const parsedAiContent = useMemo(() => {
     if (isAi) { // Always parse AI messages in case they contain tool_use or just text
-      return parseMessageWithToolUse(message.text);
+      return parseMessageWithToolUse(message.content);
     }
     // Return a default structure if not AI, ensuring properties exist
     return { textBefore: "", toolCall: undefined, textAfter: '', rawText: "" };
-  }, [message.text, isAi]);
+  }, [message.content, isAi]);
 
   const parsedToolResultContent = useMemo(() => {
     if (isTool) {
-      return parseMessageWithToolResult(message.text);
+      return parseMessageWithToolResult(message.content);
     }
     return undefined;
-  }, [message.text, isTool]);
+  }, [message.content, isTool]);
 
   const hasActualTextBeforeAi = parsedAiContent.textBefore?.trim().length > 0;
   const hasActualTextAfterAi = parsedAiContent.textAfter?.trim().length > 0;
@@ -149,7 +149,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
         className={`max-w-xs md:max-w-md lg:max-w-lg px-3 py-2 rounded-lg shadow ${messageBubbleClasses}`}
       >
         {isUser && (
-          <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
         )}
 
         {isAi && (
@@ -160,7 +160,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
             )}
             {/* Render ToolUseDisplay if a tool_use block is parsed (valid or not, ToolUseDisplay handles undefined) */}
             {/* ToolUseDisplay will show loading/error if toolCall is undefined due to parsing error */}
-            {message.text.includes('```tool_use') && (
+            {message.content.includes('```tool_use') && (
                  <ToolUseDisplay toolCall={parsedAiContent.toolCall} />
             )}
             {/* Render text after tool_use block if it exists and tool_use is parsed */}
@@ -169,7 +169,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
             )}
             {/* If no tool_use block was intended or if it was completely unparsable leading to no toolCall, render raw text */}
             {/* This also covers AI messages that are purely text */}
-            {!message.text.includes('```tool_use') && (
+            {!message.content.includes('```tool_use') && (
                  <p className="text-sm whitespace-pre-wrap">{parsedAiContent.rawText}</p>
             )}
           </>
@@ -188,7 +188,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
               <p className="font-semibold">Malformed Tool Result</p>
               <p className="italic">Could not display tool result data.</p>
               <pre className="mt-1 text-gray-400 text-[10px] bg-black/20 p-1 rounded whitespace-pre-wrap break-all">
-                {message.text}
+                {message.content}
               </pre>
             </div>
           )

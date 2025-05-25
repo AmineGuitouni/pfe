@@ -4,7 +4,9 @@
 import { useMemo, useState } from 'react';
 // Adjust path if your AutoCompleteTextArea.tsx is in a different location, e.g., '../components/AutoCompleteTextArea'
 import AutoCompleteTextArea, { Command } from './AutoCompleteTextArea'; 
-import { usePathname } from 'next/navigation';
+import { useParams, usePathname } from 'next/navigation';
+import { useCommandCenterContext } from '../context/CommandCenterContext';
+import { Button } from '@heroui/react';
 
 const predefinedCommands: Command[] = [
   {
@@ -122,7 +124,11 @@ export default function CommandInput() {
     return parsedOutput;
   };
 
+  const {SendMessage, sendingMessage} = useCommandCenterContext();
+  const {command_center_session} = useParams();
+
   const handleSubmit = () => {
+    SendMessage(textValue)
     const result = parseCommandString(textValue, predefinedCommands);
 
     if ('error' in result) {
@@ -142,15 +148,17 @@ export default function CommandInput() {
           commands={predefinedCommands}
           enableAutocomplete={autocompleteEnabled}
           placeholder="Type @ for commands..."
-          rows={8}
+          rows={command_center_session ? 3 : 8}
           className="w-full p-3 bg-dark_blue text-white border border-light_blue-500/20 rounded-md focus:ring-2 focus:ring-light_blue-500 focus:border-light_blue-500 outline-none resize-none"
         />
-        <button
-          onClick={handleSubmit}
-          className="mt-4 w-full bg-light_blue hover:bg-light_blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+        <Button
+          onPress={handleSubmit}
+          isDisabled={sendingMessage}
+          isLoading={sendingMessage}
+          className="bg-light_blue hover:bg-light_blue-500 text-black w-full"
         >
           Submit Command
-        </button>
+        </Button>
       </div>
     </div>
   );

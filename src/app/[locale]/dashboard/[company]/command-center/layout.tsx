@@ -24,7 +24,7 @@ export default function Layout({ children, params }: LayoutProps) {
                         <HistoryModal />
                     </div>
                 </div>
-                <div className="h-[calc(100vh-117px)] overflow-y-auto">
+                <div className="h-[calc(100vh-117px)] overflow-y-auto flex flex-col">
                     {children}
                     <CommandInput/>
                 </div>

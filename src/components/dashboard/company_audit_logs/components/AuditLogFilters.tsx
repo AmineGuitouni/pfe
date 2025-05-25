@@ -1,7 +1,6 @@
 "use client";
 
-import { Input } from "@heroui/react";
-import { SearchIcon } from "./icons";
+import { Input, Select, SelectItem } from "@heroui/react";
 
 interface AuditLogFiltersProps {
   searchText: string;
@@ -25,63 +24,63 @@ export const AuditLogFilters = ({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col sm:flex-row gap-4">
-        <Input
-          isClearable
-          placeholder="Search actions..."
-          value={searchText}
-          onClear={() => onSearchChange?.("")}
-          onValueChange={onSearchChange}
-          className="dark flex-grow"
+        <Select
+          aria-label="Action type"
+          placeholder="Select action..."
+          selectedKeys={searchText ? [searchText] : []}
+          onSelectionChange={(keys) => {
+            const value = Array.from(keys)[0] as string || "";
+            onSearchChange?.(value);
+          }}
+          className="flex-grow"
           classNames={{
-            base: "w-full h-full dark",
-            input: [
-                "bg-transparent",
-                "text-white/90 ",
-                "placeholder:text-white/90",
+            base: "w-full h-full bg-dark_blue",
+            trigger: [
+              "bg-dark_blue",
+              "text-light_blue",
+              "placeholder:text-light_blue",
+              "border-light_blue/20",
+              "hover:bg-light_blue-500/10",
+              "focus:bg-light_blue-500/20",
             ],
-            innerWrapper: "bg-transparent text-white",
-            inputWrapper: [
-                "bg-transparent border-white/20",
-                "!cursor-text",
-                "hover:bg-white/5",
-                "group-data-[focus=true]:bg-white/5",
-                "group-data-[hover=true]:bg-white/5",
-
-            ],
-            }}
-          startContent={<SearchIcon className="text-light_blue" />}
+            popoverContent: "bg-modal_bg text-light_blue",
+          }}
           variant="bordered"
-        />
+        >
+          <SelectItem key="">All actions</SelectItem>
+          <SelectItem key="delete">Delete</SelectItem>
+          <SelectItem key="update">Update</SelectItem>
+          <SelectItem key="insert">Insert</SelectItem>
+        </Select>
         <Input
           type="date"
           value={dateFilter}
           onChange={(e) => onDateFilterChange?.(e.target.value)}
           classNames={{
-            base: "w-full sm:w-auto dark",
+            base: "w-full sm:w-auto bg-dark_blue",
             input: [
-                "bg-transparent",
-                "text-light_blue" ,
-                "placeholder:text-white/90",
+                "bg-dark_blue",
+                "text-light_blue",
+                "placeholder:text-light_blue",
             ],
-            innerWrapper: "bg-transparent text-light_blue-500",
+            innerWrapper: "bg-dark_blue text-light_blue-500",
             inputWrapper: [
-                "bg-transparent border-white/20",
+                "bg-dark_blue border-light_blue/20",
                 "!cursor-text",
-                "hover:bg-white/5",
-                "group-data-[focus=true]:bg-white/5",
-                "group-data-[hover=true]:bg-white/5",
-
+                "hover:bg-light_blue-500/10",
+                "group-data-[focus=true]:bg-light_blue-500/20",
+                "group-data-[hover=true]:bg-light_blue-500/10",
             ],
             }}
           variant="bordered"
         />
       </div>
       <div className="flex justify-between items-center">
-        <span className="text-default-400 text-small">Total {totalCount} logs</span>
-        <label className="flex items-center text-default-400 text-small">
+        <span className="text-light_blue text-small">Total {totalCount} logs</span>
+        <label className="flex items-center text-light_blue text-small">
           Rows per page:
           <select
-            className="bg-transparent outline-none text-default-400 text-small"
+            className="bg-dark_blue outline-none text-light_blue text-small border border-light_blue/20 rounded ml-2 px-2 py-1 hover:bg-light_blue-500/10 focus:bg-light_blue-500/20"
             value={rowsPerPage}
             onChange={(e) => onRowsPerPageChange?.(Number(e.target.value))}
           >
