@@ -18,9 +18,13 @@ function getPath(path: string) {
 
 export async function middleware(request: NextRequest) {
   // return i18nRouter(request, i18nConfig);
-  const token = await getToken({req: request})
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET
+  })
+  
   const path = getPath(request.nextUrl.pathname);
-
+  
   if(path.startsWith("/api")){
     return await apiMiddleware({path, token, request});
   }
@@ -29,7 +33,6 @@ export async function middleware(request: NextRequest) {
   if(!token){
     const protectedPagesMiddlewareRes = protectedPagesMiddleware({path, request});
     if(protectedPagesMiddlewareRes){
-      console.log(`route ${path} is protected`)
       return protectedPagesMiddlewareRes
     }
   } else {

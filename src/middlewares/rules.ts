@@ -16,7 +16,11 @@ const DatabasesApisRules: pageRuleType = {
     "/api/v1/[user_id]/databases/[database_id]/edit":{
         authOnly: true,
         role: "owner",
-    }
+    },
+    "/api/v1/[user_id]/databases/[database_id]/get":{
+        authOnly: true,
+        role: "owner",
+    },
 }
 
 const CompaniesApisRules: pageRuleType = {

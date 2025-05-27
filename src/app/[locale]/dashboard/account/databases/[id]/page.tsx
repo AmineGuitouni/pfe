@@ -5,6 +5,7 @@ import StorageTab from "@/components/dashboard/databases/database-analytics/Stor
 import TablesTab from "@/components/dashboard/databases/database-analytics/TablesTab";
 import { authOptions } from "@/lib/auth/authOptions";
 import { formatBytes } from "@/lib/utils/formatBytes";
+import { serverGet } from "@/lib/utils/serverFetch";
 import { BucketSize, IndexStat, RecentQuery, RowCount, TableSize } from "@/types/databaseAnalyticsTypes";
 import { Card, CardBody, CardFooter, CardHeader } from "@heroui/react";
 import { createClient } from "@supabase/supabase-js";
@@ -83,10 +84,8 @@ export default async function DataBaseInfoPage({params:{id}}:{params:{id:string}
             redirect("/login")
         }
 
-        console.log(`http://localhost:3000/api/v1/${session.user.id}/databases/${id}/get`)
+        const response = await serverGet(`/api/v1/${session.user.id}/databases/${id}/get`);
 
-        const response = await fetch(`http://localhost:3000/api/v1/${session.user.id}/databases/${id}/get`)
-        console.log(response.ok, response.status)
         if(!response.ok){
             throw new Error("Failed to get database")
         }
@@ -95,7 +94,6 @@ export default async function DataBaseInfoPage({params:{id}}:{params:{id:string}
         if(error){
             throw new Error(error)
         }
-        console.log(data)
         if(!data){
             throw new Error("Database not found")
         }

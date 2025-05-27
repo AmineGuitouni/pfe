@@ -13,39 +13,38 @@ interface ApiMiddlewareOptions {
 }
 
 export default async function apiMiddleware({path, token}:ApiMiddlewareOptions) {
-    // for testing purposes only
-    if(!token){
-        console.log("No token found, using default token");
-        token = {
-            name: 'Mohamed Amine Guitouni',
-            email: 'guitouni.medamine@gmail.com',
-            sub: 'a1232090-2c7b-4d8a-bcd0-9350df246ced',
-            first_name: 'Mohamed Amine',
-            last_name: 'Guitouni',
-            role: 'owner',
-            email_verified: true,
-            country: 'Tunisia',
-            phone_number: '56522039',
-            jti: '4a58d684-7aa9-4737-833a-29fa92516238'
-        }
-    }
+    // Authentication check - return early if no token
+    
+    // for testing purposes only (disabled for production testing)
+    // if(!token){
+    //     console.log("No token found, using default token");
+    //     token = {
+    //         name: 'Mohamed Amine Guitouni',
+    //         email: 'guitouni.medamine@gmail.com',
+    //         sub: 'a1232090-2c7b-4d8a-bcd0-9350df246ced',
+    //         first_name: 'Mohamed Amine',
+    //         last_name: 'Guitouni',
+    //         role: 'owner',
+    //         email_verified: true,
+    //         country: 'Tunisia',
+    //         phone_number: '56522039',
+    //         jti: '4a58d684-7aa9-4737-833a-29fa92516238'
+    //     } as JWT
+    // }
     const passResponse = NextResponse.next();
-    passResponse.headers.set('x-user-role', token.role as string);
+    passResponse.headers.set('x-user-role', token?.role as string | null || 'guest');
 
     const {pattern, params, rule} = extractPathParameters(path, apisRules)
     if(!pattern || !rule || !rule.authOnly){
-        console.log("No rule found for this path", {path})
         return passResponse;
     }
     
     if(!params){
-        console.log("asdasd aospd kjaos")
         return NextResponse.json({error: "Bad Request"}, {status: 400});
     }
 
     if(!token){
-        console.log("asdasd aospd kjaos")
-        return NextResponse.json({error: "Access denied: unauthanticated request"}, {status: 403});
+        return NextResponse.json({error: "Access denied: unauthenticated request"}, {status: 403});
     }
 
     if(rule.role === "owner" && token.role !== rule.role){

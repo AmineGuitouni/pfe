@@ -7,6 +7,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth/authOptions';
 import { notFound } from 'next/navigation';
 import ShowDiff from '@/components/dashboard/projects/components/assignement/showDiff';
+import { serverGet } from '@/lib/utils/serverFetch';
 
 interface Params {
     locale: string;
@@ -84,9 +85,7 @@ export default async function ProjectPage({ params: { locale, company, project_i
     let fetchError: string | null = null;
 
     try {
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-        const apiUrl = `${baseUrl}/api/v1/${user_id}/companies/${company}/projects/${project_id}/get`;
-        const res = await fetch(apiUrl, { cache: 'no-store' });
+        const res = await serverGet(`/api/v1/${user_id}/companies/${company}/projects/${project_id}/get`);
 
         if (!res.ok) {
             const errorBody = await res.json();
