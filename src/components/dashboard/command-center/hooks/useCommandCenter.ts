@@ -1,8 +1,8 @@
 import { CreateSessionRequest, CreateSessionResponse } from '@/app/api/v1/[user_id]/companies/[company_id]/command-center/sessions/new/route';
+import { MessagesRouteResponse } from '@/app/api/v1/[user_id]/companies/[company_id]/command-center/sessions/[session_id]/messages/route';
 import { useSession } from 'next-auth/react';
 import { useParams, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { streamChatResponse } from '../utils';
+import { useCallback, useEffect, useState } from 'react';
 
 // Define the possible modes
 export type CommandMode = 'chat' | 'cli';
@@ -19,14 +19,11 @@ export interface SessionMessage {
     session_id: string;
     sender: 'user' | 'ai' | 'tool';
     content: string;
-    content_type: 'text' | 'audio'
+    content_type: 'text' | 'audio';
     created_at: string;
 }
 
 export const useCommandCenter = () => {
-  const [sessions, setSessions] = useState<CommandCenterSession[]>([]);
-  const [loadingSessions, setLoadingSessions] = useState(false);
-
   const { data: userSession } = useSession();
   const router = useRouter();
   const {company:company_id, command_center_session, mode}: {
@@ -39,9 +36,9 @@ export const useCommandCenter = () => {
   const [streamedMessage, setStreamedMessage] = useState<SessionMessage | null>(null);
   const [loadingMessages, setLoadingMessages] = useState(false);
 
-  const ActiveSession = useMemo(() => {
-      return sessions.find(session => session.id === command_center_session);
-  }, [sessions, command_center_session]);
+  // const ActiveSession = useMemo(() => {
+  //     return sessions.find(session => session.id === command_center_session);
+  // }, [sessions, command_center_session]);
 
   const [sendingMessage, setSendingMessage] = useState(false);
 
@@ -52,8 +49,9 @@ export const useCommandCenter = () => {
       }
     }
 
-    setSendingMessage(true);
-
+    // Generate placeholder ID outside try block for error handling access
+    const placeholderId = crypto.randomUUID();
+    
     try{
       let currentMode = mode
       if(!currentMode){
@@ -91,10 +89,11 @@ export const useCommandCenter = () => {
 
         currentSessionId = data.session_id;
         router.push(`/dashboard/${company_id}/command-center/${currentMode}/${data.session_id}`);
+        setMessages([]);
       }
 
       const userMessage: SessionMessage = {
-        id: crypto.randomUUID(),
+        id: placeholderId,
         session_id: currentSessionId,
         sender: 'user',
         content,
@@ -102,42 +101,159 @@ export const useCommandCenter = () => {
         created_at: new Date().toISOString()
       }
 
-      setMessages((prev) => [...prev, userMessage]);
-      streamChatResponse({
-        apiEndpoint: `/api/v1/${userSession.user.id}/companies/${company_id}/command-center/sessions/${currentSessionId}`,
-        userMessage: content,
-        callbacks:{
-          onAiChunk: (chunk) =>{
-            setStreamedMessage((prev) => prev ? {
-              ...prev,
-              content: prev.content + chunk
-            }:{
-              id: crypto.randomUUID(),
-              session_id: currentSessionId,
-              sender: 'ai',
-              content: chunk,
-              content_type: 'text',
-              created_at: new Date().toISOString()
-            })
-          },
-          onAiResponseEmpty: (data)=>{console.log('AI response empty:', data)},
-          onAiResponseSaved: (data) =>{console.log('AI response saved:', data)},
-          onError: (error) => {console.error('Error:', error)},
-          onUserMessageSaved: (data)=>{console.log('User message saved:', data)},
-          onStreamEnd: () => {console.log('Stream ended'); setSendingMessage(false); setStreamedMessage(null);},
-        }
+      // Add user message to local state immediately for optimistic UI
+      setMessages(prev => [...prev, userMessage]);
+      setSendingMessage(true);
+      
+      const response = await fetch(`/api/v1/${userSession.user.id}/companies/${company_id}/command-center/sessions/${currentSessionId}`, {
+        method: 'POST',
+        body: JSON.stringify({
+          user_prompt: content,
+        })
       })
+
+      if(!response.ok) {
+        // Remove the optimistic user message on failure
+        setMessages(prev => prev.filter(msg => msg.id !== placeholderId));
+        setSendingMessage(false);
+        return {
+          error: 'Failed to send message'
+        }
+      }
+
+      const { response: aiResponse, response_id, user_message_id } = await response.json();
+      console.log('AI Response:', aiResponse);
+
+      // Update the user message with the actual ID from server
+      setMessages(prev => prev.map(msg => 
+        msg.id === placeholderId ? { ...msg, id: user_message_id } : msg
+      ));
+      
+      // Add AI response to existing messages (user message already added optimistically)
+      setMessages(prev => [...prev, {
+        id: response_id,
+        session_id: currentSessionId,
+        sender: 'ai',
+        content: aiResponse,
+        content_type: 'text',
+        created_at: new Date().toISOString()
+      }]);
+      
+      setSendingMessage(false);
     }
     catch (error) {
         console.error('Error sending message:', error);
+        // Remove the optimistic user message on error
+        setMessages(prev => prev.filter(msg => msg.id !== placeholderId));
+        setSendingMessage(false);
         return {
             error: 'Failed to send message'
         }
     }
-    finally {
+  }, [command_center_session, company_id, mode, router, userSession?.user.id]);
+
+  const toolCallAction = useCallback(async(action: 'accept' | 'reject') => {
+    if(!userSession?.user?.id || !company_id || !command_center_session) return;
+
+    setSendingMessage(true);
+
+    try {
+      const response = await fetch(`/api/v1/${userSession.user.id}/companies/${company_id}/command-center/sessions/${command_center_session}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          accept_tool_call: action === 'accept',
+          reject_tool_call: action === 'reject'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to process tool call');
+      }
+
+      const { response: aiResponse, error, toolCallMessage, response_id }: { response: string; error?: string, toolCallMessage:{id:string, content:string}, response_id:string } = await response.json();
+
+      if (error) {
+        throw new Error(error);
+      }
+
+      // Add AI response to existing messages
+      setMessages(prev => [...prev, {
+        id: toolCallMessage.id,
+        session_id: command_center_session,
+        sender: 'tool',
+        content: toolCallMessage.content,
+        content_type: 'text',
+        created_at: new Date().toISOString()
+      },{
+        id: response_id,
+        session_id: command_center_session,
+        sender: 'ai',
+        content: aiResponse,
+        content_type: 'text',
+        created_at: new Date().toISOString()
+      }]);
+
+    } catch (error) {
+      console.error('Error processing tool call:', error);
+    } finally {
       setSendingMessage(false);
     }
-  }, [command_center_session, company_id, mode, router, userSession?.user.id]);
+  },[command_center_session, company_id, userSession?.user.id])
+
+  const fetchMessages = useCallback(async () => {
+    // Skip fetching if currently sending a message or if no session exists
+    if (!command_center_session || !userSession?.user?.id || !company_id || sendingMessage) return;
+
+    setLoadingMessages(true);
+
+    try {
+      const response = await fetch(`/api/v1/${userSession.user.id}/companies/${company_id}/command-center/sessions/${command_center_session}/messages`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch messages');
+      }
+
+      const { data, error }: MessagesRouteResponse = await response.json();
+
+      if (error || !data) {
+        throw new Error('Failed to fetch messages');
+      }
+
+      // Transform the response to match our SessionMessage interface
+      const transformedMessages: SessionMessage[] = data.map(message => ({
+        id: message.id,
+        session_id: message.session_id,
+        sender: message.sender,
+        content: message.content,
+        content_type: message.type,
+        created_at: message.created_at
+      }));
+      console.log('Fetched messages:', transformedMessages);
+      setMessages(prev => {
+        const filteredPrev = prev.filter(msg => msg.session_id !== command_center_session);
+        const uniqueMessages = transformedMessages.filter(msg => !filteredPrev.some(prevMsg => prevMsg.id === msg.id));
+        return [...filteredPrev, ...uniqueMessages];
+      });
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    } finally {
+      setLoadingMessages(false);
+    }
+  }, [command_center_session, company_id, userSession?.user.id, sendingMessage]);
+
+
+  // Fetch messages when the component mounts or command_center_session changes
+  useEffect(() => {
+    fetchMessages()
+  }, [fetchMessages]);
 
   // handle the agentic flow
   useEffect(()=>{
@@ -146,8 +262,11 @@ export const useCommandCenter = () => {
 
   return {
     messages,
+    loadingMessages,
     SendMessage,
     sendingMessage,
-    streamedMessage
+    streamedMessage,
+    fetchMessages,
+    toolCallAction
   }
 }

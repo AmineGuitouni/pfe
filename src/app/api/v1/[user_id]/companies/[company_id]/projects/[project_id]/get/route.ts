@@ -26,7 +26,16 @@ export async function GET(req: Request, { params: { company_id, project_id, user
                     description,
                     difficulty_level,
                     task_status,
-                    dependencies:project_tasks_dependencies_main_task_id_fkey(dependent_task_id)
+                    dependencies:project_tasks_dependencies_main_task_id_fkey(dependent_task_id),
+                    assigned_users:project_user_tasks (
+                        user:users (
+                            id,
+                            first_name,
+                            last_name,
+                            email,
+                            image
+                        )
+                    )
                 )
             `)
             .eq('id', project_id)
@@ -48,7 +57,8 @@ export async function GET(req: Request, { params: { company_id, project_id, user
         const tasksMap = projectData.tasks?.reduce((acc, task)=>{
             return {...acc, [task.id]: {
                 ...task,
-                dependencies: task.dependencies.map(dep => dep.dependent_task_id)
+                dependencies: task.dependencies.map(dep => dep.dependent_task_id),
+                assigned_users: task.assigned_users?.map(assignment => assignment.user) || []
             }};
         }, {} as any) || {};
 
@@ -66,9 +76,14 @@ export async function GET(req: Request, { params: { company_id, project_id, user
                     description: task.description,
                     task_status: task.task_status,
                     dependencies: task.dependencies.map((depId: string) => tasksMap[depId].title),
-                    difficultyLevel: task.difficulty_level
+                    difficultyLevel: task.difficulty_level,
+                    assigned_users: task.assigned_users
                 }
-            })
+            }),
+            projectUsers: [...new Set(Object.values(tasksMap).flatMap((task:any) => task.assigned_users))]
+                .filter((user, index, self) =>
+                    self.findIndex(u => u.id === user.id) === index
+                )
         };
 
         return NextResponse.json(responseData);

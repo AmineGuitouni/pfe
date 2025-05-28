@@ -1,6 +1,7 @@
 import TaskItem from '@/components/dashboard/projects/components/assignement/showTaskItem';
-import { Task, ProjectStatusType } from '@/components/dashboard/projects/types';
-import { FaCalendarAlt } from 'react-icons/fa';
+import { Task, ProjectStatusType, User } from '@/components/dashboard/projects/types';
+import { FaCalendarAlt, FaUsers, FaUser } from 'react-icons/fa';
+import { Avatar } from '@heroui/react';
 import React from 'react';
 import Link from 'next/link';
 import { getServerSession } from 'next-auth/next';
@@ -70,6 +71,7 @@ interface ApiResponse {
         deadline: string | null;
     };
     tasksData: Task[];
+    projectUsers: User[];
 }
 
 export default async function ProjectPage({ params: { locale, company, project_id }, searchParams: { filter } }: { params: Params, searchParams: searchParams }) {
@@ -114,7 +116,8 @@ export default async function ProjectPage({ params: { locale, company, project_i
     }
 
     const projectData = apiData.projectData;
-    const tasksData: Task[] = apiData.tasksData
+    const tasksData: Task[] = apiData.tasksData;
+    const projectUsers: User[] = apiData.projectUsers || [];
 
     const totalTasks = tasksData.length;
     const completed = tasksData.filter(t => t.task_status === 'Completed').length;
@@ -207,6 +210,43 @@ export default async function ProjectPage({ params: { locale, company, project_i
                     </div>
                 </div>
             </div>
+
+            {/* Project Team Section */}
+            {projectUsers.length > 0 && (
+                <div className={`${cardBaseClasses} ${cardHoverClasses} mb-8`}>
+                    <div className="flex items-center gap-2 mb-6">
+                        <FaUsers className="text-light_blue text-xl" />
+                        <h2 className="text-2xl font-semibold text-light_blue">Project Team</h2>
+                        <span className="text-sm text-light_blue-500 bg-light_blue/10 px-2 py-1 rounded-full">
+                            {projectUsers.length} member{projectUsers.length !== 1 ? 's' : ''}
+                        </span>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        {projectUsers.map((user) => (
+                            <div
+                                key={user.id}
+                                className="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 hover:border-light_blue/30 transition-all duration-300"
+                            >
+                                <Avatar
+                                    src={user.image}
+                                    name={`${user.first_name} ${user.last_name}`}
+                                    className="w-10 h-10"
+                                    fallback={<FaUser className="text-light_blue-400" />}
+                                />
+                                <div className="flex-1 min-w-0">
+                                    <h3 className="text-sm font-medium text-white truncate">
+                                        {user.first_name} {user.last_name}
+                                    </h3>
+                                    <p className="text-xs text-light_blue-400 truncate">
+                                        {user.email}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             <div className={`${cardBaseClasses} mb-8`}>
                 <h2 className="text-2xl font-semibold mb-5 text-light_blue">Tasks</h2>

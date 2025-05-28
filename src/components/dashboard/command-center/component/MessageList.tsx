@@ -7,8 +7,8 @@ import LoadingIndicator from './LoadingIndicator';
 
 const MessageList = () => {
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
-  const {messages, streamedMessage} = useCommandCenterContext();
-
+  const {messages, streamedMessage, sendingMessage} = useCommandCenterContext();
+  
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   },[])
@@ -19,11 +19,11 @@ const MessageList = () => {
 
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
-      {messages.map((message) => (
-        <MessageItem key={message.id} message={message} />
+      {messages.map((message, index) => (
+        <MessageItem key={message.id} message={message} isLast={index === (messages.length-1) && !streamedMessage}/>
       ))}
       {streamedMessage && <MessageItem message={streamedMessage} />}
-      <LoadingIndicator />
+      {sendingMessage && <LoadingIndicator />}
       <div ref={messagesEndRef} />
     </div>
   );

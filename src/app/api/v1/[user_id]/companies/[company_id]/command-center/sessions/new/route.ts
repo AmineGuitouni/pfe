@@ -30,6 +30,7 @@ export async function POST(req: Request, {params}:{params:Params}) {
         const {name, mode} = await req.json() as CreateSessionRequest;
 
         if (!name || !mode) {
+            console.log({name, mode})
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
