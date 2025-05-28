@@ -7,6 +7,16 @@ import { useTranslations } from 'next-intl';
 export default function PricingPage() {
   const t = useTranslations('pricing');
 
+  const getFeatures = (planKey: string): string[] => {
+    try {
+      const features = t.raw(`plans.${planKey}.features`);
+      return Array.isArray(features) ? features : [];
+    } catch (error) {
+      console.error(`Error loading features for ${planKey}:`, error);
+      return [];
+    }
+  };
+
   const pricingPlans = [
     {
       key: 'starter',
@@ -14,7 +24,7 @@ export default function PricingPage() {
       price: t('plans.starter.price'),
       frequency: t('plans.starter.frequency'),
       description: t('plans.starter.description'),
-      features: t.raw('plans.starter.features') as string[],
+      features: getFeatures('starter'),
       cta: t('plans.starter.cta'),
       href: '/register',
       popular: false,
@@ -25,7 +35,7 @@ export default function PricingPage() {
       price: t('plans.professional.price'),
       frequency: t('plans.professional.frequency'),
       description: t('plans.professional.description'),
-      features: t.raw('plans.professional.features') as string[],
+      features: getFeatures('professional'),
       cta: t('plans.professional.cta'),
       href: '/register',
       popular: true,
@@ -36,7 +46,7 @@ export default function PricingPage() {
       price: t('plans.enterprise.price'),
       frequency: t('plans.enterprise.frequency'),
       description: t('plans.enterprise.description'),
-      features: t.raw('plans.enterprise.features') as string[],
+      features: getFeatures('enterprise'),
       cta: t('plans.enterprise.cta'),
       href: '/contact-us',
       popular: false,
@@ -79,12 +89,19 @@ export default function PricingPage() {
               </div>
 
               <ul className="space-y-4 mb-10 flex-grow">
-                {plan.features.map((feature, index) => (
-                  <li key={index} className="flex items-center">
+                {plan.features && plan.features.length > 0 ? (
+                  plan.features.map((feature, index) => (
+                    <li key={index} className="flex items-center">
+                      <FaCheckCircle className="text-light_blue-500 mr-3 flex-shrink-0" />
+                      <span className="text-white/90">{feature}</span>
+                    </li>
+                  ))
+                ) : (
+                  <li className="flex items-center">
                     <FaCheckCircle className="text-light_blue-500 mr-3 flex-shrink-0" />
-                    <span className="text-white/90">{feature}</span>
+                    <span className="text-white/90">No features available</span>
                   </li>
-                ))}
+                )}
               </ul>
 
               <Button

@@ -32,7 +32,7 @@ export default function Nav({session}:{session : Session | null}){
                         href={item.href}
                         className="text-xl text-white hover:text-light_blue-500 transition-all ease-linear "
                     >
-                        {item.name}  
+                        {item.name} {item.href}
                     </Link>
                 ))}
                 

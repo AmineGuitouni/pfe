@@ -1,7 +1,9 @@
 // Define the available translation namespaces
 export const TRANSLATION_NAMESPACES = [
   'homepage',
-  'navigation'
+  'navigation',
+  'contact',
+  'pricing'
 ] as const;
 
 export type TranslationNamespace = typeof TRANSLATION_NAMESPACES[number];
