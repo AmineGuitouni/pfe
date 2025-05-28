@@ -1,5 +1,5 @@
-import { i18nRouter } from 'next-i18n-router';
-import i18nConfig from '../i18config';
+import createMiddleware from 'next-intl/middleware';
+import {routing} from './i18n/routing';
 import { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import apiMiddleware from './middlewares/api.middleware';
@@ -9,7 +9,7 @@ import checkCvProvided from './middlewares/checkCvProvided';
 
 function getPath(path: string) {
   let list = path.split('/');
-  if(list.length > 1 && i18nConfig.locales.includes(list[1])){
+  if(list.length > 1 && routing.locales.includes(list[1] as any)){
     list = [list[0], ...list.slice(2)];
   }
   if(list.length === 1) return "/";
@@ -53,9 +53,12 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return i18nRouter(request, i18nConfig);
+  return createMiddleware(routing)(request);
 }
 
 export const config = {
-  matcher: '/((?!static|.*\\..*|_next).*)'
+  // Match all pathnames except for
+  // - … if they start with `/api`, `/trpc`, `/_next` or `/_vercel`
+  // - … the ones containing a dot (e.g. `favicon.ico`)
+  matcher: '/((?!api|trpc|_next|_vercel|.*\\..*).*)'
 };

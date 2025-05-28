@@ -28,6 +28,71 @@
   }
 }
 
+/* RTL Support */
+@layer base {
+  [dir="rtl"] {
+    text-align: right;
+  }
+  
+  [dir="rtl"] .flex {
+    flex-direction: row-reverse;
+  }
+  
+  /* Preserve specific flex directions that shouldn't be reversed */
+  [dir="rtl"] .flex-col {
+    flex-direction: column !important;
+  }
+  
+  [dir="rtl"] .flex-col-reverse {
+    flex-direction: column-reverse !important;
+  }
+  
+  [dir="rtl"] .flex-row {
+    flex-direction: row-reverse !important;
+  }
+  
+  [dir="rtl"] .flex-row-reverse {
+    flex-direction: row !important;
+  }
+}
+
+@layer utilities {
+  /* RTL-specific utilities */
+  .rtl\:text-right[dir="rtl"] {
+    text-align: right;
+  }
+  
+  .rtl\:text-left[dir="rtl"] {
+    text-align: left;
+  }
+  
+  .rtl\:flex-row-reverse[dir="rtl"] {
+    flex-direction: row-reverse;
+  }
+  
+  /* Margin and padding adjustments for RTL */
+  [dir="rtl"] .ml-auto {
+    margin-left: 0;
+    margin-right: auto;
+  }
+  
+  [dir="rtl"] .mr-auto {
+    margin-right: 0;
+    margin-left: auto;
+  }
+  
+  /* Toast container RTL positioning */
+  [dir="rtl"] .Toastify__toast-container--bottom-right {
+    right: auto;
+    left: 1em;
+  }
+  
+  [dir="rtl"] .Toastify__toast-container--top-right {
+    right: auto;
+    left: 1em;
+  }
+}
+
 @font-face {
   font-family: 'Helvetica';
   src: url('./fonts/Helvetica.woff') format('woff');

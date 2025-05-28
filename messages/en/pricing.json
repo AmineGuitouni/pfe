@@ -1,0 +1,55 @@
+{
+  "title": "Pricing Plans",
+  "subtitle": "Choose the plan that best fits your company's needs. Scale up as you grow.",
+  "mostPopular": "Most Popular",
+  "plans": {
+    "starter": {
+      "name": "Starter",
+      "price": "$10",
+      "frequency": "/month",
+      "description": "Ideal for small teams getting started.",
+      "features": [
+        "Up to 5 Users",
+        "Basic Project & Task Management",
+        "1 GB File Storage",
+        "Basic AI Search",
+        "Community Support"
+      ],
+      "cta": "Get Started"
+    },
+    "professional": {
+      "name": "Professional",
+      "price": "$20",
+      "frequency": "/user/month",
+      "description": "For growing businesses needing core AI features.",
+      "features": [
+        "Up to 50 Users",
+        "Full Project & Task Management",
+        "AI CV Analysis & Task Suggestions",
+        "10 GB File Storage per User",
+        "Semantic File Search",
+        "Analytics Dashboards",
+        "Group Management (RBAC)",
+        "Priority Email Support"
+      ],
+      "cta": "Choose Plan"
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "price": "Custom",
+      "frequency": "",
+      "description": "For large organizations with advanced needs.",
+      "features": [
+        "Unlimited Users",
+        "Advanced AI Workflow Automation",
+        "Full Audit Logs",
+        "Tenant Database Management",
+        "Customizable Storage",
+        "Dedicated Account Manager",
+        "Premium Support & SLA",
+        "API Access (Optional)"
+      ],
+      "cta": "Contact Sales"
+    }
+  }
+}

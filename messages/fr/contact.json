@@ -1,0 +1,36 @@
+{
+  "title": "Contactez-nous",
+  "subtitle": "Prenez contact avec DigiGrowing. Nous sommes là pour vous aider.",
+  "company": {
+    "name": "DigiGrowing",
+    "address": "B N°12 Incubateur d'entreprises Mahdia Entreprendre,\nMahdia, Tunisie, 5111",
+    "phone": "+216 21 897 583",
+    "email": "ceo.digigrowing@gmail.com",
+    "website": "www.fb.com/digigrowing.company"
+  },
+  "form": {
+    "title": "Envoyez-nous un message",
+    "fields": {
+      "name": {
+        "label": "Nom",
+        "placeholder": "Votre nom"
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "vous@exemple.com"
+      },
+      "message": {
+        "label": "Message",
+        "placeholder": "Comment pouvons-nous vous aider ?"
+      }
+    },
+    "submit": {
+      "default": "Envoyer le message",
+      "sending": "Envoi en cours..."
+    },
+    "messages": {
+      "success": "Message envoyé avec succès !",
+      "error": "Veuillez remplir tous les champs."
+    }
+  }
+}

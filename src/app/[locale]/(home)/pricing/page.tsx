@@ -1,76 +1,58 @@
 import React from 'react';
-import { Button } from '@heroui/react'; // Assuming Button component is available
+import { Button } from '@heroui/react';
 import { FaCheckCircle } from 'react-icons/fa';
 import Link from 'next/link';
-
-const pricingPlans = [
-  {
-    name: 'Starter',
-    price: '$10',
-    frequency: '/month',
-    description: 'Ideal for small teams getting started.',
-    features: [
-      'Up to 5 Users',
-      'Basic Project & Task Management',
-      '1 GB File Storage',
-      'Basic AI Search',
-      'Community Support',
-    ],
-    cta: 'Get Started',
-    href: '/register', // Link to registration
-    popular: false,
-  },
-  {
-    name: 'Professional',
-    price: '$20',
-    frequency: '/user/month',
-    description: 'For growing businesses needing core AI features.',
-    features: [
-      'Up to 50 Users',
-      'Full Project & Task Management',
-      'AI CV Analysis & Task Suggestions',
-      '10 GB File Storage per User',
-      'Semantic File Search',
-      'Analytics Dashboards',
-      'Group Management (RBAC)',
-      'Priority Email Support',
-    ],
-    cta: 'Choose Plan',
-    href: '/register', // Link to registration
-    popular: true, // Highlight this plan
-  },
-  {
-    name: 'Enterprise',
-    price: 'Custom',
-    frequency: '',
-    description: 'For large organizations with advanced needs.',
-    features: [
-      'Unlimited Users',
-      'Advanced AI Workflow Automation',
-      'Full Audit Logs',
-      'Tenant Database Management',
-      'Customizable Storage',
-      'Dedicated Account Manager',
-      'Premium Support & SLA',
-      'API Access (Optional)',
-    ],
-    cta: 'Contact Sales',
-    href: '/contact-us', // Link to a contact page (assuming it exists or will exist)
-    popular: false,
-  },
-];
+import { useTranslations } from 'next-intl';
 
 export default function PricingPage() {
+  const t = useTranslations('pricing');
+
+  const pricingPlans = [
+    {
+      key: 'starter',
+      name: t('plans.starter.name'),
+      price: t('plans.starter.price'),
+      frequency: t('plans.starter.frequency'),
+      description: t('plans.starter.description'),
+      features: t.raw('plans.starter.features') as string[],
+      cta: t('plans.starter.cta'),
+      href: '/register',
+      popular: false,
+    },
+    {
+      key: 'professional',
+      name: t('plans.professional.name'),
+      price: t('plans.professional.price'),
+      frequency: t('plans.professional.frequency'),
+      description: t('plans.professional.description'),
+      features: t.raw('plans.professional.features') as string[],
+      cta: t('plans.professional.cta'),
+      href: '/register',
+      popular: true,
+    },
+    {
+      key: 'enterprise',
+      name: t('plans.enterprise.name'),
+      price: t('plans.enterprise.price'),
+      frequency: t('plans.enterprise.frequency'),
+      description: t('plans.enterprise.description'),
+      features: t.raw('plans.enterprise.features') as string[],
+      cta: t('plans.enterprise.cta'),
+      href: '/contact-us',
+      popular: false,
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-dark_blue text-white px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl sm:text-5xl font-semibold mb-4 bg-gradient-to-r from-light_blue via-light_blue-500 to-white bg-clip-text text-transparent pb-4">
-            Pricing Plans
+            {t('title')}
           </h1>
           <p className="text-lg sm:text-xl text-white/70 max-w-2xl mx-auto">
-            Choose the plan that best fits your company&amp;apos;s needs. Scale up as you grow.
+            {t('subtitle')}
           </p>
         </div>
 
@@ -78,12 +60,12 @@ export default function PricingPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
           {pricingPlans.map((plan) => (
             <div
-              key={plan.name}
+              key={plan.key}
               className={`bg-white/5 border border-white/20 rounded-xl p-8 flex flex-col ${plan.popular ? 'border-light_blue-500 border-2 relative' : ''}`}
             >
               {plan.popular && (
                 <div className="absolute top-0 right-0 mr-4 -mt-3 bg-light_blue-500 text-dark_blue text-xs font-semibold px-3 py-1 rounded-full">
-                  Most Popular
+                  {t('mostPopular')}
                 </div>
               )}
               <h2 className="text-2xl font-semibold text-white mb-2">{plan.name}</h2>
@@ -97,8 +79,8 @@ export default function PricingPage() {
               </div>
 
               <ul className="space-y-4 mb-10 flex-grow">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-center">
+                {plan.features.map((feature, index) => (
+                  <li key={index} className="flex items-center">
                     <FaCheckCircle className="text-light_blue-500 mr-3 flex-shrink-0" />
                     <span className="text-white/90">{feature}</span>
                   </li>

@@ -3,19 +3,9 @@ import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button, cn } from "@heroui/react";
 import { motion } from "framer-motion";
+import { useTranslations } from 'next-intl';
 
 const SLIDE_DURATION = 5000;
-
-const slides = [
-  {
-    title: "AI-Powered Company Management",
-    content: "Overcome operational hurdles with a unified platform designed to centralize resources, automate task management, and streamline workflows using intelligent AI."
-  },
-  {
-    title: "Efficiency Meets Intelligence",
-    content: "Leverage AI for automated task suggestions based on skills, gain real-time insights through dynamic dashboards, and manage company resources effortlessly."
-  }
-];
 
 const slideVariants = {
   hidden: { opacity: 0 },
@@ -23,7 +13,20 @@ const slideVariants = {
 };
 
 const Banner = () => {
+  const t = useTranslations('homepage.section2');
   const [currentSlide, setCurrentSlide] = useState(0);
+  
+  // Get slides from translations
+  const slides = [
+    {
+      title: t('slides.0.title'),
+      content: t('slides.0.content')
+    },
+    {
+      title: t('slides.1.title'),
+      content: t('slides.1.content')
+    }
+  ];
 
   const goToSlide = useCallback((index : number) => {
     setCurrentSlide(index);
@@ -31,11 +34,11 @@ const Banner = () => {
 
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
-  }, []);
+  }, [slides.length]);
 
   const prevSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-  }, []);
+  }, [slides.length]);
 
   // Reset timer whenever currentSlide changes
   useEffect(() => {

@@ -5,13 +5,17 @@ import Humburger from "./content/humburger/humburger";
 import { Session } from "next-auth";
 import DropDownMenu from "./content/dropDownMenu";
 import Image from "next/image";
-export const menuItems = [
-    {name : "Home" , href : "/"},
-    {name : "Pricing" , href : "/pricing"},
-    {name : "Contact us" , href : "/contact"},
-  ];
+import LanguageChanger from "../languageChanger";
+import { useTranslations } from 'next-intl';
 
-export default async function Nav({session}:{session : Session | null}){
+export default function Nav({session}:{session : Session | null}){
+    const t = useTranslations('navigation');
+    
+    const menuItems = [
+        {name : t('menuItems.home'), href : "/"},
+        {name : t('menuItems.pricing'), href : "/pricing"},
+        {name : t('menuItems.contact'), href : "/contact"},
+    ];
 
     return (
         <nav  className="bg-white/10 border-white/20 border-1 z-50 sticky top-10 w-[calc(100%-20px)] mx-auto sm:w-[calc(100%-40px)] lg:w-[calc(100%-200px)] max-w-[1920px]  rounded-full h-[60px] sm:mx-[20px] lg:mx-[100px] backdrop-blur flex justify-center items-center mb-20 sm:mb-28 ">
@@ -36,10 +40,12 @@ export default async function Nav({session}:{session : Session | null}){
 
             <div className="flex gap-2 sm:gap-6 items-center">
 
+                <LanguageChanger />
+
                 {!session ?
                 <>
                     <LoginButton/>
-                    <Button as={Link} href="/register" variant="bordered" className="border-light_blue/70 text-light_blue  rounded-xl text-sm md:text-md font-semibold">Sign up</Button>
+                    <Button as={Link} href="/register" variant="bordered" className="border-light_blue/70 text-light_blue  rounded-xl text-sm md:text-md font-semibold">{t('buttons.signUp')}</Button>
                 </>: <DropDownMenu session={session}/>
                 }
 

@@ -1,0 +1,13 @@
+{
+  "menuItems": {
+    "home": "الرئيسية",
+    "pricing": "التسعير",
+    "contact": "اتصل بنا"
+  },
+  "buttons": {
+    "login": "تسجيل الدخول",
+    "signUp": "إنشاء حساب",
+    "asAdmin": "كمدير",
+    "asWorker": "كموظف"
+  }
+}

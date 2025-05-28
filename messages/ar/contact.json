@@ -1,0 +1,36 @@
+{
+  "title": "اتصل بنا",
+  "subtitle": "تواصل مع DigiGrowing. نحن هنا لمساعدتك.",
+  "company": {
+    "name": "DigiGrowing",
+    "address": "B N°12 حاضنة الأعمال مهدية للمؤسسات،\nمهدية، تونس، 5111",
+    "phone": "+216 21 897 583",
+    "email": "ceo.digigrowing@gmail.com",
+    "website": "www.fb.com/digigrowing.company"
+  },
+  "form": {
+    "title": "أرسل لنا رسالة",
+    "fields": {
+      "name": {
+        "label": "الاسم",
+        "placeholder": "اسمك"
+      },
+      "email": {
+        "label": "البريد الإلكتروني",
+        "placeholder": "you@example.com"
+      },
+      "message": {
+        "label": "الرسالة",
+        "placeholder": "كيف يمكننا مساعدتك؟"
+      }
+    },
+    "submit": {
+      "default": "إرسال الرسالة",
+      "sending": "جاري الإرسال..."
+    },
+    "messages": {
+      "success": "تم إرسال الرسالة بنجاح!",
+      "error": "يرجى ملء جميع الحقول."
+    }
+  }
+}

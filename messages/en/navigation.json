@@ -1,0 +1,13 @@
+{
+  "menuItems": {
+    "home": "Home",
+    "pricing": "Pricing",
+    "contact": "Contact us"
+  },
+  "buttons": {
+    "login": "Login",
+    "signUp": "Sign up",
+    "asAdmin": "As admin",
+    "asWorker": "As worker"
+  }
+}

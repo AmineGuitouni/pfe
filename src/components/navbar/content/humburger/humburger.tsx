@@ -3,16 +3,18 @@ import { Cross as Hamburger } from 'hamburger-react'
 import { useState } from 'react'
 import {motion} from "framer-motion"
 import Link from 'next/link'
-import { menuItems } from '../../navbar'
-
-
+import { useTranslations } from 'next-intl'
 
 export default function Humburger() {
-
+    const t = useTranslations('navigation');
     const [isOpen, setOpen] = useState(false)
     const onToggle = () => setOpen(!isOpen)
 
-    
+    const menuItems = [
+        {name : t('menuItems.home'), href : "/"},
+        {name : t('menuItems.pricing'), href : "/pricing"},
+        {name : t('menuItems.contact'), href : "/contact"},
+    ];
 
     return ( 
         <div className='md:hidden z-10 mr-2 '>

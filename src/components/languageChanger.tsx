@@ -1,40 +1,19 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { usePathname } from 'next/navigation';
-import { useTranslation } from 'react-i18next';
-import i18nConfig from '../../i18config';
+import { useRouter, usePathname } from '@/i18n/navigation';
+import { useLocale } from 'next-intl';
 import { Select, SelectItem } from '@heroui/react';
 
 const languages = [
-  "en","fr","ar","de"
+  "en","fr","ar"
 ]
 export default function LanguageChanger() {
-  const { i18n } = useTranslation();
-  const currentLocale = i18n.language;
+  const currentLocale = useLocale();
   const router = useRouter();
-  const currentPathname = usePathname();
+  const pathname = usePathname();
 
-  const handleChange = ( newLocale: string ) => {
-    // set cookie for next-i18n-router
-    const days = 30;
-    const date = new Date();
-    date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
-    const expires = date.toUTCString();
-    document.cookie = `NEXT_LOCALE=${newLocale};expires=${expires};path=/`;
-
-    // redirect to the new locale path
-    if (
-      currentLocale === i18nConfig.defaultLocale
-    ) {
-      router.push('/' + newLocale + currentPathname);
-    } else {
-      router.push(
-        currentPathname.replace(`/${currentLocale}`, `/${newLocale}`)
-      );
-    }
-
-    router.refresh();
+  const handleChange = (newLocale: string) => {
+    router.push(pathname, {locale: newLocale});
   };
 
   return (
@@ -44,7 +23,7 @@ export default function LanguageChanger() {
       variant='bordered'
       value={currentLocale}
       classNames={{
-        base : "w-[70px] dark",
+        base : "w-[100px] dark",
         trigger:"border-light_blue-500 shadow-none text-logo_color",
         value :"text-light_blue-500",
         selectorIcon:"text-light_blue-500 text-md"
