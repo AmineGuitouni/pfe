@@ -19,17 +19,23 @@ export default async function apiMiddleware({path, token}:ApiMiddlewareOptions) 
     if(!token){
         console.log("No token found, using default token");
         token = {
-            name: 'Mohamed Amine Guitouni',
-            email: 'guitouni.medamine@gmail.com',
-            sub: 'a1232090-2c7b-4d8a-bcd0-9350df246ced',
-            first_name: 'Mohamed Amine',
-            last_name: 'Guitouni',
-            role: 'owner',
-            email_verified: true,
-            country: 'Tunisia',
-            phone_number: '56522039',
-            jti: '4a58d684-7aa9-4737-833a-29fa92516238'
-        } as JWT
+                name: 'amine Guitlouni',
+                email: 'notam1ne2002@gmail.com',
+                picture: null,
+                sub: '51f8b578-5768-409e-883c-5cf012d6f98f',
+                first_name: 'amine',
+                last_name: 'Guitlouni',
+                role: 'worker',
+                email_verified: true,
+                country: 'Tunisia',
+                phone_number: '+4456522039',
+                company_id: '031db447-2c1b-45a4-b8fe-5a5db89009e5',
+                image: null,
+                cv_informations: true,
+                iat: 1748516754,
+                exp: 1748538354,
+                jti: '847183b1-d94d-4588-9889-6f5133b63897'
+            } as JWT
     }
     const passResponse = NextResponse.next();
     passResponse.headers.set('x-user-role', token?.role as string | null || 'guest');
