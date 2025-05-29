@@ -20,6 +20,7 @@ interface AutoCompleteTextAreaProps extends React.TextareaHTMLAttributes<HTMLTex
   commands: Command[];
   value: string;
   onValueChange: (value: string) => void;
+  onSubmit?: () => void;
 }
 
 const AutoCompleteTextArea: React.FC<AutoCompleteTextAreaProps> = ({
@@ -27,6 +28,7 @@ const AutoCompleteTextArea: React.FC<AutoCompleteTextAreaProps> = ({
   commands,
   value,
   onValueChange,
+  onSubmit,
   ...textareaProps
 }) => {
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -387,6 +389,20 @@ const AutoCompleteTextArea: React.FC<AutoCompleteTextAreaProps> = ({
       } else if (e.key === 'Escape') {
         e.preventDefault();
         setShowSuggestions(false);
+      }
+    } else {
+      // Handle Enter and Shift+Enter when no suggestions are showing
+      if (e.key === 'Enter') {
+        if (e.shiftKey) {
+          // Shift+Enter: Allow normal behavior (new line)
+          return;
+        } else {
+          // Enter: Submit the form
+          e.preventDefault();
+          if (onSubmit) {
+            onSubmit();
+          }
+        }
       }
     }
   };

@@ -35,12 +35,17 @@ export async function GET(req: Request, {params: {user_id}}: {params: {user_id: 
         const loaclSupabase = await getServerDBfromCompanyId(company_id)
         if(loaclSupabase){
             console.log("Fetching workers count from local database for company ID:", company_id);
-            const {count} = await loaclSupabase.from("users")
+            const {count, error} = await loaclSupabase.from("users")
             .select("", {count: "exact"})
             .eq("company_id", company_id)
 
+            if( error) {
+                console.log("Error counting workers:", error);
+                return NextResponse.json({error: error.message}, {status: 500});
+            }
+            
+            console.log("Counted workers:", countWorkers);
             countWorkers = count || 0;
-
         }
 
         const newData = {

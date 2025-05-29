@@ -1,3 +1,11 @@
+export interface User {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  image?: string;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -7,6 +15,7 @@ export interface Task {
   difficultyLevel: number;
   user_id? : string
   checked : boolean
+  assigned_users?: User[];
 }
 
 export interface GeneratedTask {

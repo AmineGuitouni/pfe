@@ -3,6 +3,7 @@ import { SessionMessage } from '../hooks/useCommandCenter';
 import { User, Bot, Wrench } from 'lucide-react'; // Added Wrench for tool results
 import ToolUseDisplay, { ToolCall } from './toolUseDisplay';
 import ToolResultDisplay from './toolResultDisplay'; // Import the new component
+import { useCommandCenterContext } from '../context/CommandCenterContext';
 
 interface ParsedMessage {
   textBefore: string;
@@ -35,6 +36,7 @@ const parseMessageWithToolUse = (text: string): ParsedMessage => {
       const parsedToolCall = parsedJson as ToolCall;
       const textBefore = text.substring(0, startIndex);
       const textAfter = text.substring(startIndex + blockLength);
+      
       return { textBefore, toolCall: parsedToolCall, textAfter, rawText: text };
     } catch (error) {
       console.error(
@@ -70,7 +72,7 @@ const parseMessageWithToolResult = (text: string): ParsedToolResult | undefined 
       if (
         typeof parsedJson !== 'object' ||
         parsedJson === null ||
-        typeof parsedJson.tool_name !== 'string' ||
+        typeof parsedJson.name !== 'string' ||
         // It must have either 'output' or 'error'
         (!parsedJson.hasOwnProperty('output') && !parsedJson.hasOwnProperty('error'))
       ) {
@@ -78,7 +80,7 @@ const parseMessageWithToolResult = (text: string): ParsedToolResult | undefined 
         return undefined; // Indicates parsing failure or invalid structure
       }
       return {
-        toolName: parsedJson.tool_name,
+        toolName: parsedJson.name,
         output: parsedJson.output,
         error: parsedJson.error,
         rawJsonString: toolResultJsonString,
@@ -98,12 +100,15 @@ const parseMessageWithToolResult = (text: string): ParsedToolResult | undefined 
 
 interface MessageItemProps {
   message: SessionMessage;
+  isLast?: boolean;
 }
 
-const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
+const MessageItem: React.FC<MessageItemProps> = ({ message, isLast }) => {
   const isUser = message.sender === 'user';
   const isAi = message.sender === 'ai';
   const isTool = message.sender === 'tool';
+
+  const {toolCallAction} = useCommandCenterContext();
 
   // Memoize parsing results
   const parsedAiContent = useMemo(() => {
@@ -161,7 +166,16 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
             {/* Render ToolUseDisplay if a tool_use block is parsed (valid or not, ToolUseDisplay handles undefined) */}
             {/* ToolUseDisplay will show loading/error if toolCall is undefined due to parsing error */}
             {message.content.includes('```tool_use') && (
-                 <ToolUseDisplay toolCall={parsedAiContent.toolCall} />
+                 <ToolUseDisplay
+                   toolCall={parsedAiContent.toolCall}
+                   onAccept={async ()=>{
+                     await toolCallAction('accept');
+                   }}
+                   onReject={async ()=>{
+                     await toolCallAction('reject');
+                   }}
+                   isLast={isLast}
+                 />
             )}
             {/* Render text after tool_use block if it exists and tool_use is parsed */}
             {parsedAiContent.toolCall && hasActualTextAfterAi && (

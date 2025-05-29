@@ -19,8 +19,8 @@ export interface ListProjectsResponseBody {
     }
 }
 
-export async function GET(request: Request, { params: { company_id } }: { params: params }) {
-    const supabase = await getServerDBfromCompanyId(company_id)
+export async function GET(request: Request, { params: { company_id, user_id } }: { params: params }) {
+    const supabase = await getServerDBfromCompanyId(company_id, user_id)
 
     if(!supabase) return NextResponse.json({error: "Failed to connect to database"}, {status: 500});
 

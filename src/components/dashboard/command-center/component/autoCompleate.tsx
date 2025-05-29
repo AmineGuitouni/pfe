@@ -127,15 +127,18 @@ export default function CommandInput() {
   const {SendMessage, sendingMessage} = useCommandCenterContext();
   const {command_center_session} = useParams();
 
-  const handleSubmit = () => {
-    SendMessage(textValue)
-    const result = parseCommandString(textValue, predefinedCommands);
-
-    if ('error' in result) {
-      console.error("Validation Error:", result.error);
-    } else {
-      console.log("Parsed Command:", result);
+  const handleSubmit = async () => {
+    if (textValue.trim()) {
+      await SendMessage(textValue);
+      setTextValue(''); // Clear the input after sending
     }
+    // const result = parseCommandString(textValue, predefinedCommands);
+
+    // if ('error' in result) {
+    //   console.error("Validation Error:", result.error);
+    // } else {
+    //   console.log("Parsed Command:", result);
+    // }
   };
 
   return (
@@ -150,6 +153,7 @@ export default function CommandInput() {
           placeholder="Type @ for commands..."
           rows={command_center_session ? 3 : 8}
           className="w-full p-3 bg-dark_blue text-white border border-light_blue-500/20 rounded-md focus:ring-2 focus:ring-light_blue-500 focus:border-light_blue-500 outline-none resize-none"
+          onSubmit={handleSubmit}
         />
         <Button
           onPress={handleSubmit}

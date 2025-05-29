@@ -1,0 +1,62 @@
+{
+  "title": "Welcome to Our Platform",
+  "subtitle": "Discover amazing features and grow your business",
+  "section1": {
+    "aiPowered": "AI-Powered",
+    "title": "Revolutionize your",
+    "titleHighlight": "Workplace",
+    "description": "Experience the future of company management with our revolutionary AI-driven platform. Streamline operations, enhance HR processes, centralize resources, and adapt to your team's unique dynamics.",
+    "getStarted": "Get Started",
+    "seeFeatures": "See Features",
+    "features": {
+      "aiTaskManagement": {
+        "title": "AI Task Management",
+        "description": "Smart task generation and assignment based on CV analysis and skill tracking."
+      },
+      "commandCenter": {
+        "title": "Command Center",
+        "description": "Lightning-fast CLI interface for seamless workflow execution and team coordination."
+      },
+      "smartAnalytics": {
+        "title": "Smart Analytics",
+        "description": "Real-time insights with AI-powered performance optimization suggestions."
+      },
+      "resourceHub": {
+        "title": "Resource Hub",
+        "description": "Access all company documents instantly with smart, AI-powered search."
+      },
+      "streamlinedHR": {
+        "title": "Streamlined HR",
+        "description": "Simplify HR processes with automated CV analysis and skill tracking."
+      },
+      "projectVisibility": {
+        "title": "Project Visibility",
+        "description": "Gain clear insights into project progress and team productivity with dynamic dashboards."
+      }
+    }
+  },
+  "section2": {
+    "slides": [
+      {
+        "title": "AI-Powered Company Management",
+        "content": "Overcome operational hurdles with a unified platform designed to centralize resources, automate task management, and streamline workflows using intelligent AI."
+      },
+      {
+        "title": "Efficiency Meets Intelligence",
+        "content": "Leverage AI for automated task suggestions based on skills, gain real-time insights through dynamic dashboards, and manage company resources effortlessly."
+      }
+    ]
+  },
+  "whoIsItFor": {
+    "title": "Who Is It For?",
+    "description": "Our platform operates on a Software as a Service (SaaS) model, designed to cater specifically to the needs of modern businesses and their teams.",
+    "companyOwners": {
+      "title": "Company Owners",
+      "description": "Businesses subscribing to manage their operations, employees, projects, and resources efficiently. Get a comprehensive suite of tools to oversee your entire company structure, track progress, and leverage AI for smarter management."
+    },
+    "employees": {
+      "title": "Employees",
+      "description": "Team members invited by their company owners. Use the platform to manage your profile, submit CVs for skill analysis, track assigned tasks, access project resources, and collaborate effectively within your company's workspace."
+    }
+  }
+}

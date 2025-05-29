@@ -1,0 +1,55 @@
+{
+  "title": "Plans de tarification",
+  "subtitle": "Choisissez le plan qui convient le mieux aux besoins de votre entreprise. Évoluez au fur et à mesure de votre croissance.",
+  "mostPopular": "Le plus populaire",
+  "plans": {
+    "starter": {
+      "name": "Débutant",
+      "price": "10$",
+      "frequency": "/mois",
+      "description": "Idéal pour les petites équipes qui commencent.",
+      "features": [
+        "Jusqu'à 5 utilisateurs",
+        "Gestion de projet et de tâches de base",
+        "1 Go de stockage de fichiers",
+        "Recherche IA de base",
+        "Support communautaire"
+      ],
+      "cta": "Commencer"
+    },
+    "professional": {
+      "name": "Professionnel",
+      "price": "20$",
+      "frequency": "/utilisateur/mois",
+      "description": "Pour les entreprises en croissance ayant besoin des fonctionnalités IA principales.",
+      "features": [
+        "Jusqu'à 50 utilisateurs",
+        "Gestion complète de projet et de tâches",
+        "Analyse de CV par IA et suggestions de tâches",
+        "10 Go de stockage par utilisateur",
+        "Recherche sémantique de fichiers",
+        "Tableaux de bord d'analyse",
+        "Gestion de groupes (RBAC)",
+        "Support email prioritaire"
+      ],
+      "cta": "Choisir ce plan"
+    },
+    "enterprise": {
+      "name": "Entreprise",
+      "price": "Personnalisé",
+      "frequency": "",
+      "description": "Pour les grandes organisations avec des besoins avancés.",
+      "features": [
+        "Utilisateurs illimités",
+        "Automatisation avancée des flux de travail par IA",
+        "Journaux d'audit complets",
+        "Gestion de base de données locataire",
+        "Stockage personnalisable",
+        "Gestionnaire de compte dédié",
+        "Support premium et SLA",
+        "Accès API (optionnel)"
+      ],
+      "cta": "Contacter les ventes"
+    }
+  }
+}

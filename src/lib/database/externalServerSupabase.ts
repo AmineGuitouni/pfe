@@ -19,6 +19,9 @@ export async function getServerDBfromCompanyId( companyId: string , user_id?:str
     const KEY = data.database_id ? data.database.connection_config.SUPABASE_KEY :
     process.env.SHARED_SUPABASE_KEY
 
+    const JWT = data.database_id ? data.database.connection_config.SUPABASE_JWT_SECRET :
+    process.env.SHARED_SUPABASE_JWT_SECRET;
+
     if(user_id){
 
         const supabaseTokenPayload = {
@@ -29,7 +32,7 @@ export async function getServerDBfromCompanyId( companyId: string , user_id?:str
             company_id: companyId,
         }
 
-        const supabase_token = jwt.sign(supabaseTokenPayload, data.database.connection_config.SUPABASE_JWT_SECRET!)
+        const supabase_token = jwt.sign(supabaseTokenPayload, JWT)
         
         const client = createClient(URL, KEY,{
             global: {

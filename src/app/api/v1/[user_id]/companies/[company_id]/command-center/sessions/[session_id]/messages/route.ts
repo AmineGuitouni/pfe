@@ -9,6 +9,18 @@ interface Params {
     session_id: string;
 }
 
+export interface MessagesRouteResponse {
+    data?: {
+        id: string;
+        session_id: string;
+        sender: 'user' | 'ai' | 'tool';
+        content: string;
+        created_at: string;
+        type: 'text' | 'audio';
+    }[];
+    error?: string;
+}
+
 export async function GET(req: Request, { params }: { params: Params }) {
     try{
         const { company_id, session_id } = params;
@@ -20,10 +32,10 @@ export async function GET(req: Request, { params }: { params: Params }) {
 
         const { data, error } = await supabase
             .from('command_center_sessions_messages')
-            .select('id, session_id, sender, text, created_at')
+            .select('id, session_id, sender, content, created_at, content_type')
             .eq('session_id', session_id)
             .order('created_at', { ascending: true });
-
+        
         if (error) {
             console.error('Error fetching messages:', error);
             return NextResponse.json({ error: "Database Error" }, { status: 500 });
@@ -38,8 +50,9 @@ export async function GET(req: Request, { params }: { params: Params }) {
                 id: message.id,
                 session_id: message.session_id,
                 sender: message.sender,
-                text: message.text,
-                created_at: message.created_at
+                content: message.content,
+                created_at: message.created_at,
+                type: message.content_type || 'text'
             }))
         }, { status: 200 });
     }

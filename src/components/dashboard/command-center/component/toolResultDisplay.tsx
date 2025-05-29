@@ -1,5 +1,5 @@
-import React from 'react';
-import { CheckCircle, XCircle } from 'lucide-react'; // Using Wrench as a general icon
+import React, { useState } from 'react';
+import { CheckCircle, XCircle, ChevronDown, ChevronRight } from 'lucide-react';
 
 interface ToolResultDisplayProps {
   toolName: string;
@@ -8,6 +8,7 @@ interface ToolResultDisplayProps {
 }
 
 const ToolResultDisplay: React.FC<ToolResultDisplayProps> = ({ toolName, output, error }) => {
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const hasError = error !== undefined && error !== null;
   const hasOutput = output !== undefined && output !== null;
 
@@ -56,27 +57,40 @@ const ToolResultDisplay: React.FC<ToolResultDisplayProps> = ({ toolName, output,
         hasError ? 'text-red-300' : 'text-green-300'
       }`}>
         {hasError ? <XCircle size={18} /> : <CheckCircle size={18} />}
-        <h4 className="font-semibold text-sm">
+        <h4 className="font-semibold text-sm flex-1">
           Tool: {toolName}
         </h4>
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className={`flex items-center justify-center w-6 h-6 rounded hover:bg-opacity-20 transition-colors ${
+            hasError ? 'hover:bg-red-500' : 'hover:bg-green-500'
+          }`}
+          title={isCollapsed ? 'Expand' : 'Collapse'}
+        >
+          {isCollapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
+        </button>
       </div>
 
-      {hasError && displayErrorMessage && (
-        <div className="text-xs">
-          <p className="font-medium text-red-200">Error:</p>
-          <p className="whitespace-pre-wrap break-all text-red-300">{displayErrorMessage}</p>
-        </div>
-      )}
+      {!isCollapsed && (
+        <>
+          {hasError && displayErrorMessage && (
+            <div className="text-xs">
+              <p className="font-medium text-red-200">Error:</p>
+              <p className="whitespace-pre-wrap break-all text-red-300">{displayErrorMessage}</p>
+            </div>
+          )}
 
-      {!hasError && hasOutput && (
-        <div className="space-y-1 text-xs">
-          <p className="font-medium text-green-200">Output:</p>
-          <div className="text-gray-200">{renderOutput(output)}</div>
-        </div>
-      )}
-      
-      {!hasError && !hasOutput && (
-         <p className="text-xs text-green-400 italic">Tool executed successfully. (No explicit output)</p>
+          {!hasError && hasOutput && (
+            <div className="space-y-1 text-xs">
+              <p className="font-medium text-green-200">Output:</p>
+              <div className="text-gray-200">{renderOutput(output)}</div>
+            </div>
+          )}
+          
+          {!hasError && !hasOutput && (
+             <p className="text-xs text-green-400 italic">Tool executed successfully. (No explicit output)</p>
+          )}
+        </>
       )}
     </div>
   );

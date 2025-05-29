@@ -1,0 +1,62 @@
+{
+  "title": "Bienvenue sur notre plateforme",
+  "subtitle": "Découvrez des fonctionnalités incroyables et développez votre entreprise",
+  "section1": {
+    "aiPowered": "Alimenté par l'IA",
+    "title": "Révolutionnez votre",
+    "titleHighlight": "Lieu de travail",
+    "description": "Découvrez l'avenir de la gestion d'entreprise avec notre plateforme révolutionnaire pilotée par l'IA. Rationalisez les opérations, améliorez les processus RH, centralisez les ressources et adaptez-vous à la dynamique unique de votre équipe.",
+    "getStarted": "Commencer",
+    "seeFeatures": "Voir les fonctionnalités",
+    "features": {
+      "aiTaskManagement": {
+        "title": "Gestion des tâches par IA",
+        "description": "Génération intelligente de tâches et attribution basée sur l'analyse de CV et le suivi des compétences."
+      },
+      "commandCenter": {
+        "title": "Centre de commande",
+        "description": "Interface CLI ultra-rapide pour une exécution de flux de travail transparente et la coordination d'équipe."
+      },
+      "smartAnalytics": {
+        "title": "Analyses intelligentes",
+        "description": "Informations en temps réel avec des suggestions d'optimisation des performances alimentées par l'IA."
+      },
+      "resourceHub": {
+        "title": "Centre de ressources",
+        "description": "Accédez instantanément à tous les documents de l'entreprise avec une recherche intelligente alimentée par l'IA."
+      },
+      "streamlinedHR": {
+        "title": "RH rationalisées",
+        "description": "Simplifiez les processus RH avec l'analyse automatisée de CV et le suivi des compétences."
+      },
+      "projectVisibility": {
+        "title": "Visibilité des projets",
+        "description": "Obtenez des informations claires sur l'avancement des projets et la productivité de l'équipe avec des tableaux de bord dynamiques."
+      }
+    }
+  },
+  "section2": {
+    "slides": [
+      {
+        "title": "Gestion d'entreprise alimentée par l'IA",
+        "content": "Surmontez les obstacles opérationnels avec une plateforme unifiée conçue pour centraliser les ressources, automatiser la gestion des tâches et rationaliser les flux de travail grâce à l'IA intelligente."
+      },
+      {
+        "title": "L'efficacité rencontre l'intelligence",
+        "content": "Exploitez l'IA pour des suggestions de tâches automatisées basées sur les compétences, obtenez des informations en temps réel grâce aux tableaux de bord dynamiques et gérez les ressources de l'entreprise sans effort."
+      }
+    ]
+  },
+  "whoIsItFor": {
+    "title": "Pour qui est-ce ?",
+    "description": "Notre plateforme fonctionne sur un modèle Software as a Service (SaaS), conçu pour répondre spécifiquement aux besoins des entreprises modernes et de leurs équipes.",
+    "companyOwners": {
+      "title": "Propriétaires d'entreprise",
+      "description": "Entreprises s'abonnant pour gérer leurs opérations, employés, projets et ressources efficacement. Obtenez une suite complète d'outils pour superviser toute votre structure d'entreprise, suivre les progrès et exploiter l'IA pour une gestion plus intelligente."
+    },
+    "employees": {
+      "title": "Employés",
+      "description": "Membres de l'équipe invités par leurs propriétaires d'entreprise. Utilisez la plateforme pour gérer votre profil, soumettre des CV pour l'analyse des compétences, suivre les tâches assignées, accéder aux ressources du projet et collaborer efficacement dans l'espace de travail de votre entreprise."
+    }
+  }
+}
