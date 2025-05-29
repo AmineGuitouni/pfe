@@ -1,6 +1,6 @@
 "use client"
 import { formatShortDate } from "@/lib/utils";
-import { Alert, Avatar, Link } from "@heroui/react";
+import { Alert, Avatar, cn, Link } from "@heroui/react";
 import { 
   BuildingOffice2Icon, 
   CalendarDaysIcon,
@@ -72,15 +72,15 @@ export default function CompanyOverview({ company_id }: { company_id: string }) 
       ) : (
         // Actual Content
         <div className="flex flex-col md:flex-row w-full gap-8 md:gap-10 items-center md:items-start text-center md:text-left mb-8 p-6 rounded-xl border border-white/10 shadow-lg bg-white/5 backdrop-filter backdrop-blur-sm">
-          <div className="flex flex-col items-center justify-center">
+          <div className="flex flex-col items-center justify-center w-[25%]">
             <Avatar
               src={company?.logo || undefined}
               name={company?.name}
               size="lg" // Changed back from "xl" to "lg" to fix TS error
               className="flex-shrink-0 bg-gradient-to-br from-light_blue to-light_blue-500 text-dark_blue border-4 border-white/20 shadow-lg w-28 h-28 mb-4" // Kept adjusted size and margin via className
             />
-            <div className="text-4xl sm:text-5xl font-bold text-center md:text-left bg-gradient-to-r from-light_blue via-light_blue-500 to-white bg-clip-text text-transparent mb-2">
-                {company?.name}
+            <div className={cn(" text-4xl font-bold text-center h-[50px] bg-gradient-to-r from-light_blue via-light_blue-500 to-white bg-clip-text text-transparent mb-2")}>
+               {company?.name}
               </div>
             {company?.industry && (
               <p className="text-white/70 text-base sm:text-lg text-center md:text-left flex items-center justify-center md:justify-start gap-2">

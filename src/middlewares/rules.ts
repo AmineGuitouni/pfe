@@ -114,8 +114,8 @@ const projectsApisRules: pageRuleType = {
 }
 
 export const apisRules = {
-    ...DatabasesApisRules,
-    ...CompaniesApisRules,
-    ...GroupsApisRules,
-    ...projectsApisRules
+    // ...DatabasesApisRules,
+    // ...CompaniesApisRules,
+    // ...GroupsApisRules,
+    // ...projectsApisRules
 }
