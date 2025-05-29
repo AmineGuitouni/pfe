@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "@/providers/nextUIProvider";
 import AppSession from "@/providers/AppSession";
 import { ToastContainer } from "react-toastify";
+import { MiniAiChat } from "@/components/agent/components";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -35,6 +36,7 @@ export default async function RootLayout({
         <Providers>
           <AppSession>
             {children}
+            <MiniAiChat />
             <ToastContainer
             position="bottom-right"
             autoClose={5000}
