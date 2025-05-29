@@ -19,9 +19,9 @@ export default function CompanyOverview({ company_id }: { company_id: string }) 
   const { data: session } = useSession();
 
 
- if((error || !company  ) && !loading) {
+ if(error && !loading) {
     return <div className=" w-full h-[100px] ">
-              <Alert color="danger" title="Error Loading Company"  description={"Company data could not be found."} />;
+              <Alert color="danger" title="Error Loading Company"  description={error || "Company data could not be found."} />
            </div>
     
   }
@@ -31,7 +31,7 @@ export default function CompanyOverview({ company_id }: { company_id: string }) 
     <section className="w-full flex flex-col  gap-8">
 
       {/* Conditional Rendering: Skeleton or Actual Content */}
-      {loading  && !company ? (
+      {loading || (!company && !error) ? (
         // Skeleton Loading State
         <div className="flex flex-col md:flex-row w-full gap-8 md:gap-10 items-center md:items-start text-center md:text-left mb-8 p-6 rounded-xl border border-white/10 shadow-lg bg-white/5 backdrop-filter backdrop-blur-sm animate-pulse">
           {/* Left Side Skeleton */}

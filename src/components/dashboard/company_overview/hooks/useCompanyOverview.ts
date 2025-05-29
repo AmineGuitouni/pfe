@@ -28,10 +28,10 @@ export type projectData = {
 
 export default function useCompanyOverview(company_id: string) {
     const [company, setCompany] = useState<CompanyType | null>(null);
-    const [companyLoading, setCompanyLoading] = useState<boolean>(false);
+    const [companyLoading, setCompanyLoading] = useState<boolean>(true);
     const [companyError, setCompanyError] = useState<string | null>(null);
     const [projectAnalyticsData, setProjectAnalyticsData] = useState<projectData[] | null>(null);
-    const [analyticsLoading, setAnalyticsLoading] = useState<boolean>(false);
+    const [analyticsLoading, setAnalyticsLoading] = useState<boolean>(true);
     const [analyticsError, setAnalyticsError] = useState<string | null>(null);
     const {data : session} = useSession();
 
@@ -89,6 +89,10 @@ export default function useCompanyOverview(company_id: string) {
         if (company_id && session?.user.id) {
             fetchCompany();
             fetchProjectAnalytics();
+        } else {
+            // If we don't have the required parameters, set loading to false
+            setCompanyLoading(false);
+            setAnalyticsLoading(false);
         }
     }
     , [company_id, fetchCompany, fetchProjectAnalytics, session?.user.id]);
