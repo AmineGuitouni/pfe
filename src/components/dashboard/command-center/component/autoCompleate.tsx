@@ -32,15 +32,15 @@ export default function CommandInput() {
 
   const handleSubmit = async () => {
     if (textValue.trim()) {
-      await SendMessage(textValue);
       setTextValue('');
+      await SendMessage(textValue);
     }
   };
 
   return (
-    <div className="p-8 flex flex-col items-center">
+    <div className="mb-4 flex flex-col items-center mx-auto w-full max-w-[1200px] px-4 md:px-6 lg:px-14 xl:px-24 2xl:px-28">
 
-      <div className="w-full max-w-2xl">
+      <div className="w-full px-3">
         <AutoCompleteTextArea
           value={textValue}
           onValueChange={setTextValue}
@@ -48,8 +48,8 @@ export default function CommandInput() {
           enableAutocomplete={autocompleteEnabled}
           placeholder={mode === 'cli' ? "Enter CLI command..." : mode === 'chat' ? "Type your message..." : "Type @ for commands or enter text..."}
           rows={command_center_session ? 3 : 8}
-          className="w-full p-3 bg-dark_blue text-white border border-light_blue-500/20 rounded-md focus:ring-2 focus:ring-light_blue-500 focus:border-light_blue-500 outline-none resize-none"
           onSubmit={handleSubmit}
+          submitDisabled={sendingMessage}
         />
         <Button
           onPress={handleSubmit}

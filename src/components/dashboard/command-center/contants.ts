@@ -6,7 +6,7 @@ export const predefinedCommands: Command[] = [
     description: "Deploys an application.",
     parameters: [
       { name: "--version", description: "Application version to deploy", placeholder: "1.0.0" },
-      { name: "--branch", description: "Git branch to deploy from", placeholder: "main" },
+      { name: "--branch", description: "Git branch to deploy from", placeholder: "main" , isRequired: true},
     ],
   },
   {

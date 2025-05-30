@@ -1,6 +1,6 @@
-export default function CommandCenterPage({ params: { company } }: { params: { company: string } }) {
+export default function CommandCenterPage() {
     return (
-        <div className="w-full p-8">
+        <div className="w-full p-8 mt-20">
             <div className="max-w-4xl mx-auto">
                 <div className="flex flex-col items-center">
                     <h1 className="text-4xl font-bold text-light_blue mb-2 animate-fade-in">
