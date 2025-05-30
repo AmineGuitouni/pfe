@@ -5,6 +5,7 @@ import NextLink from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useTranslations } from 'next-intl';
 
 export default function LoginFormAdmin() {
     const [email, setEmail] = useState("");
@@ -16,6 +17,7 @@ export default function LoginFormAdmin() {
 
     const router = useRouter();
     const searchParams = useSearchParams();
+    const t = useTranslations('auth.login');
 
     const submitHandler = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -56,27 +58,27 @@ export default function LoginFormAdmin() {
 
     return (
         <form onSubmit={submitHandler} className="w-[500px] max-h-[570px] border-1 p-8 px-4 sm:px-8 rounded-lg shadow-md bg-white/10 border-white/20 relative flex flex-col justify-center items-start gap-8 mt-20">
-            <p className="text-white text-center w-full text-2xl">Please enter your account details</p>
+            <p className="text-white text-center w-full text-2xl">{t('title')}</p>
             <Input
                 isRequired
                 className="w-full"
                 size="sm"
-                label="Email"
+                label={t('emailLabel')}
                 type="email"
                 value={email}
                 onValueChange={handleEmailChange} 
-                errorMessage={"Invalid credentials"}
+                errorMessage={t('invalidCredentials')}
                 isInvalid={error}
             />
             <Input
                 isRequired
                 className="w-full"
                 size="sm"
-                label="Password"
+                label={t('passwordLabel')}
                 type={isPasswordVisible ? "text" : "password"}
                 value={password}
                 onValueChange={handlePasswordChange} 
-                errorMessage={"Invalid credentials"}
+                errorMessage={t('invalidCredentials')}
                 isInvalid={error}
                 endContent={
                     !isPasswordVisible ? (
@@ -96,7 +98,7 @@ export default function LoginFormAdmin() {
             />
             <div className="w-full flex justify-end">
                 <Link href="/forget-password" as={NextLink} underline="hover" className="text-white text-medium">
-                    Forgot password?
+                    {t('forgotPassword')}
                 </Link>
             </div>
             <Button
@@ -107,12 +109,12 @@ export default function LoginFormAdmin() {
                 isDisabled={loading} 
                 className="bg-light_blue-500 text-dark_blue text-medium font-semibold w-full flex-shrink-0"
             >
-                Login
+                {t('loginButton')}
             </Button>
             <div className="w-full flex justify-center items-center gap-2">
-                <p className="text-white text-medium">Don`t have an account?</p>
+                <p className="text-white text-medium">{t('noAccount')}</p>
                 <Link href="/register" as={NextLink} underline="hover" className="text-light_blue-500 animate-pulse text-medium">
-                    Sign up
+                    {t('signup')}
                 </Link>
             </div>
         </form>
