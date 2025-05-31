@@ -49,18 +49,18 @@ export async function PUT(req: NextRequest, {params : { company_id, project_id }
         }, { status: 500 });
     }
 
+    // Insert into history table with correct field name
     const { error : historyError } = await client
         .from("project_task_history")
         .insert({
             task_id,
-            task_status: status
+            status: status
         })
 
     if (historyError) {
         console.error(historyError);
-        return NextResponse.json({ 
-            error: historyError.message 
-        }, { status: 500 });
+        // Don't fail the entire request if history insertion fails
+        console.warn("Failed to insert task history, but task update was successful");
     }
 
     return NextResponse.json({ ok: true });

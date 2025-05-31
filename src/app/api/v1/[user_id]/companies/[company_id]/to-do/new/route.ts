@@ -31,14 +31,27 @@ export async function POST(req: NextRequest, {params : { company_id }}: {params:
         }, { status: 400 });
     }
 
-    // Update task status in database
+    // Get the current max order for this project to set the new column order
+    const { data: existingColumns } = await client
+        .from("columns")
+        .select("column_order")
+        .eq("project_id", project_id)
+        .order("column_order", { ascending: false })
+        .limit(1);
+
+    const nextOrder = existingColumns && existingColumns.length > 0
+        ? (existingColumns[0].column_order || 0) + 1
+        : 0;
+
+    // Insert new column with calculated order
     const { data,error } = await client
         .from("columns")
         .insert({
             project_id,
             task_status ,
             name,
-            company_id
+            company_id,
+            column_order: nextOrder
         })
         .select("id,created_at")
         .single()

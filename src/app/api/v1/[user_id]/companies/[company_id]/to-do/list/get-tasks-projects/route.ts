@@ -69,9 +69,10 @@ export async function GET(req: NextRequest, {params: {company_id}}: {params: { c
           name: col.name,
           tasks: [],
           tasksStatus: col.task_status,
+          order: col.column_order || 0,
         }
       };
-    }, {});	
+    }, {});
     
     Object.values(tasksMap).forEach((task: any) => {
       if(task.column_id){

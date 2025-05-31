@@ -10,7 +10,8 @@ export interface Column {
     id: string;
     name: string;
     tasks: Task[];
-    tasksStatus : statusForCol
+    tasksStatus : statusForCol;
+    order: number;
 }
 
 export type TaskBoard = Record<string, toDoProject> 
