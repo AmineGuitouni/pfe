@@ -2,11 +2,10 @@
 
 import { MessageCircle, Terminal } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useParams } from "next/navigation";
 
 export default function SwitchesButtons({comapny_id}: {comapny_id: string}) {
-    const pathName = usePathname();
-    const mode = pathName.split("/").pop()
+    const {mode} = useParams()
 
     if(mode !== 'cli' && mode !== 'chat') {
         return (

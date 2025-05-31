@@ -16,6 +16,7 @@ interface CommandCenterContextType {
     retryLastMessage: () => Promise<{
         error: string;
     } | undefined>;
+    loadingMessages: boolean;
 }
 
 const CommandCenterContext = createContext<CommandCenterContextType | undefined>(undefined);

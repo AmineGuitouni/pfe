@@ -3,12 +3,13 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import MessageItem from './MessageItem';
 import { useCommandCenterContext } from '../context/CommandCenterContext';
 import LoadingIndicator from './LoadingIndicator';
+import MessageSkeleton from './MessageSkeleton';
 import { SessionMessage } from '../hooks/useCommandCenter';
 
 
 const MessageList = () => {
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
-  const {messages, streamedMessage, sendingMessage} = useCommandCenterContext();
+  const {messages, streamedMessage, sendingMessage, loadingMessages} = useCommandCenterContext();
   
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -34,6 +35,11 @@ const MessageList = () => {
     // Since it's the last message, there shouldn't be any responses after it
     return true;
   }, [sendingMessage]);
+
+  // Show loading skeleton when initially loading messages and no messages exist yet
+  if (loadingMessages && messages.length === 0) {
+    return <MessageSkeleton />;
+  }
 
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">

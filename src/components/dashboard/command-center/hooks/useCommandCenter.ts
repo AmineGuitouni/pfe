@@ -258,7 +258,7 @@ export const useCommandCenter = () => {
     if (!command_center_session || !userSession?.user?.id || !company_id || sendingMessage) return;
 
     setLoadingMessages(true);
-
+    
     try {
       const response = await fetch(`/api/v1/${userSession.user.id}/companies/${company_id}/command-center/sessions/${command_center_session}/messages`, {
         method: 'GET',
@@ -288,7 +288,7 @@ export const useCommandCenter = () => {
       }));
       console.log('Fetched messages:', transformedMessages);
       setMessages(prev => {
-        const filteredPrev = prev.filter(msg => msg.session_id !== command_center_session);
+        const filteredPrev = prev.filter(msg => msg.session_id === command_center_session);
         const uniqueMessages = transformedMessages.filter(msg => !filteredPrev.some(prevMsg => prevMsg.id === msg.id));
         return [...filteredPrev, ...uniqueMessages];
       });
