@@ -203,6 +203,56 @@ export const useCommandCenter = () => {
     }
   },[command_center_session, company_id, userSession?.user.id])
 
+  const retryLastMessage = useCallback(async () => {
+    if(!userSession?.user?.id || !company_id || !command_center_session) {
+      return {
+        error: 'Missing required fields'
+      }
+    }
+
+    setSendingMessage(true);
+
+    try {
+      const response = await fetch(`/api/v1/${userSession.user.id}/companies/${company_id}/command-center/sessions/${command_center_session}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          // Empty body - the API will process the existing last user message
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to retry message');
+      }
+
+      const { response: aiResponse, response_id, error }: { response: string; response_id: string; error?: string } = await response.json();
+
+      if (error) {
+        throw new Error(error);
+      }
+
+      // Add new AI response to existing messages
+      setMessages(prev => [...prev, {
+        id: response_id,
+        session_id: command_center_session,
+        sender: 'ai',
+        content: aiResponse,
+        content_type: 'text',
+        created_at: new Date().toISOString()
+      }]);
+
+    } catch (error) {
+      console.error('Error retrying message:', error);
+      return {
+        error: 'Failed to retry message'
+      }
+    } finally {
+      setSendingMessage(false);
+    }
+  }, [command_center_session, company_id, userSession?.user.id])
+
   const fetchMessages = useCallback(async () => {
     // Skip fetching if currently sending a message or if no session exists
     if (!command_center_session || !userSession?.user?.id || !company_id || sendingMessage) return;
@@ -267,6 +317,7 @@ export const useCommandCenter = () => {
     sendingMessage,
     streamedMessage,
     fetchMessages,
-    toolCallAction
+    toolCallAction,
+    retryLastMessage
   }
 }

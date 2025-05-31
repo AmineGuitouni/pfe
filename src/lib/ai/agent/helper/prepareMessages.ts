@@ -121,9 +121,8 @@ export async function prepareAgentMessages({supabase, chat_session, userPrompt, 
         console.log("About to throw error: No acceptToolCall or rejectToolCall flag provided for the last assistant message.");
         throw new Error("No acceptToolCall or rejectToolCall flag provided for the last assistant message.");
     }
-
-    console.log("About to throw error: The last message in the session is not from the assistant.");
-    throw new Error("The last message in the session is not from the assistant.");
+    
+    return {messagesHistory, savedMessage: null}
 }
 
 export async function SaveMessage(

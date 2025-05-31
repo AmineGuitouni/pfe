@@ -1,6 +1,8 @@
 import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase";
 import { NextResponse } from "next/server";
 
+export const fetchCache = "force-no-store"
+
 interface Params {
     user_id: string;
     company_id: string

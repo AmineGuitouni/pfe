@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { SessionMessage } from '../hooks/useCommandCenter';
-import { User, Bot, Wrench } from 'lucide-react'; // Added Wrench for tool results
+import { User, Bot, Wrench, RotateCcw } from 'lucide-react'; // Added Wrench for tool results and RotateCcw for retry
 import ToolUseDisplay, { ToolCall } from './toolUseDisplay';
 import ToolResultDisplay from './toolResultDisplay'; // Import the new component
 import { useCommandCenterContext } from '../context/CommandCenterContext';
@@ -101,14 +101,34 @@ const parseMessageWithToolResult = (text: string): ParsedToolResult | undefined 
 interface MessageItemProps {
   message: SessionMessage;
   isLast?: boolean;
+  showRetryButton?: boolean;
 }
 
-const MessageItem: React.FC<MessageItemProps> = ({ message, isLast }) => {
+const MessageItem: React.FC<MessageItemProps> = ({ message, isLast, showRetryButton = false }) => {
   const isUser = message.sender === 'user';
   const isAi = message.sender === 'ai';
   const isTool = message.sender === 'tool';
+  const [isHovered, setIsHovered] = useState(false);
+  const [isRetrying, setIsRetrying] = useState(false);
 
-  const {toolCallAction} = useCommandCenterContext();
+  const {toolCallAction, retryLastMessage, sendingMessage} = useCommandCenterContext();
+
+  // Handle retry functionality
+  const handleRetry = async () => {
+    if (isRetrying || sendingMessage) return;
+    
+    setIsRetrying(true);
+    try {
+      const result = await retryLastMessage();
+      if (result?.error) {
+        console.error('Error retrying message:', result.error);
+      }
+    } catch (error) {
+      console.error('Error retrying message:', error);
+    } finally {
+      setIsRetrying(false);
+    }
+  };
 
   // Memoize parsing results
   const parsedAiContent = useMemo(() => {
@@ -150,14 +170,17 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, isLast }) => {
         </div>
       )}
 
-      <div
-        className={`max-w-xs md:max-w-md lg:max-w-lg px-3 py-2 rounded-lg shadow ${messageBubbleClasses}`}
-      >
-        {isUser && (
-          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-        )}
+      <div className="relative group">
+        <div
+          className={`max-w-xs md:max-w-md lg:max-w-lg px-3 py-2 rounded-lg shadow ${messageBubbleClasses}`}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          {isUser && (
+            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+          )}
 
-        {isAi && (
+          {isAi && (
           <>
             {/* Render text before tool_use block if it exists and tool_use is parsed */}
             {parsedAiContent.toolCall && hasActualTextBeforeAi && (
@@ -206,6 +229,36 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, isLast }) => {
               </pre>
             </div>
           )
+        )}
+        </div>
+
+        {/* Retry button for user messages */}
+        {isUser && showRetryButton && (
+          <div
+            className={`absolute -bottom-4 right-0 transition-opacity duration-200 ${
+              isHovered ? 'opacity-100' : 'opacity-0'
+            }`}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            <button
+              onClick={handleRetry}
+              disabled={isRetrying || sendingMessage}
+              className={`p-1.5 rounded-full shadow-md border transition-all duration-200 ${
+                isRetrying || sendingMessage
+                  ? 'opacity-50 cursor-not-allowed bg-modal_bg border-gray-600'
+                  : 'hover:scale-105 bg-modal_bg border-light_blue-500/50 hover:border-light_blue-500'
+              }`}
+              title="Retry message"
+            >
+              <RotateCcw
+                size={14}
+                className={`${
+                  isRetrying ? 'animate-spin text-light_blue' : 'text-light_blue-500'
+                }`}
+              />
+            </button>
+          </div>
         )}
       </div>
 

@@ -58,7 +58,7 @@ export async function POST(req: NextRequest, { params }: { params: Params }) {
                     companyId: company_id,
                     userId: user_id
                 });
-
+                console.log("Prepared messages:", messages.slice(1));
                 const response = await agentResponseGeneration({
                     messages
                 });
@@ -83,11 +83,11 @@ export async function POST(req: NextRequest, { params }: { params: Params }) {
                 return NextResponse.json({ 
                     response, 
                     response_id: savedAiMessage.id,
-                    user_message_id: savedMessage.sender === 'user' ? savedMessage.id : null,
+                    ...(savedMessage ? {user_message_id: savedMessage.sender === 'user' ? savedMessage.id : null,
                     toolCallMessage: savedMessage.sender === 'tool' ? {
                         id: savedMessage.id,
                         content: savedMessage.content
-                    } : null
+                    } : null} : {})
                 }, { status: 200 });
             } catch (error) {
                 console.error('Error in chat mode with user message:', error);

@@ -12,7 +12,10 @@ interface CommandCenterContextType {
     } | undefined>;
     sendingMessage: boolean;
     streamedMessage: SessionMessage | null;
-    toolCallAction: (action: "accept" | "reject") => Promise<void>
+    toolCallAction: (action: "accept" | "reject") => Promise<void>;
+    retryLastMessage: () => Promise<{
+        error: string;
+    } | undefined>;
 }
 
 const CommandCenterContext = createContext<CommandCenterContextType | undefined>(undefined);
