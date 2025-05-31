@@ -1,4 +1,5 @@
 
+import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase";
 import { supabase } from "@/lib/database/supabase";
 import { NextResponse } from "next/server";
 
@@ -58,7 +59,33 @@ export async function POST(req:Request, {params:{user_id}}: {params:Params}) {
 
         companyId = insertData.id;
 
-        return NextResponse.json({ data: { id: companyId, logo_url: logoUrl } }); // Return ID and potentially logo URL
+        if(!companyId) {
+            return NextResponse.json({ error: "Failed to fetch company to insert admin" }, { status: 500 });
+        }
+
+        const externalSupabase = await getServerDBfromCompanyId(companyId);
+        if (!externalSupabase) {
+            return NextResponse.json({ error: "Failed to connect to external database" }, { status: 500 });
+        }
+
+        const fetchAdmin = await supabase
+            .from("users")
+            .select("first_name, last_name, email,phone_number,image,password_hash,country")
+            .eq("id", user_id)
+            .single();
+        if (!fetchAdmin.data) {
+            return NextResponse.json({ error: "Failed to fetch admin data" }, { status: 500 });
+        }
+
+        const { error: insertAdminError } = await externalSupabase.from("users")
+            .insert({ ...fetchAdmin.data, company_id: companyId })
+
+        if (insertAdminError) {
+            console.error("Admin insert error:", insertAdminError);
+            return NextResponse.json({ error: `Failed to insert admin: ${insertAdminError.message}` }, { status: 500 });
+        }
+
+        return NextResponse.json({ data: { id: companyId, logo_url: logoUrl } }); 
 
     } catch (error: any) {
         console.error("Error processing request:", error);
