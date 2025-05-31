@@ -1,0 +1,46 @@
+/* Custom styles for markdown content in message bubbles */
+.markdown-content {
+  /* Ensure proper spacing and overflow handling */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.5;
+}
+
+/* Override default margins for better message bubble layout */
+.markdown-content > *:first-child {
+  margin-top: 0 !important;
+}
+
+.markdown-content > *:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* Ensure code blocks don't overflow the message bubble */
+.markdown-content pre {
+  max-width: 100%;
+  overflow-x: auto;
+  border-radius: 6px;
+}
+
+/* Improve table responsiveness in message bubbles */
+.markdown-content table {
+  font-size: 0.875rem;
+  max-width: 100%;
+}
+
+/* Ensure lists have proper spacing */
+.markdown-content ul,
+.markdown-content ol {
+  padding-left: 1.5rem;
+}
+
+/* Better handling of inline code */
+.markdown-content p code {
+  word-break: break-all;
+}
+
+/* Ensure blockquotes don't extend too far */
+.markdown-content blockquote {
+  margin-left: 0;
+  margin-right: 0;
+}

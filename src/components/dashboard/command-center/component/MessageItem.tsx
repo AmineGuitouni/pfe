@@ -3,6 +3,7 @@ import { SessionMessage } from '../hooks/useCommandCenter';
 import { User, Bot, Wrench, RotateCcw } from 'lucide-react'; // Added Wrench for tool results and RotateCcw for retry
 import ToolUseDisplay, { ToolCall } from './toolUseDisplay';
 import ToolResultDisplay from './toolResultDisplay'; // Import the new component
+import MarkdownRenderer from './MarkdownRenderer'; // Import the new markdown renderer
 import { useCommandCenterContext } from '../context/CommandCenterContext';
 
 interface ParsedMessage {
@@ -184,7 +185,10 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, isLast, showRetryBut
           <>
             {/* Render text before tool_use block if it exists and tool_use is parsed */}
             {parsedAiContent.toolCall && hasActualTextBeforeAi && (
-              <p className="text-sm whitespace-pre-wrap mb-1">{parsedAiContent.textBefore.trim()}</p>
+              <MarkdownRenderer
+                content={parsedAiContent.textBefore.trim()}
+                className="mb-1"
+              />
             )}
             {/* Render ToolUseDisplay if a tool_use block is parsed (valid or not, ToolUseDisplay handles undefined) */}
             {/* ToolUseDisplay will show loading/error if toolCall is undefined due to parsing error */}
@@ -202,12 +206,17 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, isLast, showRetryBut
             )}
             {/* Render text after tool_use block if it exists and tool_use is parsed */}
             {parsedAiContent.toolCall && hasActualTextAfterAi && (
-              <p className="text-sm whitespace-pre-wrap mt-1">{parsedAiContent.textAfter.trim()}</p>
+              <MarkdownRenderer
+                content={parsedAiContent.textAfter.trim()}
+                className="mt-1"
+              />
             )}
             {/* If no tool_use block was intended or if it was completely unparsable leading to no toolCall, render raw text */}
             {/* This also covers AI messages that are purely text */}
             {!message.content.includes('```tool_use') && (
-                 <p className="text-sm whitespace-pre-wrap">{parsedAiContent.rawText}</p>
+                 <MarkdownRenderer
+                   content={parsedAiContent.rawText}
+                 />
             )}
           </>
         )}
