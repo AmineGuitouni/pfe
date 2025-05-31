@@ -1,6 +1,6 @@
 "use client"
 import TaskItem from "./taskItem";
-import { Draggable, Droppable } from "@hello-pangea/dnd";
+import { Draggable, Droppable, DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
 import { Column } from "../../types/type";
 import { UseColumns } from "../../context/columnsContext";
 import { useState } from "react";
@@ -9,7 +9,14 @@ import { cn } from "@heroui/react";
 import ColoneSettings from "../columnsComponents/coloneSettings";
 import { useSession } from "next-auth/react";
 
-export default function TaskContainer({ column, project_id }: { column: Column; project_id: string }) {
+interface TaskContainerProps {
+    column: Column;
+    project_id: string;
+    dragHandleProps?: DraggableProvidedDragHandleProps | null;
+    isDragging?: boolean;
+}
+
+export default function TaskContainer({ column, project_id, dragHandleProps, isDragging }: TaskContainerProps) {
     const { deleteColumn } = UseColumns();
     const [isDeleted, setIsDeleted] = useState(false);
     const {data : session } = useSession()
@@ -50,10 +57,14 @@ export default function TaskContainer({ column, project_id }: { column: Column; 
                     ref={provided.innerRef}
                     className={cn(
                         "w-[300px] h-fit flex flex-col bg-white/5 border-white/20 border-1 rounded-md p-3 transition-all ease-linear",
-                        isDeleted && "animate-pulse"
+                        isDeleted && "animate-pulse",
+                        isDragging && "transform rotate-2 shadow-lg opacity-80"
                     )}
                 >
-                    <div className="w-full flex justify-between">
+                    <div
+                        className="w-full flex justify-between cursor-grab active:cursor-grabbing hover:bg-white/10 rounded-md p-1 -m-1 transition-colors"
+                        {...dragHandleProps}
+                    >
                         <div className="flex flex-grow items-baseline mb-3 ">
                             <p className="text-light_blue text-md font-semibold  line-clamp-1">
                                 {column.name}

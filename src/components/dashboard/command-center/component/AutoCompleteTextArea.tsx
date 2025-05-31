@@ -7,6 +7,7 @@ interface CommandParameter {
   name: string; // e.g., "--param1", "--user"
   description: string;
   placeholder?: string; // e.g., "value", "user_id"
+  isRequired?: boolean;
 }
 
 export interface Command {
@@ -21,6 +22,7 @@ interface AutoCompleteTextAreaProps extends React.TextareaHTMLAttributes<HTMLTex
   value: string;
   onValueChange: (value: string) => void;
   onSubmit?: () => void;
+  submitDisabled?: boolean;
 }
 
 const AutoCompleteTextArea: React.FC<AutoCompleteTextAreaProps> = ({
@@ -29,6 +31,7 @@ const AutoCompleteTextArea: React.FC<AutoCompleteTextAreaProps> = ({
   value,
   onValueChange,
   onSubmit,
+  submitDisabled = false,
   ...textareaProps
 }) => {
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -37,6 +40,11 @@ const AutoCompleteTextArea: React.FC<AutoCompleteTextAreaProps> = ({
   const [currentContext, setCurrentContext] = useState<'command' | 'parameter' | null>(null);
   const [activeCommand, setActiveCommand] = useState<Command | null>(null);
   const [suggestionPosition, setSuggestionPosition] = useState<{ top: number; left: number } | null>(null);
+  const [commandValidation, setCommandValidation] = useState<{
+    isValid: boolean;
+    missingRequiredParams: string[];
+    hasActiveCommand: boolean;
+  }>({ isValid: false, missingRequiredParams: [], hasActiveCommand: false });
   
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const suggestionsRef = useRef<HTMLUListElement>(null);
@@ -129,6 +137,57 @@ const AutoCompleteTextArea: React.FC<AutoCompleteTextAreaProps> = ({
     return { textBeforeCursor, currentWord: potentialWord, trigger, currentWordStartIndex };
   }, [value]);
 
+  const validateCurrentCommand = useCallback(() => {
+    const { textBeforeCursor } = getCursorInfo();
+    
+    // Find all commands in the text (commands start with @)
+    const commandMatches = textBeforeCursor.match(/@(\w+)/g);
+    if (!commandMatches || commandMatches.length === 0) {
+      setCommandValidation({ isValid: false, missingRequiredParams: [], hasActiveCommand: false });
+      setActiveCommand(null);
+      return;
+    }
+
+    // Get the last command in the text
+    const lastCommandMatch = commandMatches[commandMatches.length - 1];
+    const commandName = lastCommandMatch.substring(1); // Remove @
+    
+    // Find the command definition
+    const foundCommand = commands.find(cmd => cmd.name === commandName);
+    if (!foundCommand) {
+      setCommandValidation({ isValid: false, missingRequiredParams: [], hasActiveCommand: false });
+      setActiveCommand(null);
+      return;
+    }
+
+    // Set active command if it's not already set or if it's different
+    if (!activeCommand || activeCommand.name !== foundCommand.name) {
+      setActiveCommand(foundCommand);
+    }
+
+    // Find the start position of the last command
+    const lastCommandStart = textBeforeCursor.lastIndexOf(`@${commandName}`);
+    const currentCommandSegment = textBeforeCursor.substring(lastCommandStart + `@${commandName}`.length);
+    const usedParams = new Set(currentCommandSegment.match(/--\w+/g) || []);
+    
+    const requiredParams = foundCommand.parameters?.filter(param => param.isRequired) || [];
+    const missingRequiredParams = requiredParams
+      .filter(param => !usedParams.has(param.name))
+      .map(param => param.name);
+
+    const isValid = missingRequiredParams.length === 0;
+    
+    setCommandValidation({
+      isValid,
+      missingRequiredParams,
+      hasActiveCommand: true
+    });
+  }, [getCursorInfo, commands, activeCommand]);
+
+  useEffect(() => {
+    validateCurrentCommand();
+  }, [value, validateCurrentCommand]);
+
   const calculateSuggestionsPosition = useCallback(() => {
     if (!textareaRef.current || !hiddenMirrorRef.current || !showSuggestions) {
       setSuggestionPosition(null);
@@ -157,6 +216,17 @@ const AutoCompleteTextArea: React.FC<AutoCompleteTextAreaProps> = ({
     relevantStyles.forEach(propKey => {
       (mirror.style as any)[propKey] = style[propKey];
     });
+    
+    // Override padding to match the current textarea padding state
+    if (commandValidation.hasActiveCommand) {
+      mirror.style.paddingTop = '2.5rem'; // pt-10 = 2.5rem
+      mirror.style.paddingLeft = '0.75rem'; // px-3 = 0.75rem
+      mirror.style.paddingRight = '0.75rem';
+      mirror.style.paddingBottom = '0.75rem'; // pb-3 = 0.75rem
+    } else {
+      mirror.style.padding = '0.75rem'; // p-3 = 0.75rem
+    }
+    
     mirror.style.width = style.width; 
     mirror.style.position = 'absolute';
     mirror.style.visibility = 'hidden';
@@ -198,7 +268,7 @@ const AutoCompleteTextArea: React.FC<AutoCompleteTextAreaProps> = ({
     
     setSuggestionPosition({ top: finalTop, left: finalLeft });
 
-  }, [value, showSuggestions, getCursorInfo]);
+  }, [value, showSuggestions, getCursorInfo, commandValidation.hasActiveCommand]);
 
   const updateSuggestions = useCallback(() => {
     if (!enableAutocomplete || !textareaRef.current) {
@@ -397,9 +467,9 @@ const AutoCompleteTextArea: React.FC<AutoCompleteTextAreaProps> = ({
           // Shift+Enter: Allow normal behavior (new line)
           return;
         } else {
-          // Enter: Submit the form
+          // Enter: Submit the form only if not disabled
           e.preventDefault();
-          if (onSubmit) {
+          if (onSubmit && !submitDisabled) {
             onSubmit();
           }
         }
@@ -430,9 +500,41 @@ const AutoCompleteTextArea: React.FC<AutoCompleteTextAreaProps> = ({
         onClick={() => { 
             updateSuggestions(); 
         }}
-        className="w-full p-3 bg-dark_blue text-white border border-light_blue-500/20 rounded-md focus:ring-2 focus:ring-light_blue-500 focus:border-light_blue-500 outline-none resize-none"
+        className={`w-full bg-dark_blue text-white border rounded-md focus:ring-2 focus:outline-none resize-none transition-all duration-200 ${
+          commandValidation.hasActiveCommand 
+            ? 'pt-10 px-3 pb-3' // Add top padding when validation indicator is shown
+            : 'p-3'
+        } ${
+          submitDisabled 
+            ? 'border-yellow-500/40 focus:ring-yellow-500/50 focus:border-yellow-500/60' 
+            : 'border-light_blue-500/20 focus:ring-light_blue-500 focus:border-light_blue-500'
+        }`}
         {...textareaProps}
       />
+      {/* Command Validation Indicator */}
+      {commandValidation.hasActiveCommand && (
+        <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-1 rounded text-xs pointer-events-none z-10">
+          {commandValidation.isValid ? (
+            <div className="flex items-center gap-1 bg-green-500/90 border border-green-500/60 px-2 py-1 rounded backdrop-blur-sm">
+              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              <span className="text-green-100 font-medium">Valid</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1 bg-red-500/90 border border-red-500/60 px-2 py-1 rounded backdrop-blur-sm">
+              <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+              <span className="text-red-100 font-medium">
+                Missing: {commandValidation.missingRequiredParams.map(param => param.replace('--', '')).join(', ')}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+      {submitDisabled && (
+        <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 bg-yellow-500/20 border border-yellow-500/40 rounded text-xs text-yellow-300 pointer-events-none">
+          <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+          <span>Sending...</span>
+        </div>
+      )}
       {enableAutocomplete && showSuggestions && suggestions.length > 0 && suggestionPosition && (
         <ul
           ref={suggestionsRef}
@@ -453,19 +555,34 @@ const AutoCompleteTextArea: React.FC<AutoCompleteTextAreaProps> = ({
               onClick={() => handleSuggestionClick(suggestion)}
               onMouseEnter={() => setActiveSuggestionIndex(index)}
             >
-              {suggestion}
-              {(() => {
-                let description = '';
-                if (currentContext === 'command') {
-                  const cmd = commands.find(c => c.name === suggestion);
-                  description = cmd?.description || '';
-                } else if (activeCommand && currentContext === 'parameter') {
-                  const param = activeCommand.parameters?.find(p => p.name === suggestion);
-                  description = param?.description || '';
-                  if (param?.placeholder) description += ` (e.g., ${param.placeholder})`;
-                }
-                return description ? <span className="ml-2 text-xs text-light_blue/70">{description}</span> : null;
-              })()}
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <span className="font-medium">{suggestion}</span>
+                  {(() => {
+                    let description = '';
+                    if (currentContext === 'command') {
+                      const cmd = commands.find(c => c.name === suggestion);
+                      description = cmd?.description || '';
+                    } else if (activeCommand && currentContext === 'parameter') {
+                      const param = activeCommand.parameters?.find(p => p.name === suggestion);
+                      description = param?.description || '';
+                      if (param?.placeholder) description += ` (e.g., ${param.placeholder})`;
+                    }
+                    return description ? (
+                      <div className="text-xs text-light_blue/70 mt-1">{description}</div>
+                    ) : null;
+                  })()}
+                </div>
+                {currentContext === 'parameter' && (() => {
+                  const param = activeCommand?.parameters?.find(p => p.name === suggestion);
+                  const isRequired = param?.isRequired || false;
+                  return isRequired ? (
+                    <span className="ml-2 text-xs text-red-400 font-semibold flex-shrink-0">*required</span>
+                  ) : (
+                    <span className="ml-2 text-xs text-gray-400 flex-shrink-0">optional</span>
+                  );
+                })()}
+              </div>
             </li>
           ))}
         </ul>

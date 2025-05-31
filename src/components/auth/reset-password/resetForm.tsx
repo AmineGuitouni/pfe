@@ -3,6 +3,7 @@ import { Alert, Button, cn, Input } from "@heroui/react";
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 export default function ResetPasswordForm({ token }: { token: string | null }) {
   const [password, setPassword] = useState('');
@@ -12,18 +13,19 @@ export default function ResetPasswordForm({ token }: { token: string | null }) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const router = useRouter();
+  const t = useTranslations('auth.resetPassword');
 
   const submitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (password !== confirmPass) {
-      setError("Passwords must match");
+      setError(t('passwordsMustMatch'));
       return;
     }
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).{8,}$/;
     if (!passwordRegex.test(password)) {
-      setError("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character");
+      setError(t('passwordComplexityError'));
       return;
     }
 
@@ -44,14 +46,14 @@ export default function ResetPasswordForm({ token }: { token: string | null }) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to reset password");
+        throw new Error(data.error || t('resetFailed'));
       }
 
       setSuccess(true);
       setError(null);
     } catch (error: any) {
       console.error("Password reset error:", error);
-      setError(error.message || "An unexpected error occurred.");
+      setError(error.message || t('unexpectedError'));
     } finally {
       setLoading(false);
     }
@@ -73,12 +75,12 @@ export default function ResetPasswordForm({ token }: { token: string | null }) {
         isRequired
         className="w-full"
         size="sm"
-        label="Password"
+        label={t('passwordLabel')}
         type={isPasswordVisible ? "text" : "password"}
         value={password}
         onValueChange={handlePasswordChange}
-        errorMessage={error}  // Show error message from state
-        isInvalid={!!error}  // Show error state if there is any error
+        errorMessage={error}
+        isInvalid={!!error}
         endContent={
           !isPasswordVisible ? (
             <FaEyeSlash
@@ -99,12 +101,12 @@ export default function ResetPasswordForm({ token }: { token: string | null }) {
         isRequired
         className="w-full"
         size="sm"
-        label="Confirm Password"
+        label={t('confirmPasswordLabel')}
         type={isPasswordVisible ? "text" : "password"}
         value={confirmPass}
         onValueChange={handleConfirmPasswordChange}
-        errorMessage={"Passwords must match"}  // Show error message if passwords don't match
-        isInvalid={password !== confirmPass}  // Show error state if there is any error
+        errorMessage={t('passwordsMustMatch')}
+        isInvalid={password !== confirmPass}
         endContent={
           !isPasswordVisible ? (
             <FaEyeSlash
@@ -123,14 +125,14 @@ export default function ResetPasswordForm({ token }: { token: string | null }) {
       />
       {success ? (
         <>
-          <Alert description={"Your password changed succesfully"} color="success" />
+          <Alert description={t('successMessage')} color="success" />
           <Button
             onPress={() => router.push('/login?role=admin')}
             className={cn(
               "bg-light_blue-500 text-dark_blue text-medium font-semibold w-full flex-shrink-0"
             )}
           >
-            Go to Login
+            {t('goToLoginButton')}
           </Button>
         </>
       ) : (
@@ -146,7 +148,7 @@ export default function ResetPasswordForm({ token }: { token: string | null }) {
             error && "bg-red-500"
           )}
         >
-          Submit
+          {t('submitButton')}
         </Button>
       )}
     </form>

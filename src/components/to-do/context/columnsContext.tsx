@@ -17,6 +17,7 @@ type ColumnsContextType = {
   deleteColumn : (columnId: string, projectId: string) => Promise<void>;
   editColumn : ({columnId, newName, projectId}: {columnId: string, newName: string, projectId: string}) => Promise<void>; // Updated type signature
   checkTask : (task_id: string, project_id: string,checked : boolean) => Promise<void>;
+  reorderColumns: (projectId: string, sourceIndex: number, destinationIndex: number) => Promise<void>;
 };
 
 const columnsContext = createContext<ColumnsContextType>({
@@ -31,7 +32,7 @@ const columnsContext = createContext<ColumnsContextType>({
   deleteColumn: async () => {},
   editColumn: async () => {},
   checkTask: async () => {},
-
+  reorderColumns: async () => {},
 });
 
 export function UseColumns() {
@@ -122,11 +123,16 @@ function ColumnsProvider({
             const activeProject = prevProjects[projectId];
             if (!activeProject || !activeProject.columns) return prevProjects;
 
+            // Calculate the next order number
+            const existingOrders = Object.values(activeProject.columns).map(col => col.order || 0);
+            const nextOrder = existingOrders.length > 0 ? Math.max(...existingOrders) + 1 : 0;
+
             const newColumn: Column = {
                 id: newColumnId,
                 name: name,
                 tasks: [], // Initialize with an empty array
-                tasksStatus : task_status as statusForCol
+                tasksStatus : task_status as statusForCol,
+                order: nextOrder
             };
 
             return {
@@ -141,8 +147,8 @@ function ColumnsProvider({
             };
         });
     }
-    catch{
-        toast.error("Error adding column");
+    catch(error){
+        console.error("Error adding column:", error);
     }
     finally{
        onClose()
@@ -307,8 +313,8 @@ function ColumnsProvider({
           return updatedProjects; // Return the modified state
         })
       }
-      catch{
-        toast.error("Error checking task");
+      catch(error){
+        console.error("Error checking task:", error);
       }
   
   },[userId,companyId]);
@@ -332,8 +338,7 @@ function ColumnsProvider({
         throw new Error(`HTTP error! status: ${response.status}`);
       }
     } catch (error) {
-      toast.error("Error updating task status");
-      console.error(error);
+      console.error("Error updating task status:", error);
     }
   }, [companyId, userId]);
 
@@ -564,6 +569,76 @@ function ColumnsProvider({
 
   }, [projects, updateStatus]);
 
+  const reorderColumns = useCallback(async (projectId: string, sourceIndex: number, destinationIndex: number) => {
+    if (!userId || !projects || !projects[projectId]) return;
+
+    const project = projects[projectId];
+    const columnEntries = Object.entries(project.columns);
+    
+    // Sort by current order
+    columnEntries.sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
+    
+    // Move the column to new position
+    const [movedColumn] = columnEntries.splice(sourceIndex, 1);
+    columnEntries.splice(destinationIndex, 0, movedColumn);
+    
+    // Update order values
+    const updatedColumns = columnEntries.reduce((acc, [columnId, column], index) => {
+      acc[columnId] = { ...column, order: index };
+      return acc;
+    }, {} as { [key: string]: Column });
+
+    // Optimistic update
+    setProjects(prevProjects => {
+      if (!prevProjects) return prevProjects;
+      
+      return {
+        ...prevProjects,
+        [projectId]: {
+          ...prevProjects[projectId],
+          columns: updatedColumns
+        }
+      };
+    });
+
+    // API call to persist the new order
+    try {
+      const columnOrder = columnEntries.map(([columnId], index) => ({
+        id: columnId,
+        order: index
+      }));
+
+      const response = await fetch(
+        `/api/v1/${userId}/companies/${companyId}/to-do/${projectId}/columns/reorder`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ columnOrder }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Removed toast notification for better UX
+    } catch (error) {
+      console.error("Error reordering columns:", error);
+      
+      // Revert optimistic update on error
+      setProjects(prevProjects => {
+        if (!prevProjects) return prevProjects;
+        
+        return {
+          ...prevProjects,
+          [projectId]: project
+        };
+      });
+    }
+  }, [userId, companyId, projects]);
+
   const contextValue = useMemo(() => ({
     projects,
     isLoading,
@@ -576,7 +651,8 @@ function ColumnsProvider({
     deleteColumn,
     editColumn, // Ensure editColumn is included here
     checkTask,
-  }), [projects, isLoading, search, setSearch, updateStatus, dragDropTask, AddColumn, deleteColumn, editColumn, checkTask]); // Add editColumn to dependencies
+    reorderColumns,
+  }), [projects, isLoading, search, setSearch, updateStatus, dragDropTask, AddColumn, deleteColumn, editColumn, checkTask, reorderColumns]); // Add reorderColumns to dependencies
 
   return (
     <columnsContext.Provider value={contextValue}>

@@ -1,29 +1,36 @@
 // Removed Spinner import as it's no longer used
 import { UseColumns } from "../../context/columnsContext";
 import TaskContainer from "./TaskContainer";
-import { DragDropContext, DropResult } from "@hello-pangea/dnd";
+import { DragDropContext, DropResult, Droppable, Draggable } from "@hello-pangea/dnd";
 import { toDoProject } from "../../types/type";
 import AddColumnButton from "../columnsComponents/addColumnButton";
 
 export default function Container({isLoading, activeProject}:{isLoading: boolean, activeProject: toDoProject | undefined}) {
     
-    const { dragDropTask, setProjects } = UseColumns();
+    const { dragDropTask, setProjects, reorderColumns } = UseColumns();
 
     console.log("activeProject", activeProject);
 
     const handleDragEnd = (result: DropResult) => {
         if(!activeProject) return;
 
-        const { destination, source, draggableId } = result;
+        const { destination, source, draggableId, type } = result;
 
         // If no destination, dropped in same place, or no active project, do nothing
-        if (!destination || 
-            (destination.droppableId === source.droppableId && 
+        if (!destination ||
+            (destination.droppableId === source.droppableId &&
              destination.index === source.index) ||
             !activeProject) {
             return;
         }
 
+        // Handle column reordering
+        if (type === "column") {
+            reorderColumns(activeProject.projectData.id, source.index, destination.index);
+            return;
+        }
+
+        // Handle task dragging (existing logic)
         const sourceColumn = activeProject.columns[source.droppableId];
         const destColumn = activeProject.columns[destination.droppableId];
         
@@ -35,9 +42,9 @@ export default function Container({isLoading, activeProject}:{isLoading: boolean
         if (source.droppableId !== destination.droppableId) {
             // Call dragDropTask to update state and call API
             dragDropTask(
-                draggableId, 
-                destColumn.tasksStatus, 
-                source.droppableId, 
+                draggableId,
+                destColumn.tasksStatus,
+                source.droppableId,
                 destination.droppableId,
                 activeProject.projectData.id,
                 source.index,
@@ -122,14 +129,38 @@ export default function Container({isLoading, activeProject}:{isLoading: boolean
             ) : activeProject ? (
                 // If not loading AND activeProject exists, render columns
                 <DragDropContext onDragEnd={handleDragEnd}>
-                    <div className="h-full flex gap-5 w-[500px]"> {/* Removed fixed width */}
-                        {Object.entries(activeProject.columns).map(([key, column], index) => (
-                            <div key={key} className="flex ">
-                                <TaskContainer column={column} project_id={activeProject.projectData.id} />
-                                {index === Object.keys(activeProject.columns).length - 1 && <AddColumnButton/>}
+                    <Droppable droppableId="columns" direction="horizontal" type="column">
+                        {(provided) => (
+                            <div
+                                className="h-full flex gap-5 min-w-max"
+                                {...provided.droppableProps}
+                                ref={provided.innerRef}
+                            >
+                                {Object.entries(activeProject.columns)
+                                    .sort(([, a], [, b]) => (a.order || 0) - (b.order || 0))
+                                    .map(([key, column], index) => (
+                                        <Draggable key={key} draggableId={`column-${key}`} index={index}>
+                                            {(provided, snapshot) => (
+                                                <div
+                                                    ref={provided.innerRef}
+                                                    {...provided.draggableProps}
+                                                    className="flex"
+                                                >
+                                                    <TaskContainer
+                                                        column={column}
+                                                        project_id={activeProject.projectData.id}
+                                                        dragHandleProps={provided.dragHandleProps}
+                                                        isDragging={snapshot.isDragging}
+                                                    />
+                                                    {index === Object.keys(activeProject.columns).length - 1 && <AddColumnButton/>}
+                                                </div>
+                                            )}
+                                        </Draggable>
+                                    ))}
+                                {provided.placeholder}
                             </div>
-                        ))}
-                    </div>
+                        )}
+                    </Droppable>
                 </DragDropContext>
             ) : (
                  // If not loading AND no activeProject, render message

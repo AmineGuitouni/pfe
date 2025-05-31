@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useTranslations } from 'next-intl';
 
 // Validation helper functions to match API
 const isValidEmail = (email: string) => {
@@ -11,7 +12,7 @@ const isValidEmail = (email: string) => {
     return emailRegex.test(email);
 };
 
-const validatePassword = (password: string) => {
+const validatePassword = (password: string, t: any) => {
     const minLength = password.length >= 8;
     const hasUpperCase = /[A-Z]/.test(password);
     const hasLowerCase = /[a-z]/.test(password);
@@ -19,11 +20,11 @@ const validatePassword = (password: string) => {
     const hasSpecialChar = /[!@#$%^&*]/.test(password);
 
     const errors = [
-        !minLength && "Password must be at least 8 characters long",
-        !hasUpperCase && "Password must contain at least one uppercase letter",
-        !hasLowerCase && "Password must contain at least one lowercase letter",
-        !hasNumber && "Password must contain at least one number",
-        !hasSpecialChar && "Password must contain at least one special character",
+        !minLength && t('register.errors.passwordMinLength'),
+        !hasUpperCase && t('register.errors.passwordUppercase'),
+        !hasLowerCase && t('register.errors.passwordLowercase'),
+        !hasNumber && t('register.errors.passwordNumber'),
+        !hasSpecialChar && t('register.errors.passwordSpecialChar'),
     ].filter(Boolean);
 
     return {
@@ -38,6 +39,7 @@ const isValidPhoneNumber = (phoneNumber: string) => {
 };
 
 export default function RegisterForm() {
+    const t = useTranslations('auth.register');
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -72,37 +74,37 @@ export default function RegisterForm() {
 
         // Name validation
         if (formData.firstName.length < 2 || formData.firstName.length > 50) {
-            newErrors.firstName = "First name must be between 2 and 50 characters";
+            newErrors.firstName = t('register.errors.firstNameLength');
         }
 
         if (formData.lastName.length < 2 || formData.lastName.length > 50) {
-            newErrors.lastName = "Last name must be between 2 and 50 characters";
+            newErrors.lastName = t('register.errors.lastNameLength');
         }
 
         // Country validation
         if (!formData.country.trim() || formData.country.length < 2 || formData.country.length > 50) {
-            newErrors.country = "Country is required";
+            newErrors.country = t('register.errors.countryRequired');
         }
 
         // Email validation
         if (!isValidEmail(formData.email)) {
-            newErrors.email = "Invalid email format";
+            newErrors.email = t('register.errors.invalidEmail');
         }
 
         // Phone number validation
         if (!isValidPhoneNumber(formData.phoneNumber)) {
-            newErrors.phoneNumber = "Invalid phone number format (e.g., +1234567890)";
+            newErrors.phoneNumber = t('register.errors.invalidPhone');
         }
 
         // Password validation
-        const passwordValidation = validatePassword(formData.password);
+        const passwordValidation = validatePassword(formData.password, t);
         if (!passwordValidation.isValid) {
             newErrors.password = passwordValidation.errors.join(". ");
         }
 
         // Confirm password validation
         if (formData.password !== formData.confirmPassword) {
-            newErrors.confirmPassword = "Passwords do not match";
+            newErrors.confirmPassword = t('register.errors.passwordMismatch');
         }
 
         setErrors(newErrors);
@@ -148,11 +150,11 @@ export default function RegisterForm() {
                     }));
                     return;
                 }
-                throw new Error(data.error || 'Registration failed');
+                throw new Error(data.error || t('register.errors.submit'));
             }
 
             // Show success message
-            setSuccessMessage(data.message || "Registration successful! Please check your email to verify your account.");
+            setSuccessMessage(data.message || t('register.success'));
             
             // Optional: redirect after a delay
             setTimeout(() => {
@@ -162,7 +164,7 @@ export default function RegisterForm() {
         } catch (err) {
             setErrors(prev => ({
                 ...prev,
-                submit: err instanceof Error ? err.message : 'An error occurred during registration'
+                submit: err instanceof Error ? err.message : t('register.errors.submit')
             }));
         } finally {
             setLoading(false);
@@ -171,14 +173,14 @@ export default function RegisterForm() {
 
     return (
         <form onSubmit={submitHandler} className="w-[500px] border-1 p-8 px-4 sm:px-8 rounded-lg shadow-md bg-white/10 border-white/20 relative flex flex-col justify-center items-start gap-8">
-            <p className="text-white text-center w-full text-2xl">Create your account</p>
+            <p className="text-white text-center w-full text-2xl">{t('register.title')}</p>
             
             <div className="w-full flex gap-4">
                 <Input
                     isRequired
                     className="w-full"
                     size="sm"
-                    label="First Name"
+                    label={t('register.firstName')}
                     value={formData.firstName}
                     onValueChange={handleChange('firstName')}
                     errorMessage={errors.firstName}
@@ -188,7 +190,7 @@ export default function RegisterForm() {
                     isRequired
                     className="w-full"
                     size="sm"
-                    label="Last Name"
+                    label={t('register.lastName')}
                     value={formData.lastName}
                     onValueChange={handleChange('lastName')}
                     errorMessage={errors.lastName}
@@ -200,7 +202,7 @@ export default function RegisterForm() {
                 isRequired
                 className="w-full"
                 size="sm"
-                label="Country"
+                label={t('register.country')}
                 value={formData.country}
                 onValueChange={handleChange('country')}
                 errorMessage={errors.country}
@@ -211,7 +213,7 @@ export default function RegisterForm() {
                 isRequired
                 className="w-full"
                 size="sm"
-                label="Email"
+                label={t('register.email')}
                 type="email"
                 value={formData.email}
                 onValueChange={handleChange('email')}
@@ -223,11 +225,11 @@ export default function RegisterForm() {
                 isRequired
                 className="w-full"
                 size="sm"
-                label="Phone Number"
+                label={t('register.phoneNumber')}
                 type="tel"
                 value={formData.phoneNumber}
                 onValueChange={handleChange('phoneNumber')}
-                placeholder="+1234567890"
+                placeholder={t('register.phonePlaceholder')}
                 errorMessage={errors.phoneNumber}
                 isInvalid={!!errors.phoneNumber}
             />
@@ -236,7 +238,7 @@ export default function RegisterForm() {
                 isRequired
                 className="w-full"
                 size="sm"
-                label="Password"
+                label={t('register.password')}
                 type={isPasswordVisible ? "text" : "password"}
                 value={formData.password}
                 onValueChange={handleChange('password')}
@@ -249,7 +251,7 @@ export default function RegisterForm() {
                 isRequired
                 className="w-full"
                 size="sm"
-                label="Confirm Password"
+                label={t('register.confirmPassword')}
                 type={isPasswordVisible ? "text" : "password"}
                 value={formData.confirmPassword}
                 onValueChange={handleChange('confirmPassword')}
@@ -273,7 +275,7 @@ export default function RegisterForm() {
                 isDisabled={loading}
                 className="bg-light_blue-500 text-dark_blue text-medium font-semibold w-full flex-shrink-0"
             >
-                Register
+                {t('register.registerButton')}
             </Button>
 
             {/* <div className="w-full shaded-edges overflow-hidden flex justify-center items-center">
@@ -304,8 +306,8 @@ export default function RegisterForm() {
             </div> */}
 
             <div className="w-full flex justify-center items-center gap-2">
-                <p className="text-white text-medium">Already have an account?</p>
-                <Link href="/Login" as={NextLink} underline="hover" className="text-light_blue-500 animate-pulse text-medium">Sign in</Link>
+                <p className="text-white text-medium">{t('register.alreadyHaveAccount')}</p>
+                <Link href="/Login" as={NextLink} underline="hover" className="text-light_blue-500 animate-pulse text-medium">{t('register.signIn')}</Link>
             </div>
         </form>
     );

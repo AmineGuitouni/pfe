@@ -1,6 +1,6 @@
 export default function CommandCenterPage({ params: { mode } }: { params: { mode: string } }) {
     return (
-        <div className="w-full p-8">
+        <div className="w-full p-8 mt-20">
             <div className="max-w-4xl mx-auto">
                 {mode === 'cli' ? (
                     <div className="flex flex-col items-center">
