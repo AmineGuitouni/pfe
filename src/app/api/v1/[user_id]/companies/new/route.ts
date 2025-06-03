@@ -78,7 +78,7 @@ export async function POST(req:Request, {params:{user_id}}: {params:Params}) {
         }
 
         const { error: insertAdminError } = await externalSupabase.from("users")
-            .insert({ ...fetchAdmin.data, company_id: companyId })
+            .insert({ ...fetchAdmin.data, company_id: companyId,id : user_id })
 
         if (insertAdminError) {
             console.error("Admin insert error:", insertAdminError);

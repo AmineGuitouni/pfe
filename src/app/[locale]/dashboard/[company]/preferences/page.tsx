@@ -1,4 +1,5 @@
 import AccountInformation from "@/components/dashboard/preferences/accountInformation";
+import CvEditSection from "@/components/dashboard/preferences/change_cv/components/cvEditSection";
 import ProfileInformation from "@/components/dashboard/preferences/profileInformation";
 
 export default function PreferencesPage() {
@@ -20,6 +21,13 @@ export default function PreferencesPage() {
                     <ProfileInformation className="p-4 w-full"/>
                 </section>
 
+                <section className="border-1 border-white/20 rounded-lg bg-white/5 mb-8">
+                    <h2 className="text-white text-xl mx-4 my-2">CV informations</h2>
+                    <hr className="w-full border-white/20"/>
+                    <div className="p-4 w-full">
+                        <CvEditSection/>
+                    </div>
+                </section>
             </div>
         </div>
     )
