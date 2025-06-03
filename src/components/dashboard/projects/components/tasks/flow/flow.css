@@ -1,0 +1,188 @@
+/* React Flow Custom Styles */
+.react-flow__node-taskNode {
+  width: auto;
+  height: auto;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.react-flow__handle {
+  width: 12px;
+  height: 12px;
+  border: 2px solid #7dd5de;
+  background: #081e25;
+  transition: all 0.2s ease;
+}
+
+.react-flow__handle:hover {
+  width: 16px;
+  height: 16px;
+  border-width: 3px;
+  background: #7dd5de;
+  box-shadow: 0 0 10px #7dd5de;
+}
+
+.react-flow__handle-connecting {
+  background: #7dd5de;
+  animation: pulse 0.8s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+}
+
+.react-flow__edge-path {
+  stroke: #8ab0e0;
+  stroke-width: 2px;
+  transition: all 0.3s ease;
+}
+
+.react-flow__edge:hover .react-flow__edge-path {
+  stroke-width: 3px;
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
+.react-flow__edge.animated path {
+  stroke-dasharray: 5;
+  animation: dashdraw 0.8s linear infinite;
+}
+
+.react-flow__edge .react-flow__edge-text {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* Enhanced arrow markers */
+.react-flow__arrowhead {
+  transition: all 0.3s ease;
+}
+
+.react-flow__edge:hover .react-flow__arrowhead {
+  transform: scale(1.2);
+}
+
+.react-flow__controls {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+}
+
+.react-flow__controls button {
+  background: transparent;
+  border: none;
+  color: white;
+}
+
+.react-flow__controls button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.react-flow__minimap {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+}
+
+.react-flow__attribution {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 10px;
+}
+
+@keyframes dashdraw {
+  from {
+    stroke-dashoffset: 10;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Ensure proper text wrapping in nodes */
+.react-flow__node-taskNode .line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Custom scale utilities for node interactions */
+.scale-102 {
+  transform: scale(1.02);
+}
+
+.scale-105 {
+  transform: scale(1.05);
+}
+
+/* Smooth transitions for all task nodes */
+.react-flow__node-taskNode > div {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced hover states */
+.react-flow__node-taskNode:hover {
+  z-index: 10;
+}
+
+/* Edge labels styling */
+.react-flow__edge-text {
+  pointer-events: none;
+}
+
+.react-flow__edge-textbg {
+  fill: rgba(8, 30, 37, 0.9);
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-width: 1px;
+}
+
+/* Connection line styling during drag */
+.react-flow__connection-line {
+  stroke: #7dd5de;
+  stroke-width: 2px;
+  stroke-dasharray: 5,5;
+}
+
+/* Selection styling */
+.react-flow__node.selected {
+  box-shadow: 0 0 0 2px #7dd5de;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: #7dd5de;
+  stroke-width: 3px;
+  filter: drop-shadow(0 0 8px #7dd5de);
+}
+
+/* Deletable edge styling */
+.react-flow__edge.deletable .react-flow__edge-path {
+  cursor: pointer;
+}
+
+.react-flow__edge.deletable:hover .react-flow__edge-path {
+  stroke: #f87171;
+  stroke-width: 4px;
+  filter: drop-shadow(0 0 6px #f87171);
+}
+
+/* Connection line animation */
+.react-flow__connection-line path {
+  animation: drawConnection 1s ease-in-out infinite;
+}
+
+@keyframes drawConnection {
+  0% { stroke-dashoffset: 20; }
+  100% { stroke-dashoffset: 0; }
+}
+
+/* Node connection indicator */
+.react-flow__node.connecting {
+  box-shadow: 0 0 0 3px #7dd5de40;
+  animation: nodeConnecting 1s infinite;
+}
+
+@keyframes nodeConnecting {
+  0%, 100% { box-shadow: 0 0 0 3px #7dd5de40; }
+  50% { box-shadow: 0 0 0 6px #7dd5de20; }
+}
