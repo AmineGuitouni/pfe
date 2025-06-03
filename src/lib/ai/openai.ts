@@ -5,7 +5,7 @@ export const openai = new OpenAI({
     apiKey: process.env.OPENROUTER_KEY,
 });
 
-export const agentModelName = 'gemini-2.5-flash-preview-05-20';
+export const agentModelName = 'gemini-2.0-flash';
 
 export const agentClient = new OpenAI({
     baseURL: 'https://ai.guitouni-studio.online/v1',

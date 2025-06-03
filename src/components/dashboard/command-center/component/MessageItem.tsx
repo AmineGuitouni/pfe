@@ -4,6 +4,7 @@ import { User, Bot, Wrench, RotateCcw } from 'lucide-react'; // Added Wrench for
 import ToolUseDisplay, { ToolCall } from './toolUseDisplay';
 import ToolResultDisplay from './toolResultDisplay'; // Import the new component
 import MarkdownRenderer from './MarkdownRenderer'; // Import the new markdown renderer
+import AudioMessage from './AudioMessage'; // Import the audio message component
 import { useCommandCenterContext } from '../context/CommandCenterContext';
 
 interface ParsedMessage {
@@ -178,45 +179,64 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, isLast, showRetryBut
           onMouseLeave={() => setIsHovered(false)}
         >
           {isUser && (
-            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+            <>
+              {message.content_type === 'audio' ? (
+                <AudioMessage
+                  audioUrl={message.content}
+                  isOwnMessage={true}
+                />
+              ) : (
+                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+              )}
+            </>
           )}
 
           {isAi && (
           <>
-            {/* Render text before tool_use block if it exists and tool_use is parsed */}
-            {parsedAiContent.toolCall && hasActualTextBeforeAi && (
-              <MarkdownRenderer
-                content={parsedAiContent.textBefore.trim()}
-                className="mb-1"
+            {/* Handle AI audio messages */}
+            {message.content_type === 'audio' ? (
+              <AudioMessage
+                audioUrl={message.content}
+                isOwnMessage={false}
               />
-            )}
-            {/* Render ToolUseDisplay if a tool_use block is parsed (valid or not, ToolUseDisplay handles undefined) */}
-            {/* ToolUseDisplay will show loading/error if toolCall is undefined due to parsing error */}
-            {message.content.includes('```tool_use') && (
-                 <ToolUseDisplay
-                   toolCall={parsedAiContent.toolCall}
-                   onAccept={async ()=>{
-                     await toolCallAction('accept');
-                   }}
-                   onReject={async ()=>{
-                     await toolCallAction('reject');
-                   }}
-                   isLast={isLast}
-                 />
-            )}
-            {/* Render text after tool_use block if it exists and tool_use is parsed */}
-            {parsedAiContent.toolCall && hasActualTextAfterAi && (
-              <MarkdownRenderer
-                content={parsedAiContent.textAfter.trim()}
-                className="mt-1"
-              />
-            )}
-            {/* If no tool_use block was intended or if it was completely unparsable leading to no toolCall, render raw text */}
-            {/* This also covers AI messages that are purely text */}
-            {!message.content.includes('```tool_use') && (
-                 <MarkdownRenderer
-                   content={parsedAiContent.rawText}
-                 />
+            ) : (
+              <>
+                {/* Render text before tool_use block if it exists and tool_use is parsed */}
+                {parsedAiContent.toolCall && hasActualTextBeforeAi && (
+                  <MarkdownRenderer
+                    content={parsedAiContent.textBefore.trim()}
+                    className="mb-1"
+                  />
+                )}
+                {/* Render ToolUseDisplay if a tool_use block is parsed (valid or not, ToolUseDisplay handles undefined) */}
+                {/* ToolUseDisplay will show loading/error if toolCall is undefined due to parsing error */}
+                {message.content.includes('```tool_use') && (
+                     <ToolUseDisplay
+                       toolCall={parsedAiContent.toolCall}
+                       onAccept={async ()=>{
+                         await toolCallAction('accept');
+                       }}
+                       onReject={async ()=>{
+                         await toolCallAction('reject');
+                       }}
+                       isLast={isLast}
+                     />
+                )}
+                {/* Render text after tool_use block if it exists and tool_use is parsed */}
+                {parsedAiContent.toolCall && hasActualTextAfterAi && (
+                  <MarkdownRenderer
+                    content={parsedAiContent.textAfter.trim()}
+                    className="mt-1"
+                  />
+                )}
+                {/* If no tool_use block was intended or if it was completely unparsable leading to no toolCall, render raw text */}
+                {/* This also covers AI messages that are purely text */}
+                {!message.content.includes('```tool_use') && (
+                     <MarkdownRenderer
+                       content={parsedAiContent.rawText}
+                     />
+                )}
+              </>
             )}
           </>
         )}
@@ -239,6 +259,8 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, isLast, showRetryBut
             </div>
           )
         )}
+
+
         </div>
 
         {/* Retry button for user messages */}

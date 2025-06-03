@@ -1,6 +1,7 @@
 import CommandInput from "@/components/dashboard/command-center/component/autoCompleate";
 import HistoryModal from "@/components/dashboard/command-center/component/modals/HistoryModal";
 import SwitchesButtons from "@/components/dashboard/command-center/component/switchesButtons";
+import AutoAcceptToggle from "@/components/dashboard/command-center/component/AutoAcceptToggle";
 import { CommandCenterProvider } from "@/components/dashboard/command-center/context/CommandCenterContext";
 
 
@@ -20,6 +21,7 @@ export default function Layout({ children, params }: LayoutProps) {
                 <div className="p-4 border-b border-light_blue-500/20 flex justify-between items-center">
                     <h2 className="text-lg font-semibold text-light_blue">Command Center</h2>
                     <div className="flex items-center gap-2">
+                        <AutoAcceptToggle />
                         <SwitchesButtons comapny_id={params.company}/>
                         <HistoryModal />
                     </div>

@@ -2,7 +2,7 @@ import { CreateSessionRequest, CreateSessionResponse } from '@/app/api/v1/[user_
 import { MessagesRouteResponse } from '@/app/api/v1/[user_id]/companies/[company_id]/command-center/sessions/[session_id]/messages/route';
 import { useSession } from 'next-auth/react';
 import { useParams, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Define the possible modes
 export type CommandMode = 'chat' | 'cli';
@@ -33,8 +33,10 @@ export const useCommandCenter = () => {
   } = useParams();
 
   const [messages, setMessages] = useState<SessionMessage[]>([]);
-  const [streamedMessage, setStreamedMessage] = useState<SessionMessage | null>(null);
+  const [streamedMessage] = useState<SessionMessage | null>(null);
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const initialLoadRef = useRef<string | null>(null);
+  const isMountedRef = useRef(true);
 
   // const ActiveSession = useMemo(() => {
   //     return sessions.find(session => session.id === command_center_session);
@@ -42,7 +44,7 @@ export const useCommandCenter = () => {
 
   const [sendingMessage, setSendingMessage] = useState(false);
 
-  const SendMessage = useCallback(async (content: string) =>{
+  const SendMessage = useCallback(async (content: string, contentType: 'text' | 'audio' = 'text') =>{
     if(!userSession?.user?.id || !company_id){
       return {
         error: 'Missing required fields'
@@ -89,7 +91,9 @@ export const useCommandCenter = () => {
 
         currentSessionId = data.session_id;
         router.push(`/dashboard/${company_id}/command-center/${currentMode}/${data.session_id}`);
+        // Clear messages and reset initial load ref for new session
         setMessages([]);
+        initialLoadRef.current = null;
       }
 
       const userMessage: SessionMessage = {
@@ -97,7 +101,7 @@ export const useCommandCenter = () => {
         session_id: currentSessionId,
         sender: 'user',
         content,
-        content_type: 'text',
+        content_type: contentType,
         created_at: new Date().toISOString()
       }
 
@@ -109,6 +113,7 @@ export const useCommandCenter = () => {
         method: 'POST',
         body: JSON.stringify({
           user_prompt: content,
+          user_content_type: contentType,
         })
       })
 
@@ -124,20 +129,22 @@ export const useCommandCenter = () => {
       const { response: aiResponse, response_id, user_message_id } = await response.json();
       console.log('AI Response:', aiResponse);
 
-      // Update the user message with the actual ID from server
-      setMessages(prev => prev.map(msg => 
-        msg.id === placeholderId ? { ...msg, id: user_message_id } : msg
-      ));
-      
-      // Add AI response to existing messages (user message already added optimistically)
-      setMessages(prev => [...prev, {
-        id: response_id,
-        session_id: currentSessionId,
-        sender: 'ai',
-        content: aiResponse,
-        content_type: 'text',
-        created_at: new Date().toISOString()
-      }]);
+      // Update the user message with the actual ID from server and add AI response
+      setMessages(prev => {
+        const updatedMessages = prev.map(msg =>
+          msg.id === placeholderId ? { ...msg, id: user_message_id } : msg
+        );
+        
+        // Add AI response to the updated messages
+        return [...updatedMessages, {
+          id: response_id,
+          session_id: currentSessionId,
+          sender: 'ai',
+          content: aiResponse,
+          content_type: 'text',
+          created_at: new Date().toISOString()
+        }];
+      });
       
       setSendingMessage(false);
     }
@@ -179,7 +186,7 @@ export const useCommandCenter = () => {
         throw new Error(error);
       }
 
-      // Add AI response to existing messages
+      // Add tool call message and AI response to existing messages
       setMessages(prev => [...prev, {
         id: toolCallMessage.id,
         session_id: command_center_session,
@@ -187,7 +194,7 @@ export const useCommandCenter = () => {
         content: toolCallMessage.content,
         content_type: 'text',
         created_at: new Date().toISOString()
-      },{
+      }, {
         id: response_id,
         session_id: command_center_session,
         sender: 'ai',
@@ -254,8 +261,13 @@ export const useCommandCenter = () => {
   }, [command_center_session, company_id, userSession?.user.id])
 
   const fetchMessages = useCallback(async () => {
-    // Skip fetching if currently sending a message or if no session exists
-    if (!command_center_session || !userSession?.user?.id || !company_id || sendingMessage) return;
+    // Skip fetching if no session exists or required params are missing
+    if (!command_center_session || !userSession?.user?.id || !company_id) return;
+
+    // Add performance logging in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔄 fetchMessages called for session:', command_center_session);
+    }
 
     setLoadingMessages(true);
     
@@ -286,24 +298,50 @@ export const useCommandCenter = () => {
         content_type: message.type,
         created_at: message.created_at
       }));
-      console.log('Fetched messages:', transformedMessages);
-      setMessages(prev => {
-        const filteredPrev = prev.filter(msg => msg.session_id === command_center_session);
-        const uniqueMessages = transformedMessages.filter(msg => !filteredPrev.some(prevMsg => prevMsg.id === msg.id));
-        return [...filteredPrev, ...uniqueMessages];
-      });
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('📥 Fetched messages:', transformedMessages.length, 'messages');
+      }
+      
+      // Replace messages for the current session entirely to avoid duplicates
+      setMessages(transformedMessages);
     } catch (error) {
       console.error('Error fetching messages:', error);
     } finally {
       setLoadingMessages(false);
     }
-  }, [command_center_session, company_id, userSession?.user.id, sendingMessage]);
+  }, [command_center_session, company_id, userSession?.user.id]);
 
 
-  // Fetch messages when the component mounts or command_center_session changes
+  // Fetch messages only when session changes or on initial mount
   useEffect(() => {
-    fetchMessages()
-  }, [fetchMessages]);
+    // Skip if currently sending a message to avoid unnecessary fetches
+    if (sendingMessage) return;
+    
+    // Only fetch if this is a new session or initial load
+    if (command_center_session && initialLoadRef.current !== command_center_session) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🎯 Triggering fetchMessages for new session:', command_center_session);
+      }
+      
+      initialLoadRef.current = command_center_session;
+      fetchMessages();
+    }
+  }, [command_center_session, fetchMessages, sendingMessage]);
+
+  // Clear messages when session changes to prevent showing old messages
+  useEffect(() => {
+    if (command_center_session && initialLoadRef.current !== command_center_session) {
+      setMessages([]);
+    }
+  }, [command_center_session]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // handle the agentic flow
   useEffect(()=>{

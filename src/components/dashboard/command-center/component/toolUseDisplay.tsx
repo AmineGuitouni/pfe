@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Settings, Loader2, Check, X } from 'lucide-react'; // Added Check and X icons for buttons
+import { Settings, Loader2, Check, X, Zap } from 'lucide-react'; // Added Check and X icons for buttons
+import { useCommandCenterContext } from '../context/CommandCenterContext';
 
 // Define and export ToolCall related types if they are specific to this module
 // or import them if they are shared.
@@ -23,6 +24,7 @@ interface ToolUseDisplayProps {
 const ToolUseDisplay: React.FC<ToolUseDisplayProps> = ({ toolCall, onAccept, onReject, isLast = false }) => {
   const [isAcceptLoading, setIsAcceptLoading] = useState(false);
   const [isRejectLoading, setIsRejectLoading] = useState(false);
+  const { isAutoAcceptEnabled } = useCommandCenterContext();
 
   const handleAccept = async () => {
     if (!onAccept || isAcceptLoading || isRejectLoading) return;
@@ -120,41 +122,50 @@ const ToolUseDisplay: React.FC<ToolUseDisplayProps> = ({ toolCall, onAccept, onR
         <p className="text-xs text-gray-400 italic">No parameters provided.</p>
       )}
       
-      {/* Action buttons at bottom right - only show if this is the last message */}
-      {isLast && (onAccept || onReject) && (
+      {/* Action buttons or auto accept indicator at bottom right - only show if this is the last message */}
+      {isLast && (
         <div className="flex justify-end mt-3 pt-2 border-t border-gray-600">
-          <div className="flex items-center gap-2">
-            {onReject && (
-              <button
-                onClick={handleReject}
-                disabled={isAcceptLoading || isRejectLoading}
-                className="flex items-center gap-1 px-2 py-1 text-xs bg-red-600 hover:bg-red-700 disabled:bg-gray-500 disabled:cursor-not-allowed text-white rounded transition-colors duration-200"
-                title="Reject tool call"
-              >
-                {isRejectLoading ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <X size={14} />
+          {isAutoAcceptEnabled ? (
+            <div className="flex items-center gap-2 px-2 py-1 text-xs bg-green-600/30 text-green-400 rounded">
+              <Zap size={14} />
+              Auto Accept Enabled
+            </div>
+          ) : (
+            (onAccept || onReject) && (
+              <div className="flex items-center gap-2">
+                {onReject && (
+                  <button
+                    onClick={handleReject}
+                    disabled={isAcceptLoading || isRejectLoading}
+                    className="flex items-center gap-1 px-2 py-1 text-xs bg-red-600 hover:bg-red-700 disabled:bg-gray-500 disabled:cursor-not-allowed text-white rounded transition-colors duration-200"
+                    title="Reject tool call"
+                  >
+                    {isRejectLoading ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <X size={14} />
+                    )}
+                    Reject
+                  </button>
                 )}
-                Reject
-              </button>
-            )}
-            {onAccept && (
-              <button
-                onClick={handleAccept}
-                disabled={isAcceptLoading || isRejectLoading}
-                className="flex items-center gap-1 px-2 py-1 text-xs bg-green-600 hover:bg-green-700 disabled:bg-gray-500 disabled:cursor-not-allowed text-white rounded transition-colors duration-200"
-                title="Accept tool call"
-              >
-                {isAcceptLoading ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <Check size={14} />
+                {onAccept && (
+                  <button
+                    onClick={handleAccept}
+                    disabled={isAcceptLoading || isRejectLoading}
+                    className="flex items-center gap-1 px-2 py-1 text-xs bg-green-600 hover:bg-green-700 disabled:bg-gray-500 disabled:cursor-not-allowed text-white rounded transition-colors duration-200"
+                    title="Accept tool call"
+                  >
+                    {isAcceptLoading ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <Check size={14} />
+                    )}
+                    Accept
+                  </button>
                 )}
-                Accept
-              </button>
-            )}
-          </div>
+              </div>
+            )
+          )}
         </div>
       )}
     </div>
