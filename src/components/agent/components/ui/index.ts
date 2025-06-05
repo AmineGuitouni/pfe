@@ -4,3 +4,8 @@ export { MessageList } from './MessageList';
 export { MessageBubble } from './MessageBubble';
 export { ChatInput } from './ChatInput';
 export { TypingIndicator } from './TypingIndicator';
+export { SessionSelector } from './SessionSelector';
+export { ToolUseDisplay } from './ToolUseDisplay';
+export { ToolResultDisplay } from './ToolResultDisplay';
+export { AudioMessage } from './AudioMessage';
+export { AutoAcceptToggle } from './AutoAcceptToggle';

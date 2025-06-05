@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 import { Volume2, VolumeX, Mic, MicOff } from 'lucide-react';
 
 // Component imports
-import { ChatIcon, ChatHeader, MessageList, ChatInput } from './ui';
+import { ChatIcon, ChatHeader, MessageList, ChatInput, SessionSelector } from './ui';
 
 // Hook and utility imports
 import { useChatState } from '../hooks';
@@ -23,13 +23,26 @@ export const MiniAiChat: React.FC = () => {
     isVoiceResponseEnabled,
     isLiveListening,
     isRecording,
+    isSessionSelectorVisible,
     handleStateChange,
     handleSendMessage,
     setCurrentMessage,
     toggleVoiceResponse,
     toggleLiveListening,
     startRecording,
-    stopRecording
+    stopRecording,
+    navigateToCommandCenter,
+    showSessionSelector,
+    hideSessionSelector,
+    handleSessionSelect,
+    handleCreateNewSession,
+    sessionId,
+    isAutoAcceptEnabled,
+    toggleAutoAccept,
+    toolCallAction,
+    isToolCallLoading,
+    retryLastMessage,
+    isRetrying
   } = useChatState();
   
   const mouseLeaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -235,30 +248,59 @@ export const MiniAiChat: React.FC = () => {
             className="h-full flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <ChatHeader 
+            <ChatHeader
               onClose={handleClose}
               isVoiceResponseEnabled={isVoiceResponseEnabled}
               isLiveListening={isLiveListening}
               onToggleVoiceResponse={toggleVoiceResponse}
               onToggleLiveListening={toggleLiveListening}
+              onNavigateToCommandCenter={navigateToCommandCenter}
+              onShowSessionSelector={showSessionSelector}
+              isAutoAcceptEnabled={isAutoAcceptEnabled}
+              onToggleAutoAccept={toggleAutoAccept}
             />
-            <MessageList messages={messages} isTyping={isTyping} />
-            <motion.div 
-              className="p-4 border-t border-light_blue/10"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.08, duration: 0.15, ease: "easeOut" }}
-            >
-              <ChatInput
-                message={currentMessage}
-                isLoading={isLoading}
-                isRecording={isRecording}
-                onMessageChange={setCurrentMessage}
-                onSendMessage={handleSendMessage}
-                onStartRecording={startRecording}
-                onStopRecording={stopRecording}
-              />
-            </motion.div>
+            
+            {/* Session Selector - overlays the entire chat when visible */}
+            <AnimatePresence>
+              {isSessionSelectorVisible && (
+                <SessionSelector
+                  isVisible={isSessionSelectorVisible}
+                  onClose={hideSessionSelector}
+                  onSessionSelect={handleSessionSelect}
+                  onCreateNew={handleCreateNewSession}
+                  currentSessionId={sessionId}
+                />
+              )}
+            </AnimatePresence>
+            
+            {!isSessionSelectorVisible && (
+              <>
+                <MessageList
+                  messages={messages}
+                  isTyping={isTyping || isToolCallLoading}
+                  toolCallAction={toolCallAction}
+                  isAutoAcceptEnabled={isAutoAcceptEnabled}
+                  retryLastMessage={retryLastMessage}
+                  isRetrying={isRetrying}
+                />
+                <motion.div
+                  className="p-4 border-t border-light_blue/10"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.08, duration: 0.15, ease: "easeOut" }}
+                >
+                  <ChatInput
+                    message={currentMessage}
+                    isLoading={isLoading}
+                    isRecording={isRecording}
+                    onMessageChange={setCurrentMessage}
+                    onSendMessage={handleSendMessage}
+                    onStartRecording={startRecording}
+                    onStopRecording={stopRecording}
+                  />
+                </motion.div>
+              </>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

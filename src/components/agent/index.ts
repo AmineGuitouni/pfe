@@ -3,5 +3,5 @@ export * from './components';
 
 // Direct exports for convenience
 export { MiniAiChat } from './components';
-export { useChatState } from './hooks';
-export type { Message, ChatState } from './lib';
+export { useChatState, useMiniChatSession } from './hooks';
+export type { SessionMessage, ChatState } from './lib';

@@ -1,9 +1,13 @@
-// Types for the MiniAiChat component
-export interface Message {
+// Types for the MiniAiChat component - Enhanced for Command Center Integration
+
+// Use the same SessionMessage format as command center
+export interface SessionMessage {
   id: string;
-  text: string;
-  sender: 'user' | 'ai';
-  timestamp: Date;
+  session_id: string;
+  sender: 'user' | 'ai' | 'tool';
+  content: string;
+  content_type: 'text' | 'audio';
+  created_at: string;
 }
 
 export type ChatState = 'icon' | 'hovered' | 'expanded';
@@ -15,7 +19,7 @@ export interface ChatComponentProps {
 }
 
 export interface MessageBubbleProps {
-  message: Message;
+  message: SessionMessage;
   index: number;
 }
 
@@ -27,6 +31,11 @@ export interface ChatInputProps {
   onSendMessage: () => void;
   onStartRecording: () => void;
   onStopRecording: () => void;
+}
+
+export interface MessageListProps {
+  messages: SessionMessage[];
+  isTyping: boolean;
 }
 
 export interface TypingIndicatorProps {

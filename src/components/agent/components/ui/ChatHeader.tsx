@@ -2,8 +2,9 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { X, Volume2, VolumeX, Mic, MicOff } from 'lucide-react';
+import { X, Volume2, VolumeX, Mic, MicOff, MessageSquare } from 'lucide-react';
 import { STYLING, CHAT_CONFIG } from '../../lib/constants';
+import { AutoAcceptToggle } from './AutoAcceptToggle';
 
 interface ChatHeaderProps {
   onClose: () => void;
@@ -11,14 +12,21 @@ interface ChatHeaderProps {
   isLiveListening: boolean;
   onToggleVoiceResponse: () => void;
   onToggleLiveListening: () => void;
+  onNavigateToCommandCenter?: () => void;
+  onShowSessionSelector?: () => void;
+  isAutoAcceptEnabled?: boolean;
+  onToggleAutoAccept?: () => void;
 }
 
-export const ChatHeader: React.FC<ChatHeaderProps> = ({ 
-  onClose, 
-  isVoiceResponseEnabled, 
-  isLiveListening, 
-  onToggleVoiceResponse, 
-  onToggleLiveListening 
+export const ChatHeader: React.FC<ChatHeaderProps> = ({
+  onClose,
+  isVoiceResponseEnabled,
+  isLiveListening,
+  onToggleVoiceResponse,
+  onToggleLiveListening,
+  onShowSessionSelector,
+  isAutoAcceptEnabled = false,
+  onToggleAutoAccept
 }) => {
   return (
     <motion.div
@@ -40,12 +48,33 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           </p>
         </div>
         <div className="flex items-center space-x-2">
+          {/* Session Selector Button */}
+          {onShowSessionSelector && (
+            <motion.button
+              onClick={onShowSessionSelector}
+              className={`p-2 rounded-lg transition-all duration-200 bg-gray-600/20 text-gray-400 hover:bg-gray-600/30 hover:text-gray-300`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              title="Browse chat sessions"
+            >
+              <MessageSquare size={16} />
+            </motion.button>
+          )}
+
+          {/* Auto Accept Toggle */}
+          {onToggleAutoAccept && (
+            <AutoAcceptToggle
+              isAutoAcceptEnabled={isAutoAcceptEnabled}
+              onToggleAutoAccept={onToggleAutoAccept}
+            />
+          )}
+
           {/* Voice Response Button */}
           <motion.button
             onClick={onToggleVoiceResponse}
             className={`p-2 rounded-lg transition-all duration-200 ${
-              isVoiceResponseEnabled 
-                ? 'bg-light_blue/20 text-light_blue hover:bg-light_blue/30' 
+              isVoiceResponseEnabled
+                ? 'bg-light_blue/20 text-light_blue hover:bg-light_blue/30'
                 : 'bg-gray-600/20 text-gray-400 hover:bg-gray-600/30 hover:text-gray-300'
             }`}
             whileHover={{ scale: 1.05 }}
@@ -59,8 +88,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           <motion.button
             onClick={onToggleLiveListening}
             className={`p-2 rounded-lg transition-all duration-200 ${
-              isLiveListening 
-                ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' 
+              isLiveListening
+                ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
                 : 'bg-gray-600/20 text-gray-400 hover:bg-gray-600/30 hover:text-gray-300'
             }`}
             whileHover={{ scale: 1.05 }}

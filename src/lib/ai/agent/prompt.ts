@@ -280,6 +280,84 @@ Note: the tool will be executed directly after you type the syntax for it. only 
         ]
     }
 
+### List Groups
+
+- Name: list_groups
+- Description: Retrieves all permission groups for a specific company with complete details including members, permissions, and metadata
+- Parameters:
+    - user_id: The ID of the user requesting the groups list
+    - company_id: The ID of the company to list groups for
+- Returns: Array of groups with the following structure:
+    {
+        "id": "Group ID",
+        "name": "Group name",
+        "description": "Group description",
+        "permissions": ["Array of permission strings from APP_PERMISSIONS"],
+        "members_count": "Number of members in the group",
+        "members": ["Array of user IDs in the group"],
+        "created_at": "Group creation timestamp"
+    }
+
+### Get Group IDs
+
+- Name: get_group_ids
+- Description: Retrieves simplified group data (ID and name only) optimized for UI components like dropdowns and selections
+- Parameters:
+    - user_id: The ID of the user requesting the group IDs
+    - company_id: The ID of the company to get group IDs for
+- Returns: Array of simplified group objects:
+    {
+        "id": "Group ID",
+        "name": "Group name"
+    }
+
+### Create Group
+
+- Name: create_group
+- Description: Creates a new permission group with specified permissions and assigns users to it. Automatically manages user-group relationships and cache invalidation
+- Parameters:
+    - user_id: The ID of the user creating the group
+    - company_id: The ID of the company the group belongs to
+    - name: The name of the group (required)
+    - description: A description of the group's purpose (optional)
+    - permissions: Array of permission strings from the predefined APP_PERMISSIONS list (required). Valid permissions include:
+        - Groups: groups:create, groups:read, groups:update, groups:delete
+        - Projects: projects:create, projects:read, projects:update, projects:delete
+        - Storage: storage:create, storage:read, storage:update, storage:delete
+        - Users: users:create, users:read, users:update, users:delete
+    - users: Array of user IDs to assign to this group initially (required)
+- Returns: Success status with new group ID:
+    {
+        "group_id": "New group ID",
+        "status": "Group created successfully"
+    }
+
+### Edit Group
+
+- Name: edit_group
+- Description: Updates an existing group's details and manages user membership by adding new users and removing existing ones
+- Parameters:
+    - user_id: The ID of the user editing the group
+    - company_id: The ID of the company the group belongs to
+    - group_id: The ID of the group to edit
+    - name: Updated group name
+    - description: Updated group description
+    - permissions: Updated array of permission strings from APP_PERMISSIONS (same valid permissions as create_group)
+    - newUsers: Array of user IDs to add to the group
+    - removedUsers: Array of user IDs to remove from the group
+- Returns: Success confirmation message
+
+### Delete Group
+
+- Name: delete_group
+- Description: Permanently deletes a permission group and all associated user relationships. Also clears related permission cache entries
+- Parameters:
+    - user_id: The ID of the user deleting the group
+    - company_id: The ID of the company the group belongs to
+    - group_id: The ID of the group to delete
+- Returns: Success confirmation message
+- Warning: This action is irreversible and will remove all user assignments to this group
+
 ## My Learning Process
 I learn from interactions and feedback, continuously improving my ability to assist effectively. Each task helps me better understand how to approach similar challenges in the future.
 

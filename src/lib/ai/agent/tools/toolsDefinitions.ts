@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import { GeneratedTask } from "../../../../components/dashboard/projects/types";
-import { serverGet, serverPost } from "../../../utils/serverFetch";
+import { serverGet, serverPost, serverPut, serverDelete } from "../../../utils/serverFetch";
 import { resend } from "../../../resend";
 import { GeneralEmailTemplate } from "../../../emailtemplets";
 
@@ -427,6 +427,232 @@ export async function GenerateTaskAssignments({user_id, company_id, project_id}:
     }
 }
 
+// Groups Management Interfaces
+interface ListGroupsParams {
+    user_id: string;
+    company_id: string;
+}
+
+interface GetGroupIdsParams {
+    user_id: string;
+    company_id: string;
+}
+
+interface CreateGroupParams {
+    user_id: string;
+    company_id: string;
+    name: string;
+    description?: string;
+    permissions: string[];
+    users: string[];
+}
+
+interface EditGroupParams {
+    user_id: string;
+    company_id: string;
+    group_id: string;
+    name: string;
+    description: string;
+    permissions: string[];
+    newUsers: string[];
+    removedUsers: string[];
+}
+
+interface DeleteGroupParams {
+    user_id: string;
+    company_id: string;
+    group_id: string;
+}
+
+// Groups Management Functions
+export async function ListGroups({user_id, company_id}: ListGroupsParams) {
+    try {
+        const endpoint = `/api/v1/${user_id}/companies/${company_id}/groups/list`;
+        const response = await serverGet(endpoint);
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            return {
+                success: false,
+                message: null,
+                error: errorData.error || `HTTP error! status: ${response.status}`
+            };
+        }
+
+        const data = await response.json();
+        return {
+            success: true,
+            message: {
+                groups: data.data
+            },
+            error: null
+        };
+    } catch (error) {
+        console.error('Error listing groups:', error);
+        return {
+            success: false,
+            message: null,
+            error: error instanceof Error ? error.message : "Failed to list groups"
+        };
+    }
+}
+
+export async function GetGroupIds({user_id, company_id}: GetGroupIdsParams) {
+    try {
+        const endpoint = `/api/v1/${user_id}/companies/${company_id}/groups/list/get-ids`;
+        const response = await serverGet(endpoint);
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            return {
+                success: false,
+                message: null,
+                error: errorData.error || `HTTP error! status: ${response.status}`
+            };
+        }
+
+        const data = await response.json();
+        return {
+            success: true,
+            message: {
+                groups: data.data
+            },
+            error: null
+        };
+    } catch (error) {
+        console.error('Error getting group IDs:', error);
+        return {
+            success: false,
+            message: null,
+            error: error instanceof Error ? error.message : "Failed to get group IDs"
+        };
+    }
+}
+
+export async function CreateGroup({user_id, company_id, name, description, permissions, users}: CreateGroupParams) {
+    try {
+        // Validate required parameters
+        if (!name || !permissions || permissions.length === 0) {
+            return {
+                success: false,
+                message: null,
+                error: "Name and permissions are required"
+            };
+        }
+
+        const endpoint = `/api/v1/${user_id}/companies/${company_id}/groups/new`;
+        const body = {
+            name,
+            description,
+            permissions,
+            users: users || []
+        };
+        
+        const response = await serverPost(endpoint, body);
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            return {
+                success: false,
+                message: null,
+                error: errorData.error || `HTTP error! status: ${response.status}`
+            };
+        }
+
+        const data = await response.json();
+        return {
+            success: true,
+            message: {
+                group_id: data.data.id,
+                status: "Group created successfully"
+            },
+            error: null
+        };
+    } catch (error) {
+        console.error('Error creating group:', error);
+        return {
+            success: false,
+            message: null,
+            error: error instanceof Error ? error.message : "Failed to create group"
+        };
+    }
+}
+
+export async function EditGroup({user_id, company_id, group_id, name, description, permissions, newUsers, removedUsers}: EditGroupParams) {
+    try {
+        // Validate required parameters
+        if (!name || !permissions || permissions.length === 0) {
+            return {
+                success: false,
+                message: null,
+                error: "Name and permissions are required"
+            };
+        }
+
+        const endpoint = `/api/v1/${user_id}/companies/${company_id}/groups/${group_id}/edit`;
+        const body = {
+            name,
+            description,
+            permissions,
+            newUsers: newUsers || [],
+            removedUsers: removedUsers || []
+        };
+        
+        const response = await serverPut(endpoint, body);
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            return {
+                success: false,
+                message: null,
+                error: errorData.error || `HTTP error! status: ${response.status}`
+            };
+        }
+
+        return {
+            success: true,
+            message: "Group updated successfully",
+            error: null
+        };
+    } catch (error) {
+        console.error('Error editing group:', error);
+        return {
+            success: false,
+            message: null,
+            error: error instanceof Error ? error.message : "Failed to edit group"
+        };
+    }
+}
+
+export async function DeleteGroup({user_id, company_id, group_id}: DeleteGroupParams) {
+    try {
+        const endpoint = `/api/v1/${user_id}/companies/${company_id}/groups/${group_id}/delete`;
+        const response = await serverDelete(endpoint);
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            return {
+                success: false,
+                message: null,
+                error: errorData.error || `HTTP error! status: ${response.status}`
+            };
+        }
+
+        return {
+            success: true,
+            message: "Group deleted successfully",
+            error: null
+        };
+    } catch (error) {
+        console.error('Error deleting group:', error);
+        return {
+            success: false,
+            message: null,
+            error: error instanceof Error ? error.message : "Failed to delete group"
+        };
+    }
+}
+
 export const tools: Record<string, Function | undefined> ={
     "generate_tasks_for_project": GenerateTasksForProject,
     "create_project": CreateProject,
@@ -435,5 +661,10 @@ export const tools: Record<string, Function | undefined> ={
     "get_project": GetProject,
     "list_users": ListUsers,
     "send_email": SendEmail,
-    "generate_task_assignments": GenerateTaskAssignments
+    "generate_task_assignments": GenerateTaskAssignments,
+    "list_groups": ListGroups,
+    "get_group_ids": GetGroupIds,
+    "create_group": CreateGroup,
+    "edit_group": EditGroup,
+    "delete_group": DeleteGroup
 }

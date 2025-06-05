@@ -1,5 +1,5 @@
 // Utility functions for the MiniAiChat component
-import { Message } from './types';
+import { SessionMessage } from './types';
 
 /**
  * Generates a unique ID for messages
@@ -12,23 +12,34 @@ export const generateMessageId = (): string => {
  * Formats timestamp for display in messages
  */
 export const formatMessageTime = (timestamp: Date): string => {
-  return timestamp.toLocaleTimeString([], { 
-    hour: '2-digit', 
-    minute: '2-digit' 
+  return timestamp.toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit'
   });
 };
 
 /**
- * Creates a new message object
+ * Formats ISO string timestamp for display
  */
-export const createMessage = (
-  text: string, 
-  sender: 'user' | 'ai' = 'user'
-): Message => ({
+export const formatMessageTimeFromISO = (isoString: string): string => {
+  return formatMessageTime(new Date(isoString));
+};
+
+/**
+ * Creates a new session message object
+ */
+export const createSessionMessage = (
+  content: string,
+  sender: 'user' | 'ai' | 'tool' = 'user',
+  sessionId: string,
+  contentType: 'text' | 'audio' = 'text'
+): SessionMessage => ({
   id: generateMessageId(),
-  text: text.trim(),
+  session_id: sessionId,
+  content: content.trim(),
   sender,
-  timestamp: new Date()
+  content_type: contentType,
+  created_at: new Date().toISOString()
 });
 
 /**
