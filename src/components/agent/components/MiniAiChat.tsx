@@ -9,44 +9,112 @@ import { Volume2, VolumeX, Mic, MicOff } from 'lucide-react';
 import { ChatIcon, ChatHeader, MessageList, ChatInput, SessionSelector } from './ui';
 
 // Hook and utility imports
-import { useChatState } from '../hooks';
+import { useChatUIState } from '../hooks/useChatUIState';
+import { useMessageManager } from '../hooks/useMessageManager';
+import { useAudioRecording } from '../hooks/useAudioRecording';
+import { useAutoAccept } from '../hooks/useAutoAccept';
+import { useToolCallHandler } from '../hooks/useToolCallHandler';
+import { useLiveListening } from '../hooks/useLiveListening';
+import { useMiniChatSession } from '../hooks/useMiniChatSession';
+import { useChatContext } from '../contexts/ChatContext';
 import { containerVariants, STYLING } from '../lib';
 
 export const MiniAiChat: React.FC = () => {
   const { data: session } = useSession();
+  
+  // Specialized hooks
+  const uiState = useChatUIState();
+  const messageManager = useMessageManager();
+  const audioRecording = useAudioRecording();
+  const autoAccept = useAutoAccept();
+  const toolCallHandler = useToolCallHandler();
+  const liveListening = useLiveListening();
+  const sessionManager = useMiniChatSession();
+  
+  // Context for additional state and direct message control
+  const { isToolCallLoading, isRetrying, setMessages, setSessionId } = useChatContext();
+  
+  // Destructure from specialized hooks
   const {
     chatState,
+    isSessionSelectorVisible,
+    isVoiceResponseEnabled,
+    isLiveListening,
+    handleStateChange,
+    toggleVoiceResponse,
+    toggleLiveListening,
+    showSessionSelector,
+    hideSessionSelector
+  } = uiState;
+  
+  const {
     messages,
     currentMessage,
     isLoading,
-    isTyping,
-    isVoiceResponseEnabled,
-    isLiveListening,
-    isRecording,
-    isSessionSelectorVisible,
-    handleStateChange,
     handleSendMessage,
-    setCurrentMessage,
-    toggleVoiceResponse,
-    toggleLiveListening,
+    setCurrentMessage
+  } = messageManager;
+  
+  const {
+    isRecording,
     startRecording,
-    stopRecording,
-    navigateToCommandCenter,
-    showSessionSelector,
-    hideSessionSelector,
-    handleSessionSelect,
-    handleCreateNewSession,
-    sessionId,
+    stopRecording
+  } = audioRecording;
+  
+  const {
     isAutoAcceptEnabled,
-    toggleAutoAccept,
+    toggleAutoAccept
+  } = autoAccept;
+  
+  const {
     toolCallAction,
-    isToolCallLoading,
-    retryLastMessage,
-    isRetrying
-  } = useChatState();
+    retryLastMessage
+  } = toolCallHandler;
+  
+  const {
+    sessionId,
+    navigateToCommandCenter
+  } = sessionManager;
+  
+  // Session handlers
+  const handleSessionSelect = async (selectedSessionId: string) => {
+    // Clear current messages first
+    setMessages([]);
+    setCurrentMessage('');
+    // Switch session in session manager - this will trigger the context update and message fetching
+    sessionManager.switchToSession(selectedSessionId);
+  };
+
+  const handleCreateNewSession = () => {
+    // Clear current messages first
+    setMessages([]);
+    // Reset session in session manager
+    sessionManager.resetSession();
+  };
+  
+  // Computed values
+  const isTyping = isLoading || isToolCallLoading;
+  const liveListeningState = liveListening.getLiveListeningState();
   
   const mouseLeaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isTransitioning, setIsTransitioning] = React.useState(false);
+
+  // Sync session manager's sessionId with context
+  useEffect(() => {
+    if (sessionId) {
+      setSessionId(sessionId);
+    }
+  }, [sessionId, setSessionId]);
+
+  // Auto-accept integration
+  useEffect(() => {
+    if (autoAccept.shouldAutoAccept()) {
+      const timeoutId = setTimeout(() => {
+        toolCallAction('accept');
+      }, 1500);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [messages, autoAccept, toolCallAction]);
 
   // Cleanup timeout on unmount or state change
   useEffect(() => {
@@ -258,6 +326,7 @@ export const MiniAiChat: React.FC = () => {
               onShowSessionSelector={showSessionSelector}
               isAutoAcceptEnabled={isAutoAcceptEnabled}
               onToggleAutoAccept={toggleAutoAccept}
+              liveListeningState={liveListeningState}
             />
             
             {/* Session Selector - overlays the entire chat when visible */}
@@ -293,6 +362,8 @@ export const MiniAiChat: React.FC = () => {
                     message={currentMessage}
                     isLoading={isLoading}
                     isRecording={isRecording}
+                    isToolCallLoading={isToolCallLoading}
+                    isRetrying={isRetrying}
                     onMessageChange={setCurrentMessage}
                     onSendMessage={handleSendMessage}
                     onStartRecording={startRecording}

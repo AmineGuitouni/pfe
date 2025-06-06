@@ -80,21 +80,25 @@ export const useMessageManager = () => {
   const handleSendMessage = useCallback(async () => {
     if (!currentMessage.trim() || isLoading || !userSession?.user?.id || !company) return;
 
+    // Prevent duplicate sends by immediately setting loading and clearing message
+    const messageToSend = currentMessage.trim();
+    setCurrentMessage('');
+    setIsLoading(true);
+
     // Get or create session
-    const currentSessionId = sessionId || await getCurrentSession(currentMessage);
+    const currentSessionId = sessionId || await getCurrentSession(messageToSend);
     if (!currentSessionId) {
       console.error('Failed to get or create session');
+      setCurrentMessage(messageToSend); // Restore message on error
+      setIsLoading(false);
       return;
     }
 
     // Create optimistic user message
-    const userMessage = createOptimisticMessage(currentMessage, currentSessionId, 'text');
+    const userMessage = createOptimisticMessage(messageToSend, currentSessionId, 'text');
 
     // Add user message immediately for optimistic UI
     setMessages(prev => [...prev, userMessage]);
-    const messageToSend = currentMessage;
-    setCurrentMessage('');
-    setIsLoading(true);
 
     try {
       const response = await fetch(`/api/v1/${userSession.user.id}/companies/${company}/command-center/sessions/${currentSessionId}`, {

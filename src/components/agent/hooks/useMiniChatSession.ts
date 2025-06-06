@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useParams, useRouter } from 'next/navigation';
+import { useChatContext } from '../contexts/ChatContext';
 
 // Extend session type to include id
 interface ExtendedUser {
@@ -17,22 +18,22 @@ interface ExtendedSession {
   expires: string;
 }
 
-interface MiniChatSessionData {
-  sessionId: string | null;
-  isCreatingSession: boolean;
-  error: string | null;
-}
+// Interface no longer needed as we use context state
 
 export const useMiniChatSession = () => {
   const { data: userSession } = useSession() as { data: ExtendedSession | null };
   const { company } = useParams() as { company: string };
   const router = useRouter();
   
-  const [sessionData, setSessionData] = useState<MiniChatSessionData>({
-    sessionId: null,
-    isCreatingSession: false,
-    error: null
-  });
+  // Use context for session state instead of local state
+  const {
+    sessionId,
+    sessionError,
+    isCreatingSession,
+    setSessionId,
+    setSessionError,
+    setIsCreatingSession
+  } = useChatContext();
 
   // Get stored session ID for mini chat
   const getStoredSessionId = useCallback(() => {
@@ -55,11 +56,12 @@ export const useMiniChatSession = () => {
   // Create a new chat session
   const createNewSession = useCallback(async (initialMessage?: string): Promise<string | null> => {
     if (!userSession?.user?.id || !company) {
-      setSessionData(prev => ({ ...prev, error: 'Missing user session or company' }));
+      setSessionError('Missing user session or company');
       return null;
     }
 
-    setSessionData(prev => ({ ...prev, isCreatingSession: true, error: null }));
+    setIsCreatingSession(true);
+    setSessionError(null);
 
     try {
       const response = await fetch(`/api/v1/${userSession.user.id}/companies/${company}/command-center/sessions/new`, {
@@ -86,20 +88,14 @@ export const useMiniChatSession = () => {
       const newSessionId = data.session_id;
       storeSessionId(newSessionId);
       
-      setSessionData(prev => ({
-        ...prev,
-        sessionId: newSessionId,
-        isCreatingSession: false
-      }));
+      setSessionId(newSessionId);
+      setIsCreatingSession(false);
 
       return newSessionId;
     } catch (error) {
       console.error('Error creating mini chat session:', error);
-      setSessionData(prev => ({
-        ...prev,
-        isCreatingSession: false,
-        error: error instanceof Error ? error.message : 'Failed to create session'
-      }));
+      setIsCreatingSession(false);
+      setSessionError(error instanceof Error ? error.message : 'Failed to create session');
       return null;
     }
   }, [userSession?.user?.id, company, storeSessionId]);
@@ -110,7 +106,7 @@ export const useMiniChatSession = () => {
     const storedSessionId = getStoredSessionId();
     
     if (storedSessionId) {
-      setSessionData(prev => ({ ...prev, sessionId: storedSessionId }));
+      setSessionId(storedSessionId);
       return storedSessionId;
     }
 
@@ -120,29 +116,24 @@ export const useMiniChatSession = () => {
 
   // Navigate to full command center with current session
   const navigateToCommandCenter = useCallback(() => {
-    if (sessionData.sessionId && company) {
-      router.push(`/dashboard/${company}/command-center/chat/${sessionData.sessionId}`);
+    if (sessionId && company) {
+      router.push(`/dashboard/${company}/command-center/chat/${sessionId}`);
     }
-  }, [sessionData.sessionId, company, router]);
+  }, [sessionId, company, router]);
 
   // Reset session (for new conversation)
   const resetSession = useCallback(() => {
     clearStoredSessionId();
-    setSessionData({
-      sessionId: null,
-      isCreatingSession: false,
-      error: null
-    });
+    setSessionId(null);
+    setIsCreatingSession(false);
+    setSessionError(null);
   }, [clearStoredSessionId]);
 
   // Switch to existing session
   const switchToSession = useCallback((sessionId: string) => {
     storeSessionId(sessionId);
-    setSessionData(prev => ({
-      ...prev,
-      sessionId,
-      error: null
-    }));
+    setSessionId(sessionId);
+    setSessionError(null);
   }, [storeSessionId]);
 
   // Initialize session on mount if company is available
@@ -150,15 +141,15 @@ export const useMiniChatSession = () => {
     if (company && userSession?.user?.id) {
       const storedSessionId = getStoredSessionId();
       if (storedSessionId) {
-        setSessionData(prev => ({ ...prev, sessionId: storedSessionId }));
+        setSessionId(storedSessionId);
       }
     }
   }, [company, userSession?.user?.id, getStoredSessionId]);
 
   return {
-    sessionId: sessionData.sessionId,
-    isCreatingSession: sessionData.isCreatingSession,
-    error: sessionData.error,
+    sessionId,
+    isCreatingSession,
+    error: sessionError,
     getCurrentSession,
     createNewSession,
     navigateToCommandCenter,

@@ -23,9 +23,14 @@ interface ChatContextState {
   // Auto-accept state
   isAutoAcceptEnabled: boolean;
   
+  // Tool call state
+  isToolCallLoading: boolean;
+  isRetrying: boolean;
+  
   // Session state
   sessionId: string | null;
   sessionError: string | null;
+  isCreatingSession: boolean;
 }
 
 interface ChatContextActions {
@@ -47,9 +52,14 @@ interface ChatContextActions {
   // Auto-accept state actions
   setIsAutoAcceptEnabled: (enabled: boolean) => void;
   
+  // Tool call state actions
+  setIsToolCallLoading: (loading: boolean) => void;
+  setIsRetrying: (retrying: boolean) => void;
+  
   // Session state actions
   setSessionId: (id: string | null) => void;
   setSessionError: (error: string | null) => void;
+  setIsCreatingSession: (creating: boolean) => void;
 }
 
 type ChatContextType = ChatContextState & ChatContextActions;
@@ -66,8 +76,11 @@ type ChatAction =
   | { type: 'SET_LIVE_LISTENING'; payload: boolean }
   | { type: 'SET_IS_RECORDING'; payload: boolean }
   | { type: 'SET_AUTO_ACCEPT_ENABLED'; payload: boolean }
+  | { type: 'SET_TOOL_CALL_LOADING'; payload: boolean }
+  | { type: 'SET_IS_RETRYING'; payload: boolean }
   | { type: 'SET_SESSION_ID'; payload: string | null }
-  | { type: 'SET_SESSION_ERROR'; payload: string | null };
+  | { type: 'SET_SESSION_ERROR'; payload: string | null }
+  | { type: 'SET_IS_CREATING_SESSION'; payload: boolean };
 
 // Initial State
 const initialState: ChatContextState = {
@@ -89,9 +102,14 @@ const initialState: ChatContextState = {
   // Auto-accept state
   isAutoAcceptEnabled: false,
   
+  // Tool call state
+  isToolCallLoading: false,
+  isRetrying: false,
+  
   // Session state
   sessionId: null,
   sessionError: null,
+  isCreatingSession: false,
 };
 
 // Reducer
@@ -122,10 +140,16 @@ const chatReducer = (state: ChatContextState, action: ChatAction): ChatContextSt
       return { ...state, isRecording: action.payload };
     case 'SET_AUTO_ACCEPT_ENABLED':
       return { ...state, isAutoAcceptEnabled: action.payload };
+    case 'SET_TOOL_CALL_LOADING':
+      return { ...state, isToolCallLoading: action.payload };
+    case 'SET_IS_RETRYING':
+      return { ...state, isRetrying: action.payload };
     case 'SET_SESSION_ID':
       return { ...state, sessionId: action.payload };
     case 'SET_SESSION_ERROR':
       return { ...state, sessionError: action.payload };
+    case 'SET_IS_CREATING_SESSION':
+      return { ...state, isCreatingSession: action.payload };
     default:
       return state;
   }
@@ -173,6 +197,12 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
   const setIsLiveListening = useCallback((listening: boolean) => {
     dispatch({ type: 'SET_LIVE_LISTENING', payload: listening });
+    
+    // Log state change for debugging
+    console.log('Live listening state changed:', {
+      isListening: listening,
+      timestamp: new Date().toISOString()
+    });
   }, []);
 
   const setIsRecording = useCallback((recording: boolean) => {
@@ -183,12 +213,24 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     dispatch({ type: 'SET_AUTO_ACCEPT_ENABLED', payload: enabled });
   }, []);
 
+  const setIsToolCallLoading = useCallback((loading: boolean) => {
+    dispatch({ type: 'SET_TOOL_CALL_LOADING', payload: loading });
+  }, []);
+
+  const setIsRetrying = useCallback((retrying: boolean) => {
+    dispatch({ type: 'SET_IS_RETRYING', payload: retrying });
+  }, []);
+
   const setSessionId = useCallback((id: string | null) => {
     dispatch({ type: 'SET_SESSION_ID', payload: id });
   }, []);
 
   const setSessionError = useCallback((error: string | null) => {
     dispatch({ type: 'SET_SESSION_ERROR', payload: error });
+  }, []);
+
+  const setIsCreatingSession = useCallback((creating: boolean) => {
+    dispatch({ type: 'SET_IS_CREATING_SESSION', payload: creating });
   }, []);
 
   const contextValue: ChatContextType = {
@@ -206,8 +248,11 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     setIsLiveListening,
     setIsRecording,
     setIsAutoAcceptEnabled,
+    setIsToolCallLoading,
+    setIsRetrying,
     setSessionId,
     setSessionError,
+    setIsCreatingSession,
   };
 
   return (

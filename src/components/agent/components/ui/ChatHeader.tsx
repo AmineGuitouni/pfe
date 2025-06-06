@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { X, Volume2, VolumeX, Mic, MicOff, MessageSquare } from 'lucide-react';
 import { STYLING, CHAT_CONFIG } from '../../lib/constants';
 import { AutoAcceptToggle } from './AutoAcceptToggle';
+import { LiveListeningStatus } from './LiveListeningStatus';
 
 interface ChatHeaderProps {
   onClose: () => void;
@@ -16,6 +17,10 @@ interface ChatHeaderProps {
   onShowSessionSelector?: () => void;
   isAutoAcceptEnabled?: boolean;
   onToggleAutoAccept?: () => void;
+  liveListeningState?: {
+    vadState: 'calibrating' | 'listening' | 'recording' | 'processing' | 'idle';
+    isInitialized: boolean;
+  };
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
@@ -26,7 +31,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   onToggleLiveListening,
   onShowSessionSelector,
   isAutoAcceptEnabled = false,
-  onToggleAutoAccept
+  onToggleAutoAccept,
+  liveListeningState
 }) => {
   return (
     <motion.div
@@ -46,6 +52,15 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           <p className={`text-xs ${STYLING.COLORS.TEXT_SECONDARY} mt-1`}>
             {CHAT_CONFIG.HEADER_SUBTITLE}
           </p>
+          {/* Live Listening Status */}
+          {liveListeningState && (
+            <div className="mt-2">
+              <LiveListeningStatus
+                vadState={liveListeningState.vadState}
+                isVisible={isLiveListening && liveListeningState.isInitialized}
+              />
+            </div>
+          )}
         </div>
         <div className="flex items-center space-x-2">
           {/* Session Selector Button */}
@@ -96,7 +111,16 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             whileTap={{ scale: 0.95 }}
             title={isLiveListening ? "Stop live listening" : "Start live listening"}
           >
-            {isLiveListening ? <MicOff size={16} /> : <Mic size={16} />}
+            {isLiveListening ? (
+              <motion.div
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <Mic size={16} />
+              </motion.div>
+            ) : (
+              <MicOff size={16} />
+            )}
           </motion.button>
 
           {/* Close Button */}

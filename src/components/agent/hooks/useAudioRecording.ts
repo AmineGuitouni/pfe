@@ -33,6 +33,7 @@ export const useAudioRecording = () => {
   const {
     isRecording,
     sessionId,
+    isLoading,
     setIsRecording,
     setMessages,
     setIsLoading,
@@ -47,12 +48,16 @@ export const useAudioRecording = () => {
 
   // Send audio message
   const sendAudioMessage = useCallback(async (audioData: string) => {
-    if (!userSession?.user?.id || !company) return;
+    if (!userSession?.user?.id || !company || isLoading) return;
+
+    // Prevent duplicate sends by immediately setting loading
+    setIsLoading(true);
 
     // Get or create session
     const currentSessionId = sessionId || await getCurrentSession('Audio message');
     if (!currentSessionId) {
       console.error('Failed to get or create session');
+      setIsLoading(false);
       return;
     }
 
@@ -61,7 +66,6 @@ export const useAudioRecording = () => {
 
     // Add user message immediately for optimistic UI
     setMessages(prev => [...prev, userMessage]);
-    setIsLoading(true);
 
     try {
       console.log('Sending audio data to API:', {
@@ -109,7 +113,7 @@ export const useAudioRecording = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [userSession?.user?.id, company, sessionId, getCurrentSession, setMessages, setIsLoading]);
+  }, [userSession?.user?.id, company, sessionId, isLoading, getCurrentSession, setMessages, setIsLoading]);
 
   // Start recording
   const startRecording = useCallback(async () => {

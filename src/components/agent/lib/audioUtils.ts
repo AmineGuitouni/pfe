@@ -1,3 +1,5 @@
+import { quickValidateAudio } from './audioValidation';
+
 /**
  * Get the first supported MIME type for MediaRecorder
  */
@@ -19,7 +21,8 @@ export const getSupportedMimeType = (): string => {
 };
 
 /**
- * Validate and normalize audio data format
+ * Validate and normalize audio data format (legacy function for backward compatibility)
+ * For comprehensive validation including corruption detection, use validateAudioData from audioValidation.ts
  */
 export const validateAudioData = (audioData: string): string => {
   // Check if we have valid data at all
@@ -58,11 +61,11 @@ export const validateAudioData = (audioData: string): string => {
 };
 
 /**
- * Process audio blob and convert to base64
+ * Process audio blob and convert to base64 with corruption detection
  */
 export const processAudioBlob = (
   audioBlob: Blob,
-  selectedMimeType: string
+  _selectedMimeType: string
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
     console.log('Audio blob created:', {
@@ -70,9 +73,26 @@ export const processAudioBlob = (
       type: audioBlob.type
     });
     
+    // Initial blob validation
+    if (!audioBlob || audioBlob.size === 0) {
+      reject(new Error('Audio blob is empty or invalid'));
+      return;
+    }
+
+    // Check for reasonable file size
+    if (audioBlob.size < 100) {
+      reject(new Error('Audio blob too small - likely corrupted'));
+      return;
+    }
+
+    if (audioBlob.size > 50 * 1024 * 1024) { // 50MB limit
+      reject(new Error('Audio blob too large - possible corruption'));
+      return;
+    }
+    
     // Convert to base64
     const reader = new FileReader();
-    reader.onloadend = () => {
+    reader.onloadend = async () => {
       try {
         const audioData = reader.result as string;
         
@@ -84,15 +104,31 @@ export const processAudioBlob = (
           preview: audioData?.substring(0, 100)
         });
         
+        // Quick validation first (performance optimized for live audio)
+        const quickValidation = quickValidateAudio(audioData);
+        if (!quickValidation.isValid) {
+          reject(new Error(`Audio validation failed: ${quickValidation.error}`));
+          return;
+        }
+        
+        // Additional format validation
         const validatedData = validateAudioData(audioData);
+        
+        console.log('Audio data validated successfully:', {
+          originalSize: audioBlob.size,
+          base64Length: validatedData.length,
+          format: validatedData.split(';')[0].replace('data:audio/', '')
+        });
+        
         resolve(validatedData);
       } catch (error) {
+        console.error('Audio processing failed:', error);
         reject(error);
       }
     };
     
     reader.onerror = () => {
-      reject(new Error('Failed to read audio blob'));
+      reject(new Error('Failed to read audio blob - file may be corrupted'));
     };
     
     reader.readAsDataURL(audioBlob);
@@ -160,3 +196,44 @@ export const logAudioDebugInfo = (
     selectedMimeType
   });
 };
+
+/**
+ * Comprehensive audio validation with detailed corruption detection
+ * Use this for thorough validation when performance is not critical
+ */
+export const validateAudioComprehensively = async (audioData: string): Promise<{
+  isValid: boolean;
+  isCorrupted: boolean;
+  errors: string[];
+  warnings: string[];
+  shouldRetry: boolean;
+}> => {
+  try {
+    // Dynamic import to avoid loading the heavy validation unless needed
+    const { validateAudioData } = await import('./audioValidation');
+    const result = await validateAudioData(audioData);
+    
+    return {
+      isValid: result.isValid,
+      isCorrupted: result.isCorrupted,
+      errors: result.errors,
+      warnings: result.warnings,
+      shouldRetry: result.isCorrupted || result.errors.some(e => 
+        e.includes('too small') || 
+        e.includes('empty') || 
+        e.includes('corrupted')
+      )
+    };
+  } catch (error) {
+    return {
+      isValid: false,
+      isCorrupted: true,
+      errors: [`Validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`],
+      warnings: [],
+      shouldRetry: true
+    };
+  }
+};
+
+// Re-export validation utilities for convenience
+export { quickValidateAudio } from './audioValidation';

@@ -27,6 +27,8 @@ export interface ChatInputProps {
   message: string;
   isLoading: boolean;
   isRecording: boolean;
+  isToolCallLoading?: boolean;
+  isRetrying?: boolean;
   onMessageChange: (message: string) => void;
   onSendMessage: () => void;
   onStartRecording: () => void;

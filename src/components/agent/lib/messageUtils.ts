@@ -120,19 +120,3 @@ export const transformApiMessages = (
   
   return transformedMessages;
 };
-
-/**
- * Create a tool action message for accept/reject actions
- */
-export const createToolActionMessage = (
-  action: 'accept' | 'reject',
-  sessionId: string,
-  messageId: string
-): SessionMessage => ({
-  id: messageId,
-  session_id: sessionId,
-  content: action === 'accept' ? 'yes' : 'no',
-  sender: 'user' as const,
-  content_type: 'text',
-  created_at: new Date().toISOString()
-});
