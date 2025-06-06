@@ -36,6 +36,9 @@ export class VoiceActivityDetector {
   private dataArray: Float32Array;
   private energyHistory: number[] = [];
   private calibrationSamples: number[] = [];
+  private speechFrameCount: number = 0;
+  private lastTransitionTime: number = 0;
+  private readonly MIN_TRANSITION_INTERVAL = 300; // 300ms minimum between transitions
   
   constructor(config: Partial<VADConfig> = {}) {
     this.config = {
@@ -166,81 +169,107 @@ export class VoiceActivityDetector {
    * Make VAD decision based on features
    */
   private isSpeech(features: AudioFeatures): boolean {
-    // Multi-feature speech detection
-    const energyCondition = features.energy > this.state.energyThreshold;
-    const zcrCondition = features.zeroCrossingRate > 0.1 && features.zeroCrossingRate < 0.8;
-    const spectralCondition = features.spectralCentroid > 500 && features.spectralCentroid < 4000;
-    
-    // Apply hysteresis to prevent rapid switching
-    if (this.state.isRecording) {
-      // Lower threshold to continue recording
-      return energyCondition && (zcrCondition || spectralCondition);
-    } else {
-      // Higher threshold to start recording
-      return energyCondition && zcrCondition && spectralCondition;
-    }
+  // Less sensitive dynamic threshold
+  const dynamicEnergyThreshold = Math.max(
+    this.state.energyThreshold,
+    this.state.noiseFloor * 2.0 // Less sensitive - higher multiplier
+  );
+  
+  // Energy must be above noise floor
+  const energyCondition = features.energy > dynamicEnergyThreshold;
+  
+  // More restrictive ZCR bounds for speech
+  const zcrCondition = features.zeroCrossingRate > 0.02 && features.zeroCrossingRate < 0.3;
+  
+  // More restrictive spectral range
+  const spectralCondition = features.spectralCentroid > 200 && features.spectralCentroid < 3500;
+  
+  // Require multiple conditions for speech detection
+  const speechDetected = energyCondition && (zcrCondition || spectralCondition);
+  
+  // Add frame smoothing
+  if (speechDetected) {
+    this.speechFrameCount = (this.speechFrameCount || 0) + 1;
+    return this.speechFrameCount >= 3; // Require 3 consecutive frames
+  } else {
+    this.speechFrameCount = 0;
+    return false;
   }
+}
 
   /**
    * Process audio frame and return VAD decision
    */
   processFrame(): {
-    isSpeech: boolean;
-    shouldStartRecording: boolean;
-    shouldStopRecording: boolean;
-    features: AudioFeatures;
-  } {
-    if (this.state.isCalibrating || !this.state.isListening) {
-      return {
-        isSpeech: false,
-        shouldStartRecording: false,
-        shouldStopRecording: false,
-        features: { energy: 0, zeroCrossingRate: 0, spectralCentroid: 0 }
-      };
-    }
-
-    const features = this.extractFeatures();
-    const isSpeech = this.isSpeech(features);
-    const currentTime = Date.now();
-    
-    let shouldStartRecording = false;
-    let shouldStopRecording = false;
-    
-    if (isSpeech) {
-      this.state.lastSpeechTime = currentTime;
-      
-      if (!this.state.isRecording) {
-        shouldStartRecording = true;
-        this.state.isRecording = true;
-        this.state.recordingStartTime = currentTime;
-      }
-    } else {
-      // Check silence threshold
-      if (this.state.isRecording) {
-        const silenceDuration = currentTime - this.state.lastSpeechTime;
-        const recordingDuration = currentTime - this.state.recordingStartTime;
-        
-        if (silenceDuration >= this.config.silenceThreshold || 
-            recordingDuration >= this.config.maxRecordingDuration) {
-          shouldStopRecording = true;
-          this.state.isRecording = false;
-        }
-      }
-    }
-    
-    // Keep energy history for adaptive threshold adjustment
-    this.energyHistory.push(features.energy);
-    if (this.energyHistory.length > 100) {
-      this.energyHistory.shift();
-    }
-    
+  isSpeech: boolean;
+  shouldStartRecording: boolean;
+  shouldStopRecording: boolean;
+  features: AudioFeatures;
+} {
+  if (this.state.isCalibrating || !this.state.isListening) {
     return {
-      isSpeech,
-      shouldStartRecording,
-      shouldStopRecording,
+      isSpeech: false,
+      shouldStartRecording: false,
+      shouldStopRecording: false,
+      features: { energy: 0, zeroCrossingRate: 0, spectralCentroid: 0 }
+    };
+  }
+
+  const features = this.extractFeatures();
+  const currentTime = Date.now();
+  const timeSinceLastTransition = currentTime - this.lastTransitionTime;
+
+  // Prevent rapid transitions
+  if (timeSinceLastTransition < this.MIN_TRANSITION_INTERVAL) {
+    return {
+      isSpeech: this.state.isRecording, // Return current recording state
+      shouldStartRecording: false,
+      shouldStopRecording: false,
       features
     };
   }
+
+  const isSpeech = this.isSpeech(features);
+  let shouldStartRecording = false;
+  let shouldStopRecording = false;
+
+  if (isSpeech) {
+    this.state.lastSpeechTime = currentTime;
+    if (!this.state.isRecording) {
+      shouldStartRecording = true;
+      this.state.isRecording = true;
+      this.state.recordingStartTime = currentTime;
+    }
+  } else {
+    if (this.state.isRecording) {
+      const silenceDuration = currentTime - this.state.lastSpeechTime;
+      const recordingDuration = currentTime - this.state.recordingStartTime;
+      if (silenceDuration >= this.config.silenceThreshold ||
+          recordingDuration >= this.config.maxRecordingDuration) {
+        shouldStopRecording = true;
+        this.state.isRecording = false;
+      }
+    }
+  }
+
+  // Update last transition time if state changed
+  if (shouldStartRecording || shouldStopRecording) {
+    this.lastTransitionTime = currentTime;
+  }
+
+  // Keep energy history for adaptive threshold adjustment
+  this.energyHistory.push(features.energy);
+  if (this.energyHistory.length > 100) { // Keep last 100 samples (5 seconds)
+    this.energyHistory.shift();
+  }
+
+  return {
+    isSpeech,
+    shouldStartRecording,
+    shouldStopRecording,
+    features
+  };
+}
 
   /**
    * Get current VAD state

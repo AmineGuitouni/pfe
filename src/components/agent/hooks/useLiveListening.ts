@@ -34,6 +34,8 @@ interface LiveListeningState {
     segmentsSkipped: number;
     lastValidationError: string | null;
     corruptionRate: number;
+    zeroDurationErrors: number; // Track 0:00 specific errors
+    encodingErrors: number; // Track encoding errors
   };
 }
 
@@ -67,7 +69,9 @@ export const useLiveListening = () => {
       segmentsCorrupted: 0,
       segmentsSkipped: 0,
       lastValidationError: null,
-      corruptionRate: 0
+      corruptionRate: 0,
+      zeroDurationErrors: 0,
+      encodingErrors: 0
     }
   });
 
@@ -75,16 +79,16 @@ export const useLiveListening = () => {
   const vadConfig: VADConfig = useMemo(() => ({
     sampleRate: 16000,
     frameSize: 256,
-    energyThreshold: 0.005,
-    silenceThreshold: 1000,
+    energyThreshold: 0.01, // Less sensitive threshold
+    silenceThreshold: 2000, // 2 seconds of silence
     maxRecordingDuration: 30000,
-    noiseFloorCalibrationTime: 500,
+    noiseFloorCalibrationTime: 1000, // Longer calibration for better noise floor
   }), []);
 
   const bufferConfig: BufferConfig = useMemo(() => ({
     maxBufferSize: 10 * 1024 * 1024, // 10MB
     segmentOverlap: 500, // 500ms
-    minSegmentDuration: 1000, // 1 second
+    minSegmentDuration: 1500, // Increased from 1000ms to prevent 0:00 errors
   }), []);
 
   // Process audio queue sequentially to prevent corruption
@@ -151,12 +155,39 @@ export const useLiveListening = () => {
           
           // Add parsed AI response(s) to the updated messages
           return [...updatedMessages, ...parsedMessages];
-        });
-
-      } catch (error) {
-        console.error('Error processing queued audio segment:', error);
-        // Continue processing other segments in queue
-      }
+        });        } catch (error) {
+          console.error('Error processing queued audio segment:', error);
+          
+          // Enhanced error logging for debugging 0:00 errors
+          if (error instanceof Error) {
+            if (error.message.includes('0:00') || error.message.includes('duration')) {
+              console.error('🎵 Duration-related error in queue processing (0:00 error):', {
+                error: error.message,
+                audioDataLength: queueItem.audioData.length,
+                timestamp: queueItem.timestamp,
+                queueLength: audioQueueRef.current.length,
+                suggestion: 'Audio segment too short or corrupted - check buffer clearing mechanism'
+              });
+              stateRef.current.audioStats.zeroDurationErrors++;
+            } else if (error.message.includes('base64') || error.message.includes('encoding')) {
+              console.error('🎵 Encoding error in queue processing:', {
+                error: error.message,
+                audioDataPreview: queueItem.audioData.substring(0, 100),
+                audioDataLength: queueItem.audioData.length,
+                suggestion: 'Audio encoding corruption detected - check MediaRecorder state'
+              });
+              stateRef.current.audioStats.encodingErrors++;
+            } else {
+              console.error('🎵 General error in queue processing:', {
+                error: error.message,
+                audioDataLength: queueItem.audioData.length,
+                timestamp: queueItem.timestamp
+              });
+            }
+          }
+          
+          // Continue processing other segments in queue
+        }
     }
 
     isProcessingQueueRef.current = false;
@@ -194,137 +225,115 @@ export const useLiveListening = () => {
 
   // Process audio segment
   const processAudioSegment = useCallback(async () => {
-    if (!bufferManagerRef.current) {
-      console.error('No buffer manager available for audio processing');
+  if (!bufferManagerRef.current || stateRef.current.vadState === 'processing') {
+    return;
+  }
+  
+  stateRef.current.vadState = 'processing';
+  
+  try {
+    // Add a small delay to ensure all audio data is captured
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    const segment = bufferManagerRef.current.extractAndClearSegment();
+    
+    if (!segment) {
+      console.log('No valid audio segment extracted');
       return;
     }
-
-    stateRef.current.vadState = 'processing';
-
-    try {
-      const segment = bufferManagerRef.current.extractAndClearSegment();
-      
-      if (!segment) {
-        // console.log('No audio segment to process - segment extraction returned null');
-        return;
-      }
-
-      // console.log('Processing audio segment:', {
-      //   id: segment.id,
-      //   duration: segment.duration,
-      //   size: segment.audioData.size,
-      //   type: segment.audioData.type
-      // });
-
-      // Convert audio blob to base64 with corruption detection
-      const mimeType = getSupportedMimeType();
-      // console.log('Converting audio to base64 with MIME type:', mimeType);
-      
-      try {
-        const audioData = await processAudioBlob(segment.audioData, mimeType);
-        // console.log('Audio converted to base64, length:', audioData.length);
-
-        // Update statistics for successful processing
-        stateRef.current.audioStats.segmentsProcessed++;
-        stateRef.current.audioStats.lastValidationError = null;
-        
-        // Calculate corruption rate
-        const totalAttempts = stateRef.current.audioStats.segmentsProcessed + stateRef.current.audioStats.segmentsCorrupted;
-        stateRef.current.audioStats.corruptionRate = totalAttempts > 0 ? 
-          stateRef.current.audioStats.segmentsCorrupted / totalAttempts : 0;
-
-        // Send to API only if audio passed validation
-        // console.log('Sending validated audio to API...');
-        await sendAudioMessage(audioData);
-        // console.log('Audio sent to API successfully');
-      } catch (audioError) {
-        // Update corruption statistics
-        stateRef.current.audioStats.segmentsCorrupted++;
-        stateRef.current.audioStats.lastValidationError = audioError instanceof Error ? audioError.message : 'Unknown error';
-        
-        // Calculate corruption rate
-        const totalAttempts = stateRef.current.audioStats.segmentsProcessed + stateRef.current.audioStats.segmentsCorrupted;
-        stateRef.current.audioStats.corruptionRate = totalAttempts > 0 ? 
-          stateRef.current.audioStats.segmentsCorrupted / totalAttempts : 0;
-
-        console.warn('Audio validation failed, skipping segment:', {
-          segmentId: segment.id,
-          error: audioError instanceof Error ? audioError.message : 'Unknown error',
-          segmentSize: segment.audioData.size,
-          segmentDuration: segment.duration,
-          corruptionRate: `${(stateRef.current.audioStats.corruptionRate * 100).toFixed(1)}%`,
-          totalProcessed: stateRef.current.audioStats.segmentsProcessed,
-          totalCorrupted: stateRef.current.audioStats.segmentsCorrupted
-        });
-        
-        // Log warning if corruption rate is getting high
-        if (stateRef.current.audioStats.corruptionRate > 0.3 && totalAttempts >= 5) {
-          console.warn('⚠️ High audio corruption rate detected:', {
-            corruptionRate: `${(stateRef.current.audioStats.corruptionRate * 100).toFixed(1)}%`,
-            suggestion: 'Consider checking microphone connection or reducing background noise'
-          });
-        }
-        
-        // Don't throw the error, just log it and continue listening
-        // This prevents the live listening from stopping due to occasional corrupted segments
-        stateRef.current.error = null; // Clear any previous errors
-      }
-
-    } catch (error) {
-      console.error('Error processing audio segment:', error);
-      stateRef.current.error = 'Failed to process audio segment';
-    } finally {
-      stateRef.current.vadState = 'listening';
-      // console.log('VAD state reset to listening');
+    
+    // Validate segment before processing
+    if (segment.duration < 500) { // Reduced minimum to 500ms for more responsiveness
+      console.warn('Segment too short, discarding:', segment.duration);
+      stateRef.current.audioStats.segmentsSkipped++;
+      return;
     }
-  }, [sendAudioMessage]);
+    
+    // Convert to base64
+    try {
+      const audioData = await processAudioBlob(segment.audioData, getSupportedMimeType());
+      
+      // Additional validation of base64 data
+      const base64Part = audioData.split(',')[1];
+      if (!base64Part || base64Part.length < 1500) {
+        throw new Error('Base64 data too short');
+      }
+      
+      console.log('Audio segment processed successfully');
+      stateRef.current.audioStats.segmentsProcessed++;
+      
+      await sendAudioMessage(audioData);
+      
+    } catch (error) {
+      console.error('Failed to process audio:', error);
+      stateRef.current.audioStats.segmentsCorrupted++;
+    }
+    
+  } finally {
+    // Reset VAD state after a delay to prevent immediate re-triggering
+    setTimeout(() => {
+      stateRef.current.vadState = 'listening';
+      // Reset VAD to ensure clean state
+      vadRef.current?.reset();
+    }, 200);
+  }
+}, [sendAudioMessage]);
 
   // VAD processing loop
   const startVADProcessing = useCallback(() => {
-    if (processingIntervalRef.current) {
-      clearInterval(processingIntervalRef.current);
+  if (processingIntervalRef.current) {
+    clearInterval(processingIntervalRef.current);
+  }
+  
+  // VAD's processFrame method now handles silence detection and max duration internally
+  // by setting shouldStopRecording. So, silenceFrameCount here is removed.
+  
+  processingIntervalRef.current = setInterval(() => {
+    if (!vadRef.current || !stateRef.current.isListening) {
+      return;
     }
-
-    processingIntervalRef.current = setInterval(() => {
-      if (!vadRef.current || !stateRef.current.isListening) {
-        return;
-      }
-
-      const result = vadRef.current.processFrame();
-      
-      // Update VAD state based on detection
-      if (vadRef.current.getState().isCalibrating) {
-        stateRef.current.vadState = 'calibrating';
-      } else if (result.shouldStartRecording) {
-        stateRef.current.vadState = 'recording';
-        // console.log('Speech detected - starting recording');
-      } else if (result.shouldStopRecording) {
-        // console.log('Speech ended - processing segment');
-        processAudioSegment();
-      } else if (vadRef.current.getState().isRecording) {
-        stateRef.current.vadState = 'recording';
-      } else {
-        stateRef.current.vadState = 'listening';
-      }
-
-      // Debug logging for speech detection
-      // if (result.isSpeech) {
-      //   console.log('VAD: Speech detected', {
-      //     energy: result.features.energy.toFixed(4),
-      //     zcr: result.features.zeroCrossingRate.toFixed(4),
-      //     spectral: result.features.spectralCentroid.toFixed(0),
-      //     vadState: vadRef.current.getState().isRecording ? 'recording' : 'detecting'
-      //   });
-      // }
-    }, 50); // Process every 50ms
-  }, [processAudioSegment]);
+    
+    const result = vadRef.current.processFrame(); // Contains isSpeech, shouldStartRecording, shouldStopRecording
+    
+    if (vadRef.current.getState().isCalibrating) {
+      stateRef.current.vadState = 'calibrating';
+      return;
+    }
+    
+    if (result.shouldStartRecording) {
+      console.log('🎤 Speech started (VAD determined shouldStartRecording)');
+      stateRef.current.vadState = 'recording';
+      // Perform a full reset of AudioBufferManager to ensure audio capture starts precisely from this moment.
+      // This clears previous (silent) chunks, resets recordingStartTime, and re-initializes MediaRecorder.
+      bufferManagerRef.current?.resetBufferForNextSegment().catch(err => {
+        console.error("Error during resetBufferForNextSegment on speech start:", err);
+      });
+      console.log('🎵 AudioBufferManager.resetBufferForNextSegment() initiated for new speech segment.');
+    } else if (result.shouldStopRecording) {
+      console.log('🎤 Speech ended (VAD determined shouldStopRecording). Processing segment...');
+      processAudioSegment(); 
+      // processAudioSegment calls extractAndClearSegment, which itself calls resetBufferForNextSegment
+      // to prepare for the *next* segment after this one is processed.
+      stateRef.current.vadState = 'listening'; // Transition back to listening state.
+    } else if (vadRef.current.getState().isRecording) {
+      // Speech is ongoing (result.isSpeech is true), VAD is in 'recording' state,
+      // but it's not the start or end of the segment according to VAD.
+      stateRef.current.vadState = 'recording';
+    } else {
+      // Not recording, VAD is not indicating start or stop. Must be listening.
+      stateRef.current.vadState = 'listening';
+    }
+  }, 50); // Process VAD every 50ms
+}, [processAudioSegment]);
 
   // Initialize live listening
   const initializeLiveListening = useCallback(async () => {
     try {
+      console.log('🎙️ Starting live listening initialization...');
       stateRef.current.error = null;
       
       // Request microphone permission
+      console.log('🎙️ Requesting microphone access...');
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           sampleRate: vadConfig.sampleRate,
@@ -335,26 +344,40 @@ export const useLiveListening = () => {
         }
       });
 
+      console.log('🎙️ Microphone access granted, stream active:', stream.active);
+      console.log('🎙️ Audio tracks:', stream.getAudioTracks().map(track => ({
+        label: track.label,
+        enabled: track.enabled,
+        readyState: track.readyState
+      })));
+
       streamRef.current = stream;
 
       // Initialize VAD
+      console.log('🎙️ Initializing VAD with config:', vadConfig);
       vadRef.current = new VoiceActivityDetector(vadConfig);
       await vadRef.current.initialize(stream);
+      console.log('🎙️ VAD initialized successfully');
 
       // Initialize buffer manager
+      console.log('🎙️ Initializing buffer manager...');
       bufferManagerRef.current = new AudioBufferManager(bufferConfig);
       const mimeType = getSupportedMimeType();
+      console.log('🎙️ Using MIME type:', mimeType);
       
       await bufferManagerRef.current.startContinuousRecording(stream, mimeType);
+      console.log('🎙️ Buffer manager started recording');
 
       stateRef.current.isInitialized = true;
       stateRef.current.isListening = true;
 
       // Start VAD processing
+      console.log('🎙️ Starting VAD processing loop...');
       startVADProcessing();
+      console.log('🎙️ Live listening fully initialized!');
 
     } catch (error) {
-      console.error('Error initializing live listening:', error);
+      console.error('❌ Error initializing live listening:', error);
       stateRef.current.error = 'Failed to initialize microphone';
       throw error;
     }
@@ -400,7 +423,9 @@ export const useLiveListening = () => {
         segmentsCorrupted: 0,
         segmentsSkipped: 0,
         lastValidationError: null,
-        corruptionRate: 0
+        corruptionRate: 0,
+        zeroDurationErrors: 0,
+        encodingErrors: 0
       }
     };
     

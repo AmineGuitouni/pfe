@@ -61,7 +61,7 @@ export const validateAudioData = (audioData: string): string => {
 };
 
 /**
- * Process audio blob and convert to base64 with corruption detection
+ * Process audio blob and convert to base64 with enhanced corruption detection
  */
 export const processAudioBlob = (
   audioBlob: Blob,
@@ -73,21 +73,26 @@ export const processAudioBlob = (
       type: audioBlob.type
     });
     
-    // Initial blob validation
+    // Enhanced blob validation
     if (!audioBlob || audioBlob.size === 0) {
-      reject(new Error('Audio blob is empty or invalid'));
+      reject(new Error('Audio blob is empty or invalid - would cause 0:00 error'));
       return;
     }
 
-    // Check for reasonable file size
-    if (audioBlob.size < 100) {
-      reject(new Error('Audio blob too small - likely corrupted'));
+    // Check for minimum file size to prevent 0:00 errors
+    if (audioBlob.size < 1000) { // Increased threshold
+      reject(new Error(`Audio blob too small (${audioBlob.size} bytes) - would likely cause 0:00 error`));
       return;
     }
 
     if (audioBlob.size > 50 * 1024 * 1024) { // 50MB limit
       reject(new Error('Audio blob too large - possible corruption'));
       return;
+    }
+
+    // Validate blob type
+    if (!audioBlob.type || audioBlob.type === '') {
+      console.warn('Audio blob has no MIME type, this may cause issues');
     }
     
     // Convert to base64
@@ -96,6 +101,12 @@ export const processAudioBlob = (
       try {
         const audioData = reader.result as string;
         
+        // Enhanced validation
+        if (!audioData || typeof audioData !== 'string') {
+          reject(new Error('Failed to read audio data - result is empty or invalid'));
+          return;
+        }
+
         // Debug logging to see what format we're getting
         console.log('Audio data format check:', {
           hasResult: !!audioData,
@@ -107,16 +118,24 @@ export const processAudioBlob = (
         // Quick validation first (performance optimized for live audio)
         const quickValidation = quickValidateAudio(audioData);
         if (!quickValidation.isValid) {
-          reject(new Error(`Audio validation failed: ${quickValidation.error}`));
+          reject(new Error(`Audio validation failed: ${quickValidation.error} - may cause 0:00 error`));
           return;
         }
         
         // Additional format validation
         const validatedData = validateAudioData(audioData);
         
+        // Final check for reasonable base64 length
+        const base64Part = validatedData.split(',')[1];
+        if (!base64Part || base64Part.length < 1000) { // Increased threshold
+          reject(new Error(`Base64 audio data too short (${base64Part?.length || 0} chars) - would likely cause 0:00 error`));
+          return;
+        }
+        
         console.log('Audio data validated successfully:', {
           originalSize: audioBlob.size,
           base64Length: validatedData.length,
+          base64DataLength: base64Part.length,
           format: validatedData.split(';')[0].replace('data:audio/', '')
         });
         
@@ -128,7 +147,7 @@ export const processAudioBlob = (
     };
     
     reader.onerror = () => {
-      reject(new Error('Failed to read audio blob - file may be corrupted'));
+      reject(new Error('Failed to read audio blob - file may be corrupted and could cause 0:00 error'));
     };
     
     reader.readAsDataURL(audioBlob);
