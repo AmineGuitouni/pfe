@@ -10,3 +10,4 @@ export { ToolResultDisplay } from './ToolResultDisplay';
 export { AudioMessage } from './AudioMessage';
 export { AutoAcceptToggle } from './AutoAcceptToggle';
 export { LiveListeningStatus } from './LiveListeningStatus';
+export { LiveListeningButton } from './LiveListeningButton';

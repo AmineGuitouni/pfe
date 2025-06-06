@@ -32,6 +32,7 @@ export async function GET(req: Request, {params}:{params:Params}) {
             .from('command_center_sessions')
             .select('id, name, mode, created_at')
             .eq('user_id', user_id)
+            .eq('company_id', company_id)
             .order('created_at', { ascending: false });
 
         if (error) {

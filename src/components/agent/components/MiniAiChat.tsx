@@ -3,10 +3,10 @@
 import React, { useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession } from 'next-auth/react';
-import { Volume2, VolumeX, Mic, MicOff } from 'lucide-react';
+import { Volume2, VolumeX } from 'lucide-react';
 
 // Component imports
-import { ChatIcon, ChatHeader, MessageList, ChatInput, SessionSelector } from './ui';
+import { ChatIcon, ChatHeader, MessageList, ChatInput, SessionSelector, LiveListeningButton } from './ui';
 
 // Hook and utility imports
 import { useChatUIState } from '../hooks/useChatUIState';
@@ -283,22 +283,13 @@ export const MiniAiChat: React.FC = () => {
               </motion.button>
 
               {/* Live Listening Button */}
-              <motion.button
-                onClick={(e) => {
-                  e.stopPropagation();
+              <LiveListeningButton
+                isLiveListening={isLiveListening}
+                onToggleLiveListening={(e) => {
+                  e?.stopPropagation();
                   toggleLiveListening();
                 }}
-                className={`p-2 rounded-lg transition-all duration-200 ${
-                  isLiveListening 
-                    ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' 
-                    : 'bg-gray-600/20 text-gray-400 hover:bg-gray-600/30 hover:text-gray-300'
-                }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                title={isLiveListening ? "Stop live listening" : "Start live listening"}
-              >
-                {isLiveListening ? <MicOff size={16} /> : <Mic size={16} />}
-              </motion.button>
+              />
             </motion.div>
           </motion.div>
         )}

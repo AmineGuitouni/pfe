@@ -16,7 +16,6 @@ export async function GET(req: Request, {params: {user_id}}: {params: {user_id: 
             return NextResponse.json({error: "user_id is required"}, {status: 400});
         }
 
-        console.log("Fetching company with ID:", company_id, "for user:", user_id);
 
         const {data, error} = await supabase.from("company")
         .select("id,name,created_at, database:data_bases(id,name,created_at),logo,industry,description")
@@ -28,13 +27,11 @@ export async function GET(req: Request, {params: {user_id}}: {params: {user_id: 
             return NextResponse.json({error: error.message}, {status: 500});
         }
 
-        console.log("Fetched company half data:", data);
 
         let countWorkers = 0;
 
         const loaclSupabase = await getServerDBfromCompanyId(company_id)
         if(loaclSupabase){
-            console.log("Fetching workers count from local database for company ID:", company_id);
             const {count, error} = await loaclSupabase.from("users")
             .select("", {count: "exact"})
             .eq("company_id", company_id)
@@ -44,7 +41,6 @@ export async function GET(req: Request, {params: {user_id}}: {params: {user_id: 
                 return NextResponse.json({error: error.message}, {status: 500});
             }
             
-            console.log("Counted workers:", countWorkers);
             countWorkers = count || 0;
         }
 

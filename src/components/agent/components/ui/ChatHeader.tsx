@@ -2,10 +2,11 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { X, Volume2, VolumeX, Mic, MicOff, MessageSquare } from 'lucide-react';
+import { X, Volume2, VolumeX, MessageSquare } from 'lucide-react';
 import { STYLING, CHAT_CONFIG } from '../../lib/constants';
 import { AutoAcceptToggle } from './AutoAcceptToggle';
 import { LiveListeningStatus } from './LiveListeningStatus';
+import { LiveListeningButton } from './LiveListeningButton';
 
 interface ChatHeaderProps {
   onClose: () => void;
@@ -100,28 +101,10 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           </motion.button>
 
           {/* Live Listening Button */}
-          <motion.button
-            onClick={onToggleLiveListening}
-            className={`p-2 rounded-lg transition-all duration-200 ${
-              isLiveListening
-                ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
-                : 'bg-gray-600/20 text-gray-400 hover:bg-gray-600/30 hover:text-gray-300'
-            }`}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            title={isLiveListening ? "Stop live listening" : "Start live listening"}
-          >
-            {isLiveListening ? (
-              <motion.div
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <Mic size={16} />
-              </motion.div>
-            ) : (
-              <MicOff size={16} />
-            )}
-          </motion.button>
+          <LiveListeningButton
+            isLiveListening={isLiveListening}
+            onToggleLiveListening={onToggleLiveListening}
+          />
 
           {/* Close Button */}
           <motion.button
