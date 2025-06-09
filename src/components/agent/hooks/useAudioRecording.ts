@@ -13,6 +13,7 @@ import {
   logAudioDebugInfo
 } from '../lib/audioUtils';
 import { parseAndSplitAiResponse, createOptimisticMessage } from '../lib/messageUtils';
+import { playAudioResponse } from '../lib/audioPlayback';
 
 // Extend session type to include id
 interface ExtendedUser {
@@ -34,6 +35,7 @@ export const useAudioRecording = () => {
     isRecording,
     sessionId,
     isLoading,
+    isVoiceResponseEnabled,
     setIsRecording,
     setMessages,
     setIsLoading,
@@ -82,6 +84,7 @@ export const useAudioRecording = () => {
         body: JSON.stringify({
           user_prompt: audioData,
           user_content_type: 'audio',
+          audioResponse: isVoiceResponseEnabled,
         })
       });
 
@@ -91,7 +94,7 @@ export const useAudioRecording = () => {
         throw new Error('Failed to send audio message');
       }
 
-      const { response: aiResponse, response_id, user_message_id } = await response.json();
+      const { response: aiResponse, response_id, user_message_id, aiAudioResponse } = await response.json();
 
       // Parse AI response and split tool results into separate messages
       const parsedMessages = parseAndSplitAiResponse(aiResponse, response_id, currentSessionId);
@@ -106,6 +109,18 @@ export const useAudioRecording = () => {
         return [...updatedMessages, ...parsedMessages];
       });
 
+      // Play AI audio response if voice response is enabled and audio is provided
+      if (isVoiceResponseEnabled && aiAudioResponse) {
+        try {
+          await playAudioResponse(aiAudioResponse, {
+            onStart: () => console.log('🔊 Playing AI audio response for audio message'),
+            onError: (error) => console.error('🔊 Failed to play AI audio response:', error),
+          });
+        } catch (error) {
+          console.error('🔊 Audio playback error for audio message:', error);
+        }
+      }
+
     } catch (error) {
       console.error('Error sending audio message:', error);
       // Remove the optimistic user message on error
@@ -113,7 +128,7 @@ export const useAudioRecording = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [userSession?.user?.id, company, sessionId, isLoading, getCurrentSession, setMessages, setIsLoading]);
+  }, [userSession?.user?.id, company, sessionId, isLoading, isVoiceResponseEnabled, getCurrentSession, setMessages, setIsLoading]);
 
   // Start recording
   const startRecording = useCallback(async () => {

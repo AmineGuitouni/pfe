@@ -10,6 +10,7 @@ import {
   createOptimisticMessage, 
   transformApiMessages 
 } from '../lib/messageUtils';
+import { playAudioResponse } from '../lib/audioPlayback';
 
 // Extend session type to include id
 interface ExtendedUser {
@@ -33,6 +34,7 @@ export const useMessageManager = () => {
     isLoading,
     loadingMessages,
     sessionId,
+    isVoiceResponseEnabled,
     setMessages,
     setCurrentMessage,
     setIsLoading,
@@ -109,6 +111,7 @@ export const useMessageManager = () => {
         body: JSON.stringify({
           user_prompt: messageToSend,
           user_content_type: 'text',
+          audioResponse: isVoiceResponseEnabled,
         })
       });
 
@@ -118,7 +121,7 @@ export const useMessageManager = () => {
         throw new Error('Failed to send message');
       }
 
-      const { response: aiResponse, response_id, user_message_id } = await response.json();
+      const { response: aiResponse, response_id, user_message_id, aiAudioResponse } = await response.json();
 
       // Parse AI response and split tool results into separate messages
       const parsedMessages = parseAndSplitAiResponse(aiResponse, response_id, currentSessionId);
@@ -133,6 +136,18 @@ export const useMessageManager = () => {
         return [...updatedMessages, ...parsedMessages];
       });
 
+      // Play AI audio response if voice response is enabled and audio is provided
+      if (isVoiceResponseEnabled && aiAudioResponse) {
+        try {
+          await playAudioResponse(aiAudioResponse, {
+            onStart: () => console.log('🔊 Playing AI audio response for text message'),
+            onError: (error) => console.error('🔊 Failed to play AI audio response:', error),
+          });
+        } catch (error) {
+          console.error('🔊 Audio playback error for text message:', error);
+        }
+      }
+
     } catch (error) {
       console.error('Error sending message:', error);
       // Remove the optimistic user message on error
@@ -142,7 +157,7 @@ export const useMessageManager = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [currentMessage, isLoading, userSession?.user?.id, company, sessionId, getCurrentSession, setMessages, setCurrentMessage, setIsLoading]);
+  }, [currentMessage, isLoading, userSession?.user?.id, company, sessionId, isVoiceResponseEnabled, getCurrentSession, setMessages, setCurrentMessage, setIsLoading]);
 
   // Load messages when session is available
   useEffect(() => {

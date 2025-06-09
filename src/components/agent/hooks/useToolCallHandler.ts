@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation';
 import { useChatContext } from '../contexts/ChatContext';
 import { parseAndSplitAiResponse } from '../lib/messageUtils';
 import { SessionMessage } from '../lib/types';
+import { playAudioResponse } from '../lib/audioPlayback';
 
 // Extend session type to include id
 interface ExtendedUser {
@@ -25,6 +26,7 @@ export const useToolCallHandler = () => {
   const { company } = useParams() as { company: string };
   const {
     sessionId,
+    isVoiceResponseEnabled,
     setMessages,
     isToolCallLoading,
     isRetrying,
@@ -48,7 +50,8 @@ export const useToolCallHandler = () => {
         },
         body: JSON.stringify({
           accept_tool_call: action === 'accept',
-          reject_tool_call: action === 'reject'
+          reject_tool_call: action === 'reject',
+          audioResponse: isVoiceResponseEnabled,
         })
       });
 
@@ -56,7 +59,7 @@ export const useToolCallHandler = () => {
         throw new Error(`Failed to ${action} tool call`);
       }
 
-      const { response: aiResponse, response_id, toolCallMessage } = await response.json();
+      const { response: aiResponse, response_id, toolCallMessage, aiAudioResponse } = await response.json();
 
       // Parse AI response and split tool results into separate messages
       const parsedMessages = parseAndSplitAiResponse(aiResponse, response_id, sessionId);
@@ -78,13 +81,25 @@ export const useToolCallHandler = () => {
         ...parsedMessages
       ]);
 
+      // Play AI audio response if voice response is enabled and audio is provided
+      if (isVoiceResponseEnabled && aiAudioResponse) {
+        try {
+          await playAudioResponse(aiAudioResponse, {
+            onStart: () => console.log(`🔊 Playing AI audio response for tool call ${action}`),
+            onError: (error) => console.error('🔊 Failed to play AI audio response:', error),
+          });
+        } catch (error) {
+          console.error(`🔊 Audio playback error for tool call ${action}:`, error);
+        }
+      }
+
     } catch (error) {
       console.error(`Error ${action}ing tool call:`, error);
     } finally {
       setIsToolCallLoading(false);
       setIsLoading(false);
     }
-  }, [userSession?.user?.id, company, sessionId, setMessages, setIsToolCallLoading, setIsLoading]);
+  }, [userSession?.user?.id, company, sessionId, isVoiceResponseEnabled, setMessages, setIsToolCallLoading, setIsLoading]);
 
   // Retry last message functionality
   const retryLastMessage = useCallback(async () => {
@@ -105,6 +120,7 @@ export const useToolCallHandler = () => {
         },
         body: JSON.stringify({
           // Empty body - the API will process the existing last user message
+          audioResponse: isVoiceResponseEnabled,
         })
       });
 
@@ -112,7 +128,7 @@ export const useToolCallHandler = () => {
         throw new Error('Failed to retry message');
       }
 
-      const { response: aiResponse, response_id, error } = await response.json();
+      const { response: aiResponse, response_id, error, aiAudioResponse } = await response.json();
 
       if (error) {
         throw new Error(error);
@@ -124,6 +140,18 @@ export const useToolCallHandler = () => {
       // Add new AI response(s) to existing messages
       setMessages(prev => [...prev, ...parsedMessages]);
 
+      // Play AI audio response if voice response is enabled and audio is provided
+      if (isVoiceResponseEnabled && aiAudioResponse) {
+        try {
+          await playAudioResponse(aiAudioResponse, {
+            onStart: () => console.log('🔊 Playing AI audio response for retry'),
+            onError: (error) => console.error('🔊 Failed to play AI audio response:', error),
+          });
+        } catch (error) {
+          console.error('🔊 Audio playback error for retry:', error);
+        }
+      }
+
     } catch (error) {
       console.error('Error retrying message:', error);
       return {
@@ -133,7 +161,7 @@ export const useToolCallHandler = () => {
       setIsRetrying(false);
       setIsLoading(false);
     }
-  }, [userSession?.user?.id, company, sessionId, setMessages, setIsRetrying, setIsLoading]);
+  }, [userSession?.user?.id, company, sessionId, isVoiceResponseEnabled, setMessages, setIsRetrying, setIsLoading]);
 
   return {
     toolCallAction,

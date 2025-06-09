@@ -9,6 +9,7 @@ import { VoiceActivityDetector, VADConfig } from '../lib/voiceActivityDetection'
 import { AudioBufferManager, BufferConfig } from '../lib/audioBufferManager';
 import { getSupportedMimeType, processAudioBlob } from '../lib/audioUtils';
 import { parseAndSplitAiResponse, createOptimisticMessage } from '../lib/messageUtils';
+import { playAudioResponse } from '../lib/audioPlayback';
 
 // Extend session type to include id
 interface ExtendedUser {
@@ -46,6 +47,7 @@ export const useLiveListening = () => {
     isLiveListening,
     sessionId,
     isLoading,
+    isVoiceResponseEnabled,
     setMessages,
     setIsLoading,
   } = useChatContext();
@@ -133,6 +135,7 @@ export const useLiveListening = () => {
           body: JSON.stringify({
             user_prompt: queueItem.audioData,
             user_content_type: 'audio',
+            audioResponse: isVoiceResponseEnabled,
           })
         });
 
@@ -142,7 +145,7 @@ export const useLiveListening = () => {
           throw new Error('Failed to send audio message');
         }
 
-        const { response: aiResponse, response_id, user_message_id } = await response.json();
+        const { response: aiResponse, response_id, user_message_id, aiAudioResponse } = await response.json();
 
         // Parse AI response and split tool results into separate messages
         const parsedMessages = parseAndSplitAiResponse(aiResponse, response_id, currentSessionId);
@@ -155,7 +158,19 @@ export const useLiveListening = () => {
           
           // Add parsed AI response(s) to the updated messages
           return [...updatedMessages, ...parsedMessages];
-        });        } catch (error) {
+        });
+
+        // Play AI audio response if voice response is enabled and audio is provided
+        if (isVoiceResponseEnabled && aiAudioResponse) {
+          try {
+            await playAudioResponse(aiAudioResponse, {
+              onStart: () => console.log('🔊 Playing AI audio response for live listening'),
+              onError: (error) => console.error('🔊 Failed to play AI audio response:', error),
+            });
+          } catch (error) {
+            console.error('🔊 Audio playback error for live listening:', error);
+          }
+        }        } catch (error) {
           console.error('Error processing queued audio segment:', error);
           
           // Enhanced error logging for debugging 0:00 errors
@@ -192,7 +207,7 @@ export const useLiveListening = () => {
 
     isProcessingQueueRef.current = false;
     setIsLoading(false); // Clear loading when queue is empty
-  }, [userSession?.user?.id, company, sessionId, getCurrentSession, setMessages, setIsLoading]);
+  }, [userSession?.user?.id, company, sessionId, isVoiceResponseEnabled, getCurrentSession, setMessages, setIsLoading]);
 
   // Queue audio message for processing
   const sendAudioMessage = useCallback(async (audioData: string) => {

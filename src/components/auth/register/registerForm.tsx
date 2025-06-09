@@ -39,7 +39,7 @@ const isValidPhoneNumber = (phoneNumber: string) => {
 };
 
 export default function RegisterForm() {
-    const t = useTranslations('auth.register');
+    const t = useTranslations('auth');
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",

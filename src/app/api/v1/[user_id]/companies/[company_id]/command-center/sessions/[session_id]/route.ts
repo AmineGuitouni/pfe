@@ -3,6 +3,7 @@ import { prepareAgentMessages } from "@/lib/ai/agent/helper/prepareMessages";
 import { agentResponseGeneration } from "@/lib/ai/agent/helper/agentGeneration";
 import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase";
 import { NextRequest, NextResponse } from "next/server";
+import { generateAIAudio } from "@/lib/ai/agent/helper/generateAIAudio";
 
 interface Params {
     user_id: string;
@@ -16,6 +17,7 @@ export type CommandCenterRequest = {
     user_content_type?: "text" | "audio";
     accept_tool_call?: boolean;
     reject_tool_call?: boolean;
+    audioResponse?: boolean;
 }
 
 export async function POST(req: NextRequest, { params }: { params: Params }) {
@@ -209,10 +211,23 @@ export async function POST(req: NextRequest, { params }: { params: Params }) {
                         } : {})
                     }, { status: 200 });
                 }
+
+                let aiAudioResponse:string|undefined = undefined
+                const {audioResponse} = body;
+                if(audioResponse && typeof audioResponse === 'boolean' && audioResponse) {
+                    aiAudioResponse = await generateAIAudio({
+                        text: response,
+                        baseUrl: "http://localhost:8000",
+                        supabase,
+                        bucketName: "chat",
+                        folderName: "ai-audio",
+                    })
+                }
                 
                 return NextResponse.json({
                     response,
                     response_id: savedAiMessage.id,
+                    aiAudioResponse,
                     ...(savedMessage ? {
                         user_message_id: savedMessage.sender === 'user' ? savedMessage.id : null,
                         toolCallMessage: savedMessage.sender === 'tool' ? {
