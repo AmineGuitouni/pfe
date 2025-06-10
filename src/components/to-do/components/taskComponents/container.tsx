@@ -106,7 +106,7 @@ export default function Container({isLoading, activeProject}:{isLoading: boolean
 
     // Removed the early return for !activeProject
     return (
-        <div className="w-full h-full p-5 flex overflow-x-auto">
+        <div className="w-full h-full p-5 flex overflow-x-hidden">
             {isLoading ? (
                 // Skeleton Loader for Columns - Render this first if loading
                 <div className="h-full flex w-full gap-5 animate-pulse">
@@ -132,7 +132,7 @@ export default function Container({isLoading, activeProject}:{isLoading: boolean
                     <Droppable droppableId="columns" direction="horizontal" type="column">
                         {(provided) => (
                             <div
-                                className="h-full flex gap-5 min-w-max"
+                                className="h-full flex gap-5 overflow-x-auto  max-w-[1600px]"
                                 {...provided.droppableProps}
                                 ref={provided.innerRef}
                             >

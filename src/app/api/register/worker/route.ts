@@ -64,6 +64,7 @@ export async function POST(req: Request) {
                 return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
             }
 
+            if (groups && groups.length === 0) {
             // Prepare group assignments for batch insert
             const groupAssignments = groups.map(group_id => ({
                 user_id: user.id,
@@ -84,6 +85,7 @@ export async function POST(req: Request) {
                 success: true, 
                 message: 'User registered successfully!' 
             }, { status: 200 });
+            }
             
         } catch (tokenError) {
             console.error('Token verification error:', tokenError);

@@ -57,7 +57,6 @@ export async function PUT(req: Request, { params: { company_id } }: { params: { 
                     projects: cvData.projects,
                     strengths: cvData.strengths,
                     recommendedTaskTypes: cvData.recommendedTaskTypes,
-                    updated_at: new Date().toISOString()
                 })
                 .eq("user_id", id)
                 .select();

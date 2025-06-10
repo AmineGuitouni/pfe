@@ -17,9 +17,9 @@ export async function GET(req: Request, {params: {company_id,user_id}}: {params:
             return NextResponse.json({ error: "Email is required" }, { status: 400 });
         }
 
-        if (!groups || groups.length === 0) {
-            return NextResponse.json({ error: "At least one group is required" }, { status: 400 });
-        }
+        // if (!groups || groups.length === 0) {
+        //     return NextResponse.json({ error: "At least one group is required" }, { status: 400 });
+        // }
 
         // Validate email format
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
