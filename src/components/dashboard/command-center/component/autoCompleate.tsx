@@ -5,7 +5,7 @@ import { useParams, usePathname } from 'next/navigation';
 import { useCommandCenterContext } from '../context/CommandCenterContext';
 import { Button } from '@heroui/react';
 import { Mic, Square, Upload, Play, Pause } from 'lucide-react';
-import { predefinedCommands } from '../contants';
+import { predefinedCommands } from '../constants/contants';
 
 export default function CommandInput() {
   const [textValue, setTextValue] = useState('');

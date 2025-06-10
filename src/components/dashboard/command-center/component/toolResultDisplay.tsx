@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CheckCircle, XCircle, ChevronDown, ChevronRight } from 'lucide-react';
+import { useParams } from 'next/navigation';
 
 interface ToolResultDisplayProps {
   toolName: string;
@@ -8,7 +9,8 @@ interface ToolResultDisplayProps {
 }
 
 const ToolResultDisplay: React.FC<ToolResultDisplayProps> = ({ toolName, output, error }) => {
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const {mode} = useParams()
+  const [isCollapsed, setIsCollapsed] = useState(mode === "chat");
   const hasError = error !== undefined && error !== null;
   const hasOutput = output !== undefined && output !== null;
 

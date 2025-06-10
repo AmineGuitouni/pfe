@@ -23,17 +23,31 @@ export interface ListSessionsResponse {
 export async function GET(req: Request, {params}:{params:Params}) {
     try {
         const { user_id, company_id } = params;
+        const url = new URL(req.url);
+        const mode = url.searchParams.get('mode');
+        
+        // Validate mode parameter if provided
+        if (mode && !['cli', 'chat'].includes(mode)) {
+            return NextResponse.json({ error: 'Invalid mode. Must be either "cli" or "chat"' }, { status: 400 });
+        }
+        
         const supabase = await getServerDBfromCompanyId(company_id);
         if (!supabase) {
             return NextResponse.json({ error: 'Invalid company ID' }, { status: 400 });
         }
 
-        const { data, error } = await supabase
+        let query = supabase
             .from('command_center_sessions')
             .select('id, name, mode, created_at')
             .eq('user_id', user_id)
-            .eq('company_id', company_id)
-            .order('created_at', { ascending: false });
+            .eq('company_id', company_id);
+            
+        // Add mode filter if provided
+        if (mode) {
+            query = query.eq('mode', mode);
+        }
+        
+        const { data, error } = await query.order('created_at', { ascending: false });
 
         if (error) {
             console.error('Error fetching sessions:', error);

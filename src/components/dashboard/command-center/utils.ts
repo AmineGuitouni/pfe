@@ -69,3 +69,67 @@ export const parseCommandString = (
 
     return parsedOutput;
   };
+
+/**
+ * Parses a command string and returns it as JSON object format
+ * @param commandString - The command string to parse (e.g., "@search --query hello --limit 10")
+ * @returns JSON object representation of the parsed command or error
+ */
+export const parseCommandToJson = (
+  commandString: string
+): { command_name: string; parameters: Record<string, string> } | { error: string } => {
+  const trimmedValue = commandString.trim();
+
+  if (!trimmedValue.startsWith('@')) {
+    return { error: "Invalid command format: Must start with '@'." };
+  }
+
+  const commandMatch = trimmedValue.match(/^@(\w+)/);
+  if (!commandMatch || !commandMatch[1]) {
+    return { error: "Invalid command format: Command name missing or invalid after '@'." };
+  }
+
+  const commandName = commandMatch[1];
+  const parsedOutput = {
+    command_name: commandName,
+    parameters: {} as Record<string, string>,
+  };
+
+  const argString = trimmedValue.substring(commandMatch[0].length).trim();
+
+  if (!argString) {
+    // No arguments, return command with empty parameters
+    return parsedOutput;
+  }
+
+  const tokens: string[] = [];
+  // Regex to split by space but respect quotes for values
+  const tokenRegex = /[^\s"']+|"([^"]*)"|'([^']*)'/g;
+  let match;
+  while ((match = tokenRegex.exec(argString)) !== null) {
+    tokens.push(match[1] || match[2] || match[0]);
+  }
+
+  let i = 0;
+  while (i < tokens.length) {
+    const currentToken = tokens[i];
+
+    if (currentToken.startsWith('--')) {
+      // Parameter found
+      if (i + 1 >= tokens.length) {
+        return { error: `Parameter ${currentToken} expects a value, but none was found.` };
+      }
+      const paramValue = tokens[i + 1];
+      // Store parameter name without '--'
+      parsedOutput.parameters[currentToken.substring(2)] = paramValue;
+      i += 2; // Consumed parameter name and value
+    } else if (currentToken.startsWith('-') && !currentToken.startsWith('--')) {
+      // Invalid single hyphen argument
+      return { error: `Invalid argument: "${currentToken}". Only parameters (e.g., --param value) are supported.` };
+    } else {
+      return { error: `Unexpected token: "${currentToken}". Arguments must be parameters (e.g., --param value).` };
+    }
+  }
+
+  return parsedOutput;
+};

@@ -4,6 +4,8 @@ import { agentResponseGeneration } from "@/lib/ai/agent/helper/agentGeneration";
 import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase";
 import { NextRequest, NextResponse } from "next/server";
 import { generateAIAudio } from "@/lib/ai/agent/helper/generateAIAudio";
+import { parseCommandToJson } from "@/components/dashboard/command-center/utils";
+import { predefinedCommands } from "@/components/dashboard/command-center/constants/commandsFunctions";
 
 interface Params {
     user_id: string;
@@ -43,8 +45,82 @@ export async function POST(req: NextRequest, { params }: { params: Params }) {
         }
 
         if(sessionData.mode ===  "cli"){
-            // CLI mode implementation - placeholder for now
-            return NextResponse.json({ error: "CLI mode not implemented yet" }, { status: 501 });
+            const {command} = await req.json();
+            console.log(command, typeof command);
+            if (!command || typeof command !== 'string') {
+                console.log("Invalid command format");
+                return NextResponse.json({ error: "Invalid command format" }, { status: 400 });
+            }
+            
+            // Parse the command to extract the function name and arguments
+            const commandParsed = parseCommandToJson(command);
+            if ('error' in commandParsed) {
+                console.log("Error parsing command:", commandParsed.error);
+                return NextResponse.json({ error: commandParsed.error }, { status: 400 });
+            }
+
+            const commandFunction = predefinedCommands[commandParsed.command_name];
+            if (!commandFunction) {
+                return NextResponse.json({ error: `Command ${commandParsed.command_name} not found` }, { status: 404 });
+            }
+
+            console.log("Command:", commandParsed);
+
+            const funcRes = await commandFunction({
+                company_id,
+                user_id,
+                ...commandParsed.parameters
+            });
+
+            const resData = {
+                name: commandParsed.command_name,
+                output: funcRes
+            }
+
+            const {data: userMessage, error: userMessageError} = await supabase
+                .from('command_center_sessions_messages')
+                .insert({
+                    session_id: session_id,
+                    sender: 'user',
+                    content: command,
+                })
+                .select('id')
+                .single();
+
+            if (userMessageError) {
+                console.error('Error saving user message:', userMessageError);
+                return NextResponse.json({ error: "Failed to save user message" }, { status: 500 });
+            }
+            if (!userMessage || !userMessage.id) {
+                console.error('User message saved but no ID returned:', userMessage);
+                return NextResponse.json({ error: "User message saved but no ID returned" }, { status: 500 });
+            }
+
+            // Save the function response as an AI message
+            const { data: aiMessage, error: aiMessageError } = await supabase
+                .from('command_center_sessions_messages')
+                .insert({
+                    session_id: session_id,
+                    sender: 'tool',
+                    content: "```tool_result\n" + JSON.stringify(resData, null, 2) + "\n```",
+                    created_at: new Date().toISOString()
+                })
+                .select('id')
+                .single();
+            if (aiMessageError) {
+                console.error('Error saving AI message:', aiMessageError);
+                return NextResponse.json({ error: "Failed to save AI message" }, { status: 500 });
+            }
+            if (!aiMessage || !aiMessage.id) {
+                console.error('AI message saved but no ID returned:', aiMessage);
+                return NextResponse.json({ error: "AI message saved but no ID returned" }, { status: 500 });
+            }
+
+            return NextResponse.json({
+                response: "```tool_result\n" + JSON.stringify(resData, null, 2) + "\n```",
+                response_id: aiMessage.id,
+                user_message_id: userMessage.id,
+            })
         }
         else if(sessionData.mode === "chat"){
             const body = await req.json() as CommandCenterRequest ;

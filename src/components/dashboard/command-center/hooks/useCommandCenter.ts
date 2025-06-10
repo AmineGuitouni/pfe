@@ -108,6 +108,47 @@ export const useCommandCenter = () => {
       // Add user message to local state immediately for optimistic UI
       setMessages(prev => [...prev, userMessage]);
       setSendingMessage(true);
+      console.log(currentMode)
+      if(currentMode === 'cli'){
+        console.log(content)
+        const response = await fetch(`/api/v1/${userSession.user.id}/companies/${company_id}/command-center/sessions/${currentSessionId}`, {
+          method: 'POST',
+          body: JSON.stringify({
+            command: content,
+          })
+        })
+
+        if(!response.ok) {
+          // Remove the optimistic user message on failure
+          setMessages(prev => prev.filter(msg => msg.id !== placeholderId));
+          setSendingMessage(false);
+          return {
+            error: 'Failed to send command'
+          }
+        }
+
+        const { response: commandResult, response_id, user_message_id } = await response.json();
+        console.log('Command Result:', commandResult);
+        // Update the user message with the actual ID from server and add command result
+        setMessages(prev => {
+            const updatedMessages = prev.map(msg =>
+              msg.id === placeholderId ? { ...msg, id: user_message_id } : msg
+            );
+            
+            // Add command result to the updated messages
+            return [...updatedMessages, {
+              id: response_id,
+              session_id: currentSessionId,
+              sender: 'tool',
+              content: commandResult,
+              content_type: 'text',
+              created_at: new Date().toISOString()
+            }];
+          }
+        );
+        setSendingMessage(false);
+        return;
+      }
       
       const response = await fetch(`/api/v1/${userSession.user.id}/companies/${company_id}/command-center/sessions/${currentSessionId}`, {
         method: 'POST',
