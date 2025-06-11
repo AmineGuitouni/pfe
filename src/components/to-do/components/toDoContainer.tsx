@@ -19,15 +19,17 @@ export default function ToDoContainer() {
     
 
     return (
-        <div className="w-full h-full flex ">
-            <div className="w-full h-full flex flex-col">
+        <div className="w-full h-full flex overflow-hidden">
+            <div className="flex-1 min-w-0 h-full flex flex-col">
                 <ToDoHeader project={activeProject || undefined} isLoading={isLoading}/>
-                <Container isLoading={isLoading} activeProject={activeProject}/>
+                <div className="flex-1 overflow-hidden">
+                    <Container isLoading={isLoading} activeProject={activeProject}/>
+                </div>
             </div>
-            <ToDoSidebar 
-                projects={projects} 
-                isLoading={isLoading} 
-                search={search} 
+            <ToDoSidebar
+                projects={projects}
+                isLoading={isLoading}
+                search={search}
                 setSearch={setSearch}
             />
         </div>
