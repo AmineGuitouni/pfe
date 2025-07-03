@@ -106,68 +106,70 @@ export default function Container({isLoading, activeProject}:{isLoading: boolean
 
     // Removed the early return for !activeProject
     return (
-        <div className="w-full h-full p-5 flex overflow-x-hidden">
-            {isLoading ? (
-                // Skeleton Loader for Columns - Render this first if loading
-                <div className="h-full flex w-full gap-5 animate-pulse">
-                    {Array(4).fill(0).map((_, index) => (
-                        <div key={index} className="flex-shrink-0 w-[280px] h-[50%] bg-white/5 rounded-lg p-3 flex flex-col justify-between ">
-                            <div className="w-full flex flex-col ">
-                                {/* Skeleton Column Header */}
-                                <div className="h-6 bg-gray-600/50 rounded mb-4 w-3/4"></div>
-                                {/* Skeleton Task Items */}
-                                <div className="space-y-2">
-                                    <div className="h-10 bg-gray-600/50 rounded-lg"></div>
-                                    <div className="h-10 bg-gray-600/50 rounded-lg"></div>
-                                    <div className="h-10 bg-gray-600/50 rounded-lg"></div>
+        <div className="w-full h-full overflow-hidden">
+            <div className="w-full h-full p-5 flex overflow-x-auto overflow-y-hidden">
+                {isLoading ? (
+                    // Skeleton Loader for Columns - Render this first if loading
+                    <div className="h-full flex gap-5 animate-pulse">
+                        {Array(4).fill(0).map((_, index) => (
+                            <div key={index} className="flex-shrink-0 w-[280px] h-[50%] bg-white/5 rounded-lg p-3 flex flex-col justify-between">
+                                <div className="w-full flex flex-col">
+                                    {/* Skeleton Column Header */}
+                                    <div className="h-6 bg-gray-600/50 rounded mb-4 w-3/4"></div>
+                                    {/* Skeleton Task Items */}
+                                    <div className="space-y-2">
+                                        <div className="h-10 bg-gray-600/50 rounded-lg"></div>
+                                        <div className="h-10 bg-gray-600/50 rounded-lg"></div>
+                                        <div className="h-10 bg-gray-600/50 rounded-lg"></div>
+                                    </div>
                                 </div>
+                                <div className={`bg-gray-600/50 rounded-md w-32 h-4`}></div>
                             </div>
-                            <div className={`bg-gray-600/50 rounded-md w-32 h-4`}></div>
-                        </div>
-                    ))}
-                </div>
-            ) : activeProject ? (
-                // If not loading AND activeProject exists, render columns
-                <DragDropContext onDragEnd={handleDragEnd}>
-                    <Droppable droppableId="columns" direction="horizontal" type="column">
-                        {(provided) => (
-                            <div
-                                className="h-full flex gap-5 overflow-x-auto  max-w-[1600px]"
-                                {...provided.droppableProps}
-                                ref={provided.innerRef}
-                            >
-                                {Object.entries(activeProject.columns)
-                                    .sort(([, a], [, b]) => (a.order || 0) - (b.order || 0))
-                                    .map(([key, column], index) => (
-                                        <Draggable key={key} draggableId={`column-${key}`} index={index}>
-                                            {(provided, snapshot) => (
-                                                <div
-                                                    ref={provided.innerRef}
-                                                    {...provided.draggableProps}
-                                                    className="flex"
-                                                >
-                                                    <TaskContainer
-                                                        column={column}
-                                                        project_id={activeProject.projectData.id}
-                                                        dragHandleProps={provided.dragHandleProps}
-                                                        isDragging={snapshot.isDragging}
-                                                    />
-                                                    {index === Object.keys(activeProject.columns).length - 1 && <AddColumnButton/>}
-                                                </div>
-                                            )}
-                                        </Draggable>
-                                    ))}
-                                {provided.placeholder}
-                            </div>
-                        )}
-                    </Droppable>
-                </DragDropContext>
-            ) : (
-                 // If not loading AND no activeProject, render message
-                <div className="w-full h-full flex items-center justify-center">
-                    <p className="text-white/40">Select a project to view tasks</p>
-                </div>
-            )}
-        </div> 
+                        ))}
+                    </div>
+                ) : activeProject ? (
+                    // If not loading AND activeProject exists, render columns
+                    <DragDropContext onDragEnd={handleDragEnd}>
+                        <Droppable droppableId="columns" direction="horizontal" type="column">
+                            {(provided) => (
+                                <div
+                                    className="h-full flex gap-5 min-w-max"
+                                    {...provided.droppableProps}
+                                    ref={provided.innerRef}
+                                >
+                                    {Object.entries(activeProject.columns)
+                                        .sort(([, a], [, b]) => (a.order || 0) - (b.order || 0))
+                                        .map(([key, column], index) => (
+                                            <Draggable key={key} draggableId={`column-${key}`} index={index}>
+                                                {(provided, snapshot) => (
+                                                    <div
+                                                        ref={provided.innerRef}
+                                                        {...provided.draggableProps}
+                                                        className="flex"
+                                                    >
+                                                        <TaskContainer
+                                                            column={column}
+                                                            project_id={activeProject.projectData.id}
+                                                            dragHandleProps={provided.dragHandleProps}
+                                                            isDragging={snapshot.isDragging}
+                                                        />
+                                                        {index === Object.keys(activeProject.columns).length - 1 && <AddColumnButton/>}
+                                                    </div>
+                                                )}
+                                            </Draggable>
+                                        ))}
+                                    {provided.placeholder}
+                                </div>
+                            )}
+                        </Droppable>
+                    </DragDropContext>
+                ) : (
+                     // If not loading AND no activeProject, render message
+                    <div className="w-full h-full flex items-center justify-center">
+                        <p className="text-white/40">Select a project to view tasks</p>
+                    </div>
+                )}
+            </div>
+        </div>
     )
 }

@@ -56,7 +56,7 @@ export default function TaskContainer({ column, project_id, dragHandleProps, isD
                     {...provided.droppableProps}
                     ref={provided.innerRef}
                     className={cn(
-                        "w-[300px] h-fit flex flex-col bg-white/5 border-white/20 border-1 rounded-md p-3 transition-all ease-linear",
+                        "w-[300px] min-w-[300px] max-w-[300px] h-fit flex flex-col bg-white/5 border-white/20 border-1 rounded-md p-3 transition-all ease-linear flex-shrink-0",
                         isDeleted && "animate-pulse",
                         isDragging && "transform rotate-2 shadow-lg opacity-80"
                     )}

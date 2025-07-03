@@ -12,12 +12,26 @@ import HeaderFolderPath from './components/headerFolderPath';
 
 const FilesDashboard: React.FC = () => {
   const [showSharedFiles, setShowSharedFiles] = useState(true); // Keep state
-  const { files, folders, isLoading, company_id } = useFilesContext(); // Consume context, added company_id
+  const { files, folders, isLoading, company_id, searchTerm } = useFilesContext(); // Consume context, added company_id and searchTerm
 
-  // Filter files based on the showSharedFiles state here
+  // Filter files based on the showSharedFiles state and search term (frontend filtering)
   const displayFiles = useMemo(() => {
-      return files.filter(file => showSharedFiles || !file.isShared);
-  }, [files, showSharedFiles]);
+      return files.filter(file => {
+          const matchesSharedFilter = showSharedFiles || !file.isShared;
+          const matchesSearchTerm = !searchTerm || file.name.toLowerCase().includes(searchTerm.toLowerCase());
+          return matchesSharedFilter && matchesSearchTerm;
+      });
+  }, [files, showSharedFiles, searchTerm]);
+
+  // Filter folders based on search term (frontend filtering)
+  const displayFolders = useMemo(() => {
+      return folders.filter(folder => {
+          const matchesSearchTerm = !searchTerm || folder.name.toLowerCase().includes(searchTerm.toLowerCase());
+          return matchesSearchTerm;
+      });
+  }, [folders, searchTerm]);
+
+
 
   return (
     <div className="flex flex-col min-h-screen text-white p-6 md:p-8 lg:p-10">
@@ -55,7 +69,7 @@ const FilesDashboard: React.FC = () => {
           <HeaderFolderPath />
           <div className="flex-grow rounded-lg overflow-y-auto custom-scrollbar">
             {/* Pass filtered files, folders, isLoading, and company_id as props */}
-            <FileCardContainer files={displayFiles} folders={folders} isLoading={isLoading} company_id={company_id} />
+            <FileCardContainer files={displayFiles} folders={displayFolders} isLoading={isLoading} company_id={company_id} />
           </div>
         </div>
       </div>

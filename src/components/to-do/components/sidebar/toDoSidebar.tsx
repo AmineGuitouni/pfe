@@ -17,9 +17,9 @@ export default function ToDoSidebar({projects,isLoading,search,setSearch}:{proje
         }}
         animate={open ? "open" : "closed"}
         transition={{ duration: 0.2 }}
-         className=" h-full w-5 border-l-1 bg-dark_blue border-l-white/20">
-            <Button onPress={() => setOpen(!open)} size="sm" startContent={<IoIosArrowForward className={cn("text-white",!open ? "rotate-180" : "")} size={12} />} isIconOnly className={cn("absolute  right-1 top-2 bg-dark_blue   border-1 border-white/20 rounded-full ",open ? "translate-x-[-200px] rounded-sm" : "")}></Button>
-            <SideBarBody  isOpen={open} search={search} setSearch={setSearch} projects={projects} isLoading={isLoading} />
+         className="h-full flex-shrink-0 border-l-1 bg-dark_blue border-l-white/20">
+            <Button onPress={() => setOpen(!open)} size="sm" startContent={<IoIosArrowForward className={cn("text-white",!open ? "rotate-180" : "")} size={12} />} isIconOnly className={cn("absolute right-1 top-2 bg-dark_blue border-1 border-white/20 rounded-full z-10",open ? "translate-x-[-250px] rounded-sm" : "")}></Button>
+            <SideBarBody isOpen={open} search={search} setSearch={setSearch} projects={projects} isLoading={isLoading} />
         </motion.div>
     )
 
