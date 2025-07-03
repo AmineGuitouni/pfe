@@ -28,10 +28,6 @@ export async function POST(req: Request) {
             const company_id = decoded.company_id;
             const groups = decoded.groups;
             
-            // Validate groups
-            if (!groups || !Array.isArray(groups) || groups.length === 0) {
-                return NextResponse.json({ error: 'No groups specified for user' }, { status: 400 });
-            }
 
             const hashedPassword = await bcrypt.hash(password, 10);
             
@@ -64,28 +60,30 @@ export async function POST(req: Request) {
                 return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
             }
 
-            if (groups && groups.length === 0) {
-            // Prepare group assignments for batch insert
-            const groupAssignments = groups.map(group_id => ({
-                user_id: user.id,
-                group_id
-            }));
+            // Handle group assignments if groups are provided
+            if (groups && groups.length > 0) {
+                // Prepare group assignments for batch insert
+                const groupAssignments = groups.map((group_id : any)=> ({
+                    user_id: user.id,
+                    group_id
+                }));
 
-            // Insert all group assignments
-            const { error: groupError } = await client
-                .from("user_groups")
-                .insert(groupAssignments);
+                // Insert all group assignments
+                const { error: groupError } = await client
+                    .from("user_groups")
+                    .insert(groupAssignments);
 
-            if (groupError) {
-                console.error('Group assignment error:', groupError);
-                return NextResponse.json({ error: 'Failed to assign groups' }, { status: 500 });
+                if (groupError) {
+                    console.error('Group assignment error:', groupError);
+                    return NextResponse.json({ error: 'Failed to assign groups' }, { status: 500 });
+                }
             }
-                
+            
+            // Return success response for all cases (with or without groups)
             return NextResponse.json({ 
                 success: true, 
                 message: 'User registered successfully!' 
             }, { status: 200 });
-            }
             
         } catch (tokenError) {
             console.error('Token verification error:', tokenError);

@@ -51,7 +51,7 @@ export async function GET(req: NextRequest, {params: {company_id}}: {params: { c
 
   let query = client
     .from("users")
-    .select("id,first_name,last_name,phone_number,country,email,created_at,user_groups!inner(groups!inner(name))", { count: "exact" })
+    .select("id,first_name,last_name,phone_number,country,email,created_at,user_groups(groups(name))", { count: "exact" })
     .eq("company_id", company_id)
     .not("id", "in", `(${excludedUsers.join(",")})`)
     .order("created_at", { ascending: sort === "ascending" });
@@ -72,6 +72,7 @@ export async function GET(req: NextRequest, {params: {company_id}}: {params: { c
 
   const { data, error, count } = await query as any;
 
+
   if (error) {
     console.error(error);
     return NextResponse.json({ data: [], count: 0, error: error.message });
@@ -87,6 +88,7 @@ export async function GET(req: NextRequest, {params: {company_id}}: {params: { c
     created_at: user.created_at,
     group: user.user_groups.map((group : any) => group.groups.name).join(", "),
   }));
+
 
   return NextResponse.json({ data : formattedData , count });
 }
