@@ -13,13 +13,6 @@ interface ApiMiddlewareOptions {
 }
 
 export default async function apiMiddleware({path, token}:ApiMiddlewareOptions) {
-    // Authentication check - return early if no token
-    
-    // for testing purposes only (disabled for production testing)
-    if(!token){
-        console.log("No token found, using default token");
-        return NextResponse.json({error: "Access denied: unauthenticated request"}, {status: 403});
-    }
     const passResponse = NextResponse.next();
     passResponse.headers.set('x-user-role', token?.role as string | null || 'worker');
 
@@ -28,6 +21,14 @@ export default async function apiMiddleware({path, token}:ApiMiddlewareOptions) 
     if(!pattern || !rule || !rule.authOnly){
         console.log("No matching pattern or rule found, or authOnly is false");
         return passResponse;
+    }
+
+    if(rule.authOnly){
+        // Authentication check - return early if no token
+        if(!token){
+            console.log("No token found, using default token");
+            return NextResponse.json({error: "Access denied: unauthenticated request"}, {status: 403});
+        }
     }
     
     if(!params){
