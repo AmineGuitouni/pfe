@@ -1,6 +1,7 @@
 import TaskItem from '@/components/dashboard/projects/components/assignement/showTaskItem';
 import { Task, ProjectStatusType, User } from '@/components/dashboard/projects/types';
 import { FaCalendarAlt, FaUsers, FaUser } from 'react-icons/fa';
+import { FiEdit } from 'react-icons/fi';
 import { Avatar } from '@heroui/react';
 import React from 'react';
 import Link from 'next/link';
@@ -168,12 +169,19 @@ export default async function ProjectPage({ params: { locale, company, project_i
                         </div>
                     ) : (
                         <Link
-                            href={`/dashboard/${company}/projects/${project_id}/assign-workers`}
+                            href={`/${locale}/dashboard/${company}/projects/${project_id}/assign-workers`}
                             className="assign-users-btn px-4 py-2 border border-transparent rounded-md cursor-pointer transition-all duration-300 font-medium text-white bg-light_blue hover:bg-light_blue-600 hover:-translate-y-0.5 shadow-md"
                         >
                             Assign Users
                         </Link>
                     )}
+                    <Link
+                        href={`/${locale}/dashboard/${company}/projects/${project_id}/edit`}
+                        className="flex items-center gap-2 px-4 py-2 border border-white/20 rounded-md cursor-pointer transition-all duration-300 font-medium text-white hover:bg-white/10 hover:-translate-y-0.5"
+                    >
+                        <FiEdit size={16} />
+                        Edit Project
+                    </Link>
                 </div>
             </header>
 

@@ -155,6 +155,14 @@ export default function ProjectsTable({company_id}: {company_id: string}) {
                       View
                     </DropdownItem>
                     <DropdownItem
+                      key="edit"
+                      onPress={()=>{
+                        router.push(`${pathName}/${item.data.id}/edit`)
+                      }}
+                    >
+                      Edit
+                    </DropdownItem>
+                    <DropdownItem
                       key="Delete"
                       onPress={onOpenDelete}
                       color="danger"
