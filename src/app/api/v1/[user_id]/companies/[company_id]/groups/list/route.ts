@@ -39,8 +39,6 @@ export async function GET(request: Request, { params }: { params: params }) {
       .eq('company_id', company_id)
       .order('created_at', { ascending: true })
 
-    console.log({groups})
-
     if (error) throw error;
 
     return NextResponse.json({

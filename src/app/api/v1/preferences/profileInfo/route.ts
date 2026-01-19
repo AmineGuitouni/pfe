@@ -39,12 +39,13 @@ export async function PUT(req: Request) {
          return NextResponse.json({ error: "Invalid file type. Only images are allowed." }, { status: 400 });
       }
 
+      const bucketName = process.env.SUPABASE_PUBLIC_BUCKET || 'public-bucket';
       const fileExtension = avatarFile.name.split('.').pop();
       const fileName = `${uuidv4()}.${fileExtension}`;
       const filePath = `public/${fileName}`; // Path within the bucket
 
       const { error: uploadError } = await supabase.storage
-        .from('avatars') // Ensure 'avatars' bucket exists and has correct policies
+        .from(bucketName)
         .upload(filePath, avatarFile);
 
       if (uploadError) {
@@ -54,7 +55,7 @@ export async function PUT(req: Request) {
 
       // Get public URL
       const { data: urlData } = supabase.storage
-        .from('avatars')
+        .from(bucketName)
         .getPublicUrl(filePath);
 
       avatar_url = urlData?.publicUrl || null;

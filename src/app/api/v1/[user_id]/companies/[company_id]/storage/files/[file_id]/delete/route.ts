@@ -24,7 +24,7 @@ export async function DELETE(req: Request, { params: { company_id, file_id , use
             return NextResponse.json<DeleteFileResponseBody>({ error: "File ID is required" }, { status: 400 });
         }
 
-        const bucketName = "storage";
+        const bucketName = process.env.SUPABASE_PRIVATE_BUCKET || 'private-bucket';
 
         // --- Authorization Check ---
         const userRole = req.headers.get("X-user-role");

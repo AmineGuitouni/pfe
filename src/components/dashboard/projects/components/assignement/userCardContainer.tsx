@@ -32,13 +32,13 @@ export default function UserCardContainer({company_id, project_id}: {company_id:
 
     return(
         <motion.div 
-            className="flex flex-col gap-10"
+            className="flex flex-col gap-5 h-full overflow-hidden"
             variants={containerVariants}
             initial="open"
             // animate={isOpen ? "closed" : "open"}
             transition={{ duration: 0.5 }}
         >
-            <div className="w-full flex justify-between gap-5 rounded-r-lg backdrop-blur z-10">
+            <div className="w-full flex justify-between gap-5 rounded-r-lg backdrop-blur z-10 flex-shrink-0">
                 <div className="w-[384px] flex items-center gap-3">
                     <Button
                         size="sm"
@@ -63,6 +63,7 @@ export default function UserCardContainer({company_id, project_id}: {company_id:
                 </div>
                 <SaveAssignementButton company_id={company_id} project_id={project_id}/>
             </div>
+            <div className="flex-1 overflow-y-auto">
             {
                 loadingTaskUserLinks ? 
                 <div className="text-white/50 text-center py-10 w-full flex flex-col gap-4">
@@ -92,13 +93,17 @@ export default function UserCardContainer({company_id, project_id}: {company_id:
                                 filteredUsers.map((user, index) => (
                                     <Draggable key={user.id} draggableId={user.id} index={index}>
                                         {
-                                            (provided) => {
+                                            (provided, snapshot) => {
                                                 return (
                                                 <div 
                                                     {...provided.dragHandleProps} 
                                                     {...provided.draggableProps} 
                                                     ref={provided.innerRef}
                                                     className="mb-5"
+                                                    style={{
+                                                        ...provided.draggableProps.style,
+                                                        zIndex: snapshot.isDragging ? 9999 : 'auto',
+                                                    }}
                                                 >
                                                     <UserCard worker={user}/>
                                                 </div>
@@ -113,6 +118,7 @@ export default function UserCardContainer({company_id, project_id}: {company_id:
                 }
             </Droppable>
             }
+            </div>
         </motion.div>
     )
 }

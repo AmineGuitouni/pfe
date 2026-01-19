@@ -39,7 +39,7 @@ export async function GET(req: Request) {
         const link = `${url.origin}/change-password?token=${token}`
 
         const {error: mailError} = await resend.emails.send({
-            from: "noReply@guitouni-studio.online",
+            from: "noReply@guitouni-amine.me",
             to: [email],
             subject: "Change Password",
             html: changePasswordTemplate(link),

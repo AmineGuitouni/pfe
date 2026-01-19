@@ -4,7 +4,7 @@ import GroupsContextProvider from "@/components/dashboard/groups/contexts/groups
 
 export default function DataBasesPage({ params: { company } }: {params: {company: string}}) {
     return (
-        <div className="w-full p-10">
+        <div className="w-full h-full overflow-y-auto scrollbar-custom p-10">
             <div className="w-full gap-5 flex justify-between">
                 <GroupsContextProvider company_id={company}>
                     <GroupCardContainer/>

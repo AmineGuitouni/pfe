@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState } from 'react';
-import {  Input, ScrollShadow } from '@heroui/react';
+import {  Input } from '@heroui/react';
 import { SearchIcon } from 'lucide-react';
 import TaskItemSkeleton from '../tasks/TaskItemSkeleton';
 import { useTaskUserAssgnementContext } from '../../context/taskUserAssgnementContext';
@@ -20,8 +20,8 @@ export default function ProjectTaskList() {
   },[unLinkedTasks, searchText, tasks])
 
   return (
-    <div className='w-full h-fit sticky top-[100px] border-white/20 border-1 rounded-md p-5'>
-      <div className='w-full flex justify-between mb-6 gap-8'>
+    <div className='w-full h-full flex flex-col border-white/20 border-1 rounded-md p-5 overflow-hidden'>
+      <div className='w-full flex justify-between mb-6 gap-8 flex-shrink-0'>
         <Input
           isClearable
           placeholder="Search Tasks by title..."
@@ -33,7 +33,7 @@ export default function ProjectTaskList() {
           variant="bordered"
         />
       </div>
-      <ScrollShadow className='flex flex-col gap-4 h-[calc(100vh-200px)] overflow-y-auto'>
+      <div className='flex flex-col gap-4 flex-1 overflow-y-auto'>
         {isLoading ? (
           Array.from({ length: 5 }).map((_, index) => (
             <TaskItemSkeleton key={index} index={index} />
@@ -51,8 +51,17 @@ export default function ProjectTaskList() {
                     ) :
                     filteredTasks.map((task, idx) => (
                         <Draggable key={task.id} draggableId={task.id} index={idx} >
-                            {(provided) => (
-                                <div className='mb-4 w-[calc(100%-16px)]' ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                            {(provided, snapshot) => (
+                                <div 
+                                    className='mb-4 w-[calc(100%-16px)]' 
+                                    ref={provided.innerRef} 
+                                    {...provided.draggableProps} 
+                                    {...provided.dragHandleProps}
+                                    style={{
+                                        ...provided.draggableProps.style,
+                                        zIndex: snapshot.isDragging ? 9999 : 'auto',
+                                    }}
+                                >
                                     <TaskItem
                                         key={task.id}
                                         task={task}
@@ -68,7 +77,7 @@ export default function ProjectTaskList() {
             )}
           </Droppable>
         )}
-      </ScrollShadow>
+      </div>
     </div>
   );
 };

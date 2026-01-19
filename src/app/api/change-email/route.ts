@@ -26,7 +26,7 @@ export async function GET(req: Request) {
         const url = `${origin}/update-email?token=${token}`
 
         const {error} = await resend.emails.send({
-            from: "noReply@guitouni-studio.online",
+            from: "noReply@guitouni-amine.me",
             to: [session.user.email],
             subject: "Update Email",
             html: EmailChangeTemplate(url),

@@ -41,7 +41,7 @@ export async function POST(req:Request, {params:{user_id}}: {params:{user_id: st
 
     const baseReferenceClient = createClient(
       process.env.NEXT_PUBLIC_SHARED_SUPABASE_URL!,
-      process.env.SHARED_SUPABASE_KEY!,
+      process.env.SHARED_SUPABASE_SERVICE_ROLE_KEY!,
     )
 
     // Prepare the Database

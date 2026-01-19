@@ -80,7 +80,7 @@ export async function POST(request: Request, { params:{company_id,user_id} }: { 
         title: task.title,
         description: task.description,
         project_id: addedProject.id,
-        difficulty_level: task.difficultyLevel,
+        difficulty_level: task.difficultyLevel || 1,
         column_id : addColData[0].id
     })))
     .select("id, title");

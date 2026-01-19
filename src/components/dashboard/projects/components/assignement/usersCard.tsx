@@ -89,8 +89,17 @@ export function UserCard({ worker }:UserCardProps) {
                                     {
                                         workerTasks.map((task, index) => (
                                             <Draggable key={task.id} draggableId={task.id} index={index}>
-                                                {(provided) => (
-                                                    <div className="mb-4" ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                                                {(provided, snapshot) => (
+                                                    <div 
+                                                        className="mb-4" 
+                                                        ref={provided.innerRef} 
+                                                        {...provided.draggableProps} 
+                                                        {...provided.dragHandleProps}
+                                                        style={{
+                                                            ...provided.draggableProps.style,
+                                                            zIndex: snapshot.isDragging ? 9999 : 'auto',
+                                                        }}
+                                                    >
                                                         <TaskItem key={task.id} task={task} isHighlighted={false}/>
                                                     </div>
                                                 )}

@@ -28,7 +28,7 @@ export async function GET(req: Request, { params: { company_id, file_id } }: { p
             return NextResponse.json<GetSignedUrlResponseBody>({ error: "File ID is required" }, { status: 400 });
         }
 
-        const bucketName = "storage";
+        const bucketName = process.env.SUPABASE_PRIVATE_BUCKET || 'private-bucket';
 
         // 1. Fetch the file record to get the storage path
         const { data: fileData, error: fetchError } = await supabase

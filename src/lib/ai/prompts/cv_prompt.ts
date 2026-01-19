@@ -65,20 +65,14 @@ Be comprehensive in your analysis and make sure to recommend task types that tru
 
 export const projectTasksPrompt = (projectName: string, projectDescription: string) =>{
 return `
-You are an expert project manager. Your task is to generate a list of tasks based on a project name and description.
+You are an expert project manager. Your task is to generate a comprehensive list of tasks based on a project name and description.
 
 Project Name: ${projectName}
 Project Description: ${projectDescription}
 
-Please analyze this project and generate a list of tasks in a structured JSON format following this structure:
-{
-  "title": "string",
-  "description": "string",
-  "dependencies": ["string"] // list of previous task titles,
-  "difficultyLevel": number // from 1 to 5 the bigger the harder
-}
-
-Be comprehensive in your analysis and make sure that the difficulty level is a number between 1 and 5.
+Please analyze this project and generate a list of tasks.
+For each task, provide a title, a detailed description, a list of dependencies (titles of previous tasks), and a difficulty level (1-5).
+Ensure the output matches the requested JSON schema.
 `
 }
 

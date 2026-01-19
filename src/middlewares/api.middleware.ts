@@ -18,30 +18,15 @@ export default async function apiMiddleware({path, token}:ApiMiddlewareOptions) 
     // for testing purposes only (disabled for production testing)
     if(!token){
         console.log("No token found, using default token");
-        token = {
-                name: 'amine Guitlouni',
-                email: 'notam1ne2002@gmail.com',
-                picture: null,
-                sub: '51f8b578-5768-409e-883c-5cf012d6f98f',
-                first_name: 'amine',
-                last_name: 'Guitlouni',
-                role: 'worker',
-                email_verified: true,
-                country: 'Tunisia',
-                phone_number: '+4456522039',
-                company_id: '031db447-2c1b-45a4-b8fe-5a5db89009e5',
-                image: null,
-                cv_informations: true,
-                iat: 1748516754,
-                exp: 1748538354,
-                jti: '847183b1-d94d-4588-9889-6f5133b63897'
-            } as JWT
+        return NextResponse.json({error: "Access denied: unauthenticated request"}, {status: 403});
     }
     const passResponse = NextResponse.next();
-    passResponse.headers.set('x-user-role', token?.role as string | null || 'guest');
+    passResponse.headers.set('x-user-role', token?.role as string | null || 'worker');
 
     const {pattern, params, rule} = extractPathParameters(path, apisRules)
+    
     if(!pattern || !rule || !rule.authOnly){
+        console.log("No matching pattern or rule found, or authOnly is false");
         return passResponse;
     }
     
@@ -67,7 +52,13 @@ export default async function apiMiddleware({path, token}:ApiMiddlewareOptions) 
 
     if(params.company_id){
         if(token.role === "owner"){
-            const cachedCompany = await redis.get(`user:${token.sub}-company:${params.company_id}`);
+            let cachedCompany = null;
+            try {
+                cachedCompany = await redis.get(`user:${token.sub}-company:${params.company_id}`);
+            } catch (error) {
+                console.error("Redis get error:", error);
+                // Continue without cache if Redis fails
+            }
             
             if(!cachedCompany){
                 const {data, error} = await supabase.from("company")
@@ -80,11 +71,19 @@ export default async function apiMiddleware({path, token}:ApiMiddlewareOptions) 
                 }
                 
                 if(!data || data.length === 0){
-                    redis.set(`user:${token.sub}-company:${params.company_id}`, "false");
+                    try {
+                        await redis.set(`user:${token.sub}-company:${params.company_id}`, "false");
+                    } catch (error) {
+                        console.error("Redis set error:", error);
+                    }
                     return NextResponse.json({error: "Access denied: you are not the owner of this company"}, {status: 403});
                 }
 
-                redis.set(`user:${token.sub}-company:${params.company_id}`, "true");
+                try {
+                    await redis.set(`user:${token.sub}-company:${params.company_id}`, "true");
+                } catch (error) {
+                    console.error("Redis set error:", error);
+                }
             }
             else if(cachedCompany === "false"){
                 return NextResponse.json({error: "Access denied: you are not the owner of this company"}, {status: 403});
@@ -105,7 +104,14 @@ export default async function apiMiddleware({path, token}:ApiMiddlewareOptions) 
             return NextResponse.json({error: "Company ID is required"}, {status: 400});
         }
 
-        const cachedPermissions = await redis.get(`user:${token.sub}-permissions:${params.company_id}`)
+        let cachedPermissions = null;
+        try {
+            cachedPermissions = await redis.get(`user:${token.sub}-permissions:${params.company_id}`);
+        } catch (error) {
+            console.error("Redis get error:", error);
+            // Continue without cache if Redis fails
+        }
+        
         let allPermissions: string[] = [];
         if(!cachedPermissions){
             const localDb = await getServerDBfromCompanyId(params.company_id);
@@ -124,7 +130,11 @@ export default async function apiMiddleware({path, token}:ApiMiddlewareOptions) 
             }
 
             allPermissions = data?.flatMap((group: any) => group.groups.permissions) || [];
-            redis.set(`user:${token.sub}-permissions:${params.company_id}`, allPermissions);
+            try {
+                await redis.set(`user:${token.sub}-permissions:${params.company_id}`, allPermissions);
+            } catch (error) {
+                console.error("Redis set error:", error);
+            }
         }
         else {
             allPermissions = cachedPermissions as string[];

@@ -20,19 +20,6 @@ export default function checkCvProvided({path, token, request}:EmailVerification
         const isWorkerCompanyDashboard = path === `/dashboard/${workerCompanyId}` || 
                                         path.startsWith(`/dashboard/${workerCompanyId}/`) || path.startsWith("/update-email")
 
-        if(!isHome && !provide_cv_path && !isWorkerCompanyDashboard){
-            if(!cv_informations){
-                return NextResponse.redirect(new URL('/provide_cv', request.url));
-            }
-            else{
-                return NextResponse.redirect(new URL(`/dashboard/${workerCompanyId}`, request.url));
-            }
-        }
-        
-        if(isWorkerCompanyDashboard && !cv_informations){
-            return NextResponse.redirect(new URL('/provide_cv', request.url));
-        }
-
         if(cv_informations && provide_cv_path){
             return NextResponse.redirect(new URL(`/dashboard/${workerCompanyId}`, request.url));
         }

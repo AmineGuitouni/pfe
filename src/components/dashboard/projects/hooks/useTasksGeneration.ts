@@ -54,10 +54,15 @@ export default function useTasksGeneration({
                         setError(result.error);
                         break;
                     } else {
-                        const sortedData = sortTasks(result.data)
+                        const normalizedTasks = result.data.map((task: any) => ({
+                          ...task,
+                          difficultyLevel: task.difficultyLevel ?? task.difficulty ?? 1
+                        }));
+                        const sortedData = sortTasks(normalizedTasks)
                         setTasks(sortedData);
                         console.log("caching tasks");
                         setCachedTasks(sortedData);
+                        setIsLoading(false);
                         return;
                     }
                 } catch {

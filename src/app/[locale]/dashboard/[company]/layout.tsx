@@ -17,15 +17,15 @@ export default async function CompanyLayout({
 
     return (
       <main
-      className='bg-dark_blue relative flex w-full max-w-full overflow-hidden'
+      className='bg-dark_blue relative flex w-full h-screen max-w-full overflow-hidden'
     >
       <CompanyProvider company_id={company}>
       <SideBarProvider>
       <CompanySideBar companyId={company} session={session}/>
-      <div className="flex flex-col w-full min-w-0">
+      <div className="flex flex-col w-full h-full min-w-0">
         <div className="w-[700px] h-[700px] fixed left-[40%] translate-y-[20%] blur-3xl bg-light_blue-500/5 rounded-full"></div>
         <Header session={session}/>
-        <div className="w-full min-h-[calc(100vh-64px)] relative overflow-hidden">
+        <div className="w-full h-[calc(100%-64px)] relative overflow-hidden">
             {children}
         </div>
       </div>

@@ -53,16 +53,14 @@ export default function TaskContainer({ column, project_id, dragHandleProps, isD
         <Droppable type="task" droppableId={column.id}>
             {(provided) => (
                 <div
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
                     className={cn(
-                        "w-[300px] min-w-[300px] max-w-[300px] h-fit flex flex-col bg-white/5 border-white/20 border-1 rounded-md p-3 transition-all ease-linear flex-shrink-0",
+                        "w-[300px] min-w-[300px] max-w-[300px] max-h-[calc(100vh-180px)] flex flex-col bg-white/5 border-white/20 border-1 rounded-md p-3 transition-all ease-linear flex-shrink-0",
                         isDeleted && "animate-pulse",
                         isDragging && "transform rotate-2 shadow-lg opacity-80"
                     )}
                 >
                     <div
-                        className="w-full flex justify-between cursor-grab active:cursor-grabbing hover:bg-white/10 rounded-md p-1 -m-1 transition-colors"
+                        className="w-full flex justify-between cursor-grab active:cursor-grabbing hover:bg-white/10 rounded-md p-1 -m-1 transition-colors flex-shrink-0"
                         {...dragHandleProps}
                     >
                         <div className="flex flex-grow items-baseline mb-3 ">
@@ -80,7 +78,11 @@ export default function TaskContainer({ column, project_id, dragHandleProps, isD
                         <ColoneSettings deleteColumn={handleDelete} column_id={column.id}/>
                             
                     </div>
-                    <div className={"w-full flex flex-col gap-2  transition-all ease-linear min-w-2"}>
+                    <div 
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                        className="w-full flex flex-col gap-2 transition-all ease-linear min-w-2 overflow-y-auto scrollbar-custom flex-1"
+                    >
                         {column.tasks &&
                             myTasks.map((task, index) => (
                                 <Draggable key={task.id} draggableId={task.id} index={index}>
@@ -101,7 +103,7 @@ export default function TaskContainer({ column, project_id, dragHandleProps, isD
                             ))}
                         {provided.placeholder}
                     </div>
-                    <p className="text-white/50 text-xs font-normal mt-[15px]">Task status : <span className={getColorByStatus(column.tasksStatus)}>{column.tasksStatus}</span></p>
+                    <p className="text-white/50 text-xs font-normal mt-[15px] flex-shrink-0">Task status : <span className={getColorByStatus(column.tasksStatus)}>{column.tasksStatus}</span></p>
                 </div>
             )}
         </Droppable>

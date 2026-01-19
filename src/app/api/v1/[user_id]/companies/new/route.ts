@@ -30,9 +30,16 @@ export async function POST(req:Request, {params:{user_id}}: {params:Params}) {
 
         // 1. Upload logo if present
         if (logoFile) {
-            const filePath = `logos/${user_id}-${Date.now()}-${logoFile.name}`; // Unique path
+            const bucketName = process.env.SUPABASE_PUBLIC_BUCKET || 'public-bucket';
+            // Sanitize filename: remove special characters, replace spaces with underscores
+            const sanitizedName = logoFile.name
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '') // Remove accents
+                .replace(/[^a-zA-Z0-9._-]/g, '_') // Replace special chars with underscore
+                .replace(/\s+/g, '_'); // Replace spaces with underscores
+            const filePath = `logos/${user_id}-${Date.now()}-${sanitizedName}`; // Unique path
             const { error: uploadError } = await supabase.storage
-                .from('logos') // Specify the bucket name
+                .from(bucketName) // Specify the bucket name from env
                 .upload(filePath, logoFile);
 
             if (uploadError) {
@@ -41,7 +48,7 @@ export async function POST(req:Request, {params:{user_id}}: {params:Params}) {
             }
 
             // Get public URL
-            const { data: urlData } = supabase.storage.from('logos').getPublicUrl(filePath);
+            const { data: urlData } = supabase.storage.from(bucketName).getPublicUrl(filePath);
             logoUrl = urlData?.publicUrl || null;
         }
 

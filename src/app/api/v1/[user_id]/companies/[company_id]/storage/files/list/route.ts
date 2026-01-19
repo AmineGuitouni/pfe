@@ -39,21 +39,18 @@ export async function GET(req: Request, { params: { company_id, user_id } }: { p
         const searchQuery = searchParams.get("query");
         const userRole = req.headers.get("X-user-role");
 
-        // --- Search Query Handling (Remains the same, isShared might need adding in the RPC function itself) ---
+        // --- Search Query Handling (Semantic search based on content) ---
         if(searchQuery){
             const queryEmbedding = await getQueryEmbedddings(searchQuery);
             if(!queryEmbedding){
                 return NextResponse.json({ error: "Failed to get query embeddings" }, { status: 500 });
             }
 
-            // NOTE: The search_documents_content RPC function would also need modification
-            // to return an 'isShared' equivalent based on its internal logic if consistency is needed during search.
-            // This current change only affects the direct listing.
             const {data, error} = await supabase.rpc("search_documents_content",{
                 query_embedding: queryEmbedding,
                 user_id: userRole === "owner" ? null : user_id,
                 match_threshold: 0.5,
-                match_count: 100
+                match_count: 100,
             })
 
             if(error){
@@ -61,11 +58,9 @@ export async function GET(req: Request, { params: { company_id, user_id } }: { p
                 return NextResponse.json({ error: "Failed to fetch files with search query: " + searchQuery }, { status: 500 });
             }
 
-            // Assuming RPC returns raw data, add isShared: false for now for search results
-            // A more robust solution involves modifying the RPC function.
-            const filesData: FileItem[] = (data || []).map((file: any) => ({ // Added : any type annotation
+            const filesData: FileItem[] = (data || []).map((file: any) => ({
                 ...file,
-                isShared: userRole !== 'owner' && file.owner_id !== user_id // Basic check, might be inaccurate if RPC logic differs
+                isShared: userRole !== 'owner' && file.owner_id !== user_id
             }));
 
             console.log({

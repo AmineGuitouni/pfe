@@ -40,6 +40,22 @@ export async function POST(req: Request, {params: {company_id, project_id}}: {pa
             return NextResponse.json({error: error.message}, {status: 500})
         }
 
+        // Add tasks to task history table with "todo" status
+        const taskHistoryRecords = flatendLinkls.map((link) => ({
+            task_id: link.task_id,
+            status: "todo"
+        }));
+
+        const {error: historyError} = await supabase
+        .from("project_task_history")
+        .insert(taskHistoryRecords)
+
+        if(historyError){
+            console.error("Failed to insert task history:", historyError);
+            // Don't fail the entire request if history insertion fails
+            console.warn("Failed to insert task history, but task assignment was successful");
+        }
+
         return NextResponse.json({data: true}, {status: 200})
     }
     catch(error){

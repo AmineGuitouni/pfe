@@ -16,7 +16,7 @@ export async function GET(req: Request) {
         const link = `${url.origin}/provide_cv`
 
         const {error: mailError} = await resend.emails.send({
-            from: "noReply@guitouni-studio.online",
+            from: "noReply@guitouni-amine.me",
             to: [email],
             subject: "Upload cv reminder",
             html: CVUploadReminderTemplate(link),

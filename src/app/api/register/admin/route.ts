@@ -151,7 +151,7 @@ export async function POST(req: Request) {
         // Send verification email
         try {
             await resend.emails.send({
-                from: 'noReply@guitouni-studio.online',
+                from: 'noReply@guitouni-amine.me',
                 to: [email.trim().toLowerCase()],
                 subject: 'Verify Your Email Address',
                 html: VerificationEmailTemplate(verificationUrl),
@@ -200,7 +200,7 @@ export async function GET(req: Request) {
         // Send verification email
         try {
             await resend.emails.send({
-                from: 'noReply@guitouni-studio.online',
+                from: 'noReply@guitouni-amine.me',
                 to: [email],
                 subject: 'Verify Your Email Address',
                 html: VerificationEmailTemplate(verificationUrl),

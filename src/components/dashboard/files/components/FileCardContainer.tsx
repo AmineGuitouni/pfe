@@ -29,7 +29,7 @@ const FileCardContainer: React.FC<FileCardContainerProps> = ({ files, folders, i
 
   if(isLoading){
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
         {
           Array.from({ length: 2 }).map((_, index) => <FolderSkeleton key={index} index={index} /> )
         }
@@ -52,7 +52,7 @@ const FileCardContainer: React.FC<FileCardContainerProps> = ({ files, folders, i
     <>
       {/* Removed Toggle Button */}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
         {
           folders.map((item, index) => ( // Use folders prop
           <FolderComponent key={item.id} folder={item} index={index}/>

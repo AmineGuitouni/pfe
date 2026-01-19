@@ -17,7 +17,7 @@ interface useUsersTaskLinkProps {
 export default function useUsersTaskLink({company_id, project_id, setUnLinkedTasks, isTaskLoaded, tasksId}: useUsersTaskLinkProps){
     const [usersList, setUsersList] = useState<User[]>([]);
     const [taskUserLinks, setTaskUserLinks] = useState<taskUserLink>({});
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
     const {data:session} = useSession();
 
@@ -154,10 +154,6 @@ export default function useUsersTaskLink({company_id, project_id, setUnLinkedTas
             setLoading(false);
         }
     },[session?.user.id, isTaskLoaded, company_id, project_id, getUsersDetails, setUnLinkedTasks])
-
-    useEffect(()=>{
-        getAiTaskLinksFirstLoad()
-    },[getAiTaskLinksFirstLoad])
 
     const addUsers = useCallback((newUsers: User[])=>{
         setUsersList(prev=>(

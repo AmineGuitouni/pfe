@@ -212,7 +212,7 @@ export async function SaveMessage(
         const audioResult = await saveBase64Audio({
             base64Data: base64AudioData,
             supabase,
-            bucketName: 'chat',
+            bucketName: process.env.SUPABASE_PRIVATE_BUCKET || 'private-bucket',
             folderName: session_id,
             fileName: `audio_${crypto.randomUUID()}.${format}`
         });

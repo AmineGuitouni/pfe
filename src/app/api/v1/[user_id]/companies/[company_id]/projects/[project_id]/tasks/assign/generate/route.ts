@@ -1,7 +1,7 @@
 export const fetchCache = "force-no-store"
 
 import { AssignmentData } from "@/components/dashboard/projects/types";
-import { openai } from "@/lib/ai/openai";
+import { openai, AiModelName, providerOrder } from "@/lib/ai/openai";
 import { assignUsersToTasksPrompt } from "@/lib/ai/prompts/cv_prompt";
 import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase";
 import { NextResponse } from "next/server";
@@ -44,7 +44,7 @@ export async function GET(req: Request, {params: {company_id, project_id}}: {par
         }
 
         const response = await openai.chat.completions.create({
-            model: "gemini-2.0-flash",
+            model: AiModelName,
             messages:[
                 {
                     role: "user",
@@ -55,7 +55,8 @@ export async function GET(req: Request, {params: {company_id, project_id}}: {par
                         }
                     ]
                 }
-            ]
+            ],
+            ...(providerOrder && { provider: { order: providerOrder } }),
         })
 
         return NextResponse.json({

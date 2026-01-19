@@ -1,5 +1,6 @@
 "use client"
 import { SessionProvider } from "next-auth/react"
+import CvGateKeeper from "@/components/provide_cv/CvGateKeeper";
 
 export default function AppSession({
     children,
@@ -8,6 +9,7 @@ export default function AppSession({
 
     return(
         <SessionProvider session={session}>
+            <CvGateKeeper />
             {children}
         </SessionProvider>
     )

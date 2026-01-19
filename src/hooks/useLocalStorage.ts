@@ -3,6 +3,11 @@ import { useCallback, useState } from 'react';
 function useLocalStorage<T>(key: string, initialValue: T) {
   // Initialize state from localStorage or fallback to initialValue
   const [storedValue, setStoredValue] = useState<T>(() => {
+    // Check if we're on the client side
+    if (typeof window === 'undefined') {
+      return initialValue;
+    }
+    
     try {
       const item = window.localStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
@@ -18,7 +23,9 @@ function useLocalStorage<T>(key: string, initialValue: T) {
       // Use a function update to avoid needing storedValue as a dependency
       setStoredValue((currentStoredValue) => {
         const valueToStore = value instanceof Function ? value(currentStoredValue) : value;
-        window.localStorage.setItem(key, JSON.stringify(valueToStore));
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(key, JSON.stringify(valueToStore));
+        }
         return valueToStore;
       });
     } catch (error) {
@@ -29,7 +36,9 @@ function useLocalStorage<T>(key: string, initialValue: T) {
   // Also make removeValue a callback with proper dependency
   const removeValue = useCallback(() => {
     try {
-      window.localStorage.removeItem(key);
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem(key);
+      }
       setStoredValue(initialValue);
     } catch (error) {
       console.log(error);

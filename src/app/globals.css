@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  /* Prevent full-page scrolling on html and body */
+  html, body {
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+  }
+}
+
 @layer utilities {
   .shaded-edges{
     mask: linear-gradient(90deg,transparent,white 20%,white 80%,transparent);

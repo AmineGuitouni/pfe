@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState, useRef, ChangeEvent, DragEvent, FormEvent } from 'react';
 import { toast } from 'react-toastify';
+import useLocalStorage from '@/hooks/useLocalStorage';
 
 export default function ProvideCvForm() {
     const [file, setFile] = useState<File | null>(null);
@@ -15,6 +16,19 @@ export default function ProvideCvForm() {
     const [loading, setLoading] = useState<boolean>(false);
     const router = useRouter();
     const {data: session , update} = useSession();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [skipToken, setSkipToken] = useLocalStorage("skip_cv_reminder", null);
+
+    const handleSkip = () => {
+        if (session?.user?.company_id) {
+            setSkipToken({
+                expiry: Date.now() + 24 * 60 * 60 * 1000 // 24 hours
+            });
+            router.push(`/dashboard/${session.user.company_id}`);
+        } else {
+            router.push('/');
+        }
+    };
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0];
@@ -257,17 +271,27 @@ export default function ProvideCvForm() {
                 </div>
             </div>
             
-            <Button 
-                type="submit" 
-                isDisabled={!file || isSubmitting || loading}
-                isLoading={loading}
-                size="md"
-                radius="sm"
-                className="bg-light_blue-500 text-dark_blue text-medium font-semibold w-full flex-shrink-0"
-                disabled={!file || isSubmitting}
-            >
-                {isSubmitting ? 'Processing...' : 'Continue'}
-            </Button>
+            <div className="flex w-full gap-4">
+                <Button 
+                    type="button" 
+                    variant="bordered"
+                    onPress={handleSkip}
+                    disabled={isSubmitting || loading}
+                    className="flex-1 text-white border-white/40 hover:bg-white/10"
+                >
+                    Remind me later
+                </Button>
+                <Button 
+                    type="submit" 
+                    isDisabled={!file || isSubmitting || loading}
+                    isLoading={loading}
+                    size="md"
+                    radius="sm"
+                    className="flex-1 bg-light_blue-500 text-dark_blue text-medium font-semibold"
+                >
+                    {isSubmitting ? 'Processing...' : 'Continue'}
+                </Button>
+            </div>
         </form>
     )
 }

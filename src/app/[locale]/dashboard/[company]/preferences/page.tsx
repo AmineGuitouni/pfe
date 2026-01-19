@@ -4,7 +4,7 @@ import ProfileInformation from "@/components/dashboard/preferences/profileInform
 
 export default function PreferencesPage() {
     return (
-        <div className="w-full">
+        <div className="w-full h-full overflow-y-auto scrollbar-custom">
             <div className="mx-auto w-full max-w-[1200px] py-6 px-4 md:px-6 lg:px-14 xl:px-24 2xl:px-28 ">
                 <h1 className="text-2xl text-white">User Preferences</h1>
                 <p className="text-white/60 text-sm mb-6">Manage your profile, account settings, and preferences for your DigiGrowing experience.</p>

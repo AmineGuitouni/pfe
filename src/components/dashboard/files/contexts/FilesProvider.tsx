@@ -15,6 +15,7 @@ export interface FilesContextType {
   isLoadingFiles: boolean; // Individual loading state
   error: string | null;
   searchTerm: string;
+  searchMode: 'name' | 'semantic';
   company_id: string;
   currentFolder: { id: string; name: string } | null;
 
@@ -22,6 +23,7 @@ export interface FilesContextType {
   setFiles: React.Dispatch<React.SetStateAction<FileItem[]>>;
   setFolders: React.Dispatch<React.SetStateAction<FolderItem[]>>;
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
+  setSearchMode: React.Dispatch<React.SetStateAction<'name' | 'semantic'>>;
 
   // Folder Actions
   addFolder: ({ folderName, folderColor, parentFolderId }: CreateFolderRequestBody) => Promise<void>;
@@ -57,6 +59,7 @@ export const FilesProvider: React.FC<FilesProviderProps> = ({ children, company_
     refetchFolders, refetchFiles
   } = useFiles({ company_id });
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchMode, setSearchMode] = useState<'name' | 'semantic'>('name');
   const searchParams = useSearchParams();
 
   const currentFolder = useMemo(()=>{
@@ -80,11 +83,13 @@ export const FilesProvider: React.FC<FilesProviderProps> = ({ children, company_
     isLoadingFiles,   // Added
     error,
     searchTerm,
+    searchMode,
     company_id,
     currentFolder,
 
     // Setters
     setSearchTerm,
+    setSearchMode,
     setFolders,
     setFiles,
 
@@ -106,8 +111,8 @@ export const FilesProvider: React.FC<FilesProviderProps> = ({ children, company_
     refetchFiles,   // Added
 
   }), [
-    files, folders, isLoading, isLoadingFolders, isLoadingFiles, error, searchTerm, company_id, currentFolder, // State dependencies
-    setSearchTerm, setFolders, setFiles, // Setter dependencies
+    files, folders, isLoading, isLoadingFolders, isLoadingFiles, error, searchTerm, searchMode, company_id, currentFolder, // State dependencies
+    setSearchTerm, setSearchMode, setFolders, setFiles, // Setter dependencies
     addFolder, deleteFolder, editFolder, // Folder action dependencies
     addFile, deleteFile, editFile, getFileDownloadLink, getFileAccessList, editFileAccess, // Added editFileAccess
     refetchFolders, refetchFiles // Refetch action dependencies

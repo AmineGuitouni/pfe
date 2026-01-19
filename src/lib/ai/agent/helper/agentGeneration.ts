@@ -1,5 +1,5 @@
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
-import { agentClient, agentModelName } from "../../openai";
+import { openai, AiModelName, providerOrder } from "../../openai";
 
 interface AgentResponseGenerationParams {
     model?: string;
@@ -8,17 +8,18 @@ interface AgentResponseGenerationParams {
 }
 
 export async function agentResponseGeneration({
-    model = agentModelName,
+    model = AiModelName,
     messages,
     temperature = 0.0,
 }: AgentResponseGenerationParams) {
     try {
         // Make the API call without streaming
-        const response = await agentClient.chat.completions.create({
+        const response = await openai.chat.completions.create({
             messages: messages,
             model: model,
             temperature: temperature,
             stream: false,
+            ...(providerOrder && { provider: { order: providerOrder } }),
         });
 
         const fullContent = response.choices[0]?.message?.content || '';

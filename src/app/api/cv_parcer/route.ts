@@ -4,8 +4,60 @@ import { prompt } from '@/lib/ai/prompts/cv_prompt';
 import { getServerDBfromCompanyId } from '@/lib/database/externalServerSupabase';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/authOptions';
-import { openai } from '@/lib/ai/openai';
+import { openai, providerOrder } from '@/lib/ai/openai';
 
+// Models to try in order of preference (fallback chain)
+const MODELS = [
+  'google/gemini-2.0-flash-exp:free',
+  'meta-llama/llama-3.3-8b-instruct:free',
+  'mistralai/mistral-7b-instruct:free',
+];
+
+// Helper function to call AI with retry and fallback
+async function callAIWithFallback(cvPrompt: string, maxRetries = 2) {
+  let lastError: any = null;
+  
+  for (const model of MODELS) {
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        console.log(`Trying model: ${model}, attempt: ${attempt + 1}`);
+        
+        const completion = await openai.chat.completions.create({
+          model,
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert CV analyzer and talent matcher. Extract structured data from CVs and identify suitable task types. Your response must be ONLY a valid JSON object without any markdown formatting, code blocks, or explanatory text.'
+            },
+            {
+              role: 'user',
+              content: cvPrompt,
+            },
+          ],
+          temperature: 0.2,
+          ...(providerOrder && { provider: { order: providerOrder } }),
+        });
+        
+        // Check if we got a valid response
+        if (completion?.choices?.[0]?.message?.content) {
+          return { completion, model };
+        }
+        
+        console.warn(`Empty response from ${model}, attempt ${attempt + 1}`);
+      } catch (error: any) {
+        lastError = error;
+        console.error(`Error with ${model}, attempt ${attempt + 1}:`, error.message || error);
+        
+        // If it's a rate limit error (429), wait before retry
+        if (error?.status === 429) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
+    }
+  }
+  
+  throw lastError || new Error('All AI models failed');
+}
 
 export async function POST(request: Request) {
   try {
@@ -34,29 +86,9 @@ export async function POST(request: Request) {
     const cvPrompt = prompt(cvText);
     
     try {
-      const completion = await openai.chat.completions.create({
-        model: 'gemini-2.0-flash',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an expert CV analyzer and talent matcher. Extract structured data from CVs and identify suitable task types. Your response must be ONLY a valid JSON object without any markdown formatting, code blocks, or explanatory text.'
-          },
-          {
-            role: 'user',
-            content: cvPrompt,
-          },
-        ],
-        response_format: { type: "json_object" },
-        temperature: 0.2,
-      });
+      const { completion, model } = await callAIWithFallback(cvPrompt);
+      console.log(`Successfully used model: ${model}`);
 
-      // FIX: Check if completion and choices exist before accessing index 0
-      if (!completion || !completion.choices || completion.choices.length === 0) {
-        console.error('Empty response from AI service', completion);
-        return NextResponse.json({ error: 'Empty response from AI service' }, { status: 502 });
-      }
-
-      // FIX: Check if message exists before accessing content
       const responseContent = completion.choices[0].message?.content;
       if (!responseContent) {
         console.error('No content in AI response');

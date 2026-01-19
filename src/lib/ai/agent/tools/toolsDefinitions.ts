@@ -111,7 +111,7 @@ interface SendEmailParams {
 export async function SendEmail({
     to,
     subject,
-    from = "noreply@guitouni-studio.online",
+    from = "noreply@guitouni-amine.me",
     templateData
 }: SendEmailParams) {
     try {

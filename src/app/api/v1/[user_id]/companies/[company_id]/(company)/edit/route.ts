@@ -46,10 +46,11 @@ export async function PUT(req: Request, {params: {user_id, company_id}}: {params
             // 2. Delete old logo if exists
             if (currentCompany?.logo) {
                 try {
+                    const bucketName = process.env.SUPABASE_PUBLIC_BUCKET || 'public-bucket';
                     const oldUrl = new URL(currentCompany.logo);
                     const oldFilePath = oldUrl.pathname.split('/logos/')[1]; // Extract path after bucket name
                     if (oldFilePath) {
-                        const { error: deleteError } = await supabase.storage.from('logos').remove([oldFilePath]);
+                        const { error: deleteError } = await supabase.storage.from(bucketName).remove([oldFilePath]);
                         if (deleteError) {
                             console.error("Error deleting old logo:", deleteError);
                             // Decide if this should block the update or just log the error
@@ -61,9 +62,10 @@ export async function PUT(req: Request, {params: {user_id, company_id}}: {params
             }
 
             // 3. Upload new logo
+            const bucketName = process.env.SUPABASE_PUBLIC_BUCKET || 'public-bucket';
             const filePath = `logos/${user_id}-${company_id}-${Date.now()}-${logoFile.name}`; // Unique path including company_id
             const { error: uploadError } = await supabase.storage
-                .from('logos')
+                .from(bucketName)
                 .upload(filePath, logoFile);
 
             if (uploadError) {
@@ -72,7 +74,7 @@ export async function PUT(req: Request, {params: {user_id, company_id}}: {params
             }
 
             // 4. Get public URL for the new logo
-            const { data: urlData } = supabase.storage.from('logos').getPublicUrl(filePath);
+            const { data: urlData } = supabase.storage.from(bucketName).getPublicUrl(filePath);
             newLogoUrl = urlData?.publicUrl; // Assign the new URL
         }
 

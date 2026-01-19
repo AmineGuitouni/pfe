@@ -89,7 +89,7 @@ export async function GET(req: Request, {params: {company_id,user_id}}: {params:
 
         // Send invitation email
         const { error: mailError } = await resend.emails.send({
-            from: "noReply@guitouni-studio.online",
+            from: "noReply@guitouni-amine.me",
             to: [email],
             subject: `You're Invited to Join ${companyData.name}`,
             html: AddUserToCompanyTemplate(link, companyData.name),

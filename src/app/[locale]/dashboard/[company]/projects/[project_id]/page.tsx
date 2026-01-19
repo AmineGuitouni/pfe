@@ -151,7 +151,8 @@ export default async function ProjectPage({ params: { locale, company, project_i
     const statCardHoverClasses = "hover:shadow-md hover:bg-white/10";
 
     return (
-        <div className="container mx-auto p-5 text-text-light font-poppins">
+        <div className="w-full h-full overflow-y-auto scrollbar-custom">
+            <div className="container mx-auto p-5 text-text-light font-poppins">
             <header className="flex flex-col sm:flex-row justify-between items-center mb-8 pb-5 border-b border-light_blue-500/20">
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-light_blue to-light_blue-500 text-transparent bg-clip-text mb-4 sm:mb-0">
                     Project Dashboard: {projectData.name}
@@ -286,6 +287,7 @@ export default async function ProjectPage({ params: { locale, company, project_i
                     )}
                 </div>
             </div>
+        </div>
         </div>
     );
 }

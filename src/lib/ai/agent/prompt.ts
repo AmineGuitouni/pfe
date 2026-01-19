@@ -214,7 +214,7 @@ Note: the tool will be executed directly after you type the syntax for it. only 
     - company_id: The ID of the company the user belongs to
     - to: Email recipient(s) - can be a single email string or array of email strings
     - subject: Email subject line
-    - from: (Optional) Sender email address (defaults to "noreply@guitouni-studio.online")
+    - from: (Optional) Sender email address (defaults to "noreply@guitouni-amine.me")
     - templateData: Required object containing email template data with the following properties:
         - title: Email title that appears in browser tab (required)
         - heading: Main heading displayed in the email (required)

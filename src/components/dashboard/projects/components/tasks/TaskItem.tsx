@@ -42,12 +42,12 @@ const TaskItem = React.forwardRef<HTMLDivElement, TaskItemProps>(({
         className={`p-4 border-l-4 border-1 border-white/20 rounded-lg bg-white/5 hover:bg-white/10 cursor-pointer transition-colors duration-200 border-gray-700 ${
           isHighlighted ? 'ring-1 ring-light_blue' : ''
         }`}
-        style={{ borderLeftColor: borderColors[task.difficultyLevel - 1] }}
+        style={{ borderLeftColor: borderColors[(task.difficultyLevel || 1) - 1] }}
       >
         <div className="flex items-center justify-between">
           <h3
             className="text-lg font-semibold"
-            style={{ color: borderColors[task.difficultyLevel - 1] }}
+            style={{ color: borderColors[(task.difficultyLevel || 1) - 1] }}
           >{task.title}</h3>
           <div className="flex">
             <button onClick={onOpen} className="w-4 h-4 rounded mr-1 text-gray-400 hover:text-light_blue">

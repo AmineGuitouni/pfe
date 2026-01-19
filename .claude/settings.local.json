@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npx supabase:*)",
+      "Bash(node scripts/pull-schemas:*)",
+      "Bash(timeout:*)",
+      "Bash(dir:*)",
+      "Bash(psql:*)",
+      "Bash(docker logs:*)"
+    ]
+  }
+}

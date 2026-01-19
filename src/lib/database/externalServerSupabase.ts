@@ -16,13 +16,13 @@ export async function getServerDBfromCompanyId( companyId: string , user_id?:str
     const URL = data.database_id ? data.database.connection_config.NEXT_PUBLIC_SUPABASE_URL :
     process.env.NEXT_PUBLIC_SHARED_SUPABASE_URL
 
-    const KEY = data.database_id ? data.database.connection_config.SUPABASE_KEY :
-    process.env.SHARED_SUPABASE_KEY
+    const KEY = data.database_id ? (data.database.connection_config.SUPABASE_SERVICE_ROLE_KEY || data.database.connection_config.SUPABASE_KEY) :
+    process.env.SHARED_SUPABASE_SERVICE_ROLE_KEY
 
     const JWT = data.database_id ? data.database.connection_config.SUPABASE_JWT_SECRET :
     process.env.SHARED_SUPABASE_JWT_SECRET;
 
-    if(user_id){
+    if(user_id && process.env.ENVIREMENT !== "dev"){
 
         const supabaseTokenPayload = {
             sub: user_id,

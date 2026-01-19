@@ -40,7 +40,7 @@ export async function POST(request: Request, { params: { user_id, company_id } }
         const uniqueFileName = `${uuidv4()}.${fileExtension}`;
         // Store files under company_id/user_id/ to keep things organized
         const storagePath = `${company_id}/${user_id}/${uniqueFileName}`;
-        const bucketName = "storage"; // As requested
+        const bucketName = process.env.SUPABASE_PRIVATE_BUCKET || 'private-bucket';
 
         // Upload file to Supabase Storage
         const { data: storageData, error: storageError } = await supabase.storage

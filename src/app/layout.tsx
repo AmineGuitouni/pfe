@@ -30,9 +30,9 @@ export default async function RootLayout({
 }>) {
   
   return (
-    <html suppressHydrationWarning>
+    <html suppressHydrationWarning className="h-full overflow-hidden">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} font-Helvetica antialiased bg-dark_blue min-h-svh w-full max-w-full overflow-x-hidden scrollbar-custom`}
+        className={`${geistSans.variable} ${geistMono.variable} font-Helvetica antialiased bg-dark_blue h-full w-full overflow-hidden`}
       >
         <Providers>
           <AppSession>

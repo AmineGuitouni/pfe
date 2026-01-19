@@ -31,7 +31,7 @@ export async function GET(request: Request, { params: { company_id,user_id } }: 
 
     const { data, error } = await supabase
     .from("comments")
-    .select("*,users(first_name, last_name),comments_likes_dislikes(user_id,like_dislike)")
+    .select("*,users!comments_user_id_fkey(first_name, last_name),comments_likes_dislikes(user_id,like_dislike)")
     .eq("task_id",task_id)
     .order("created_at", { ascending: false });
 

@@ -9,27 +9,37 @@ import AddFolderButton from './components/AddFolderButton';
 import FileCardContainer from './components/FileCardContainer';
 import Search from './components/search';
 import HeaderFolderPath from './components/headerFolderPath';
+import { useSearchParams } from 'next/navigation';
 
 const FilesDashboard: React.FC = () => {
   const [showSharedFiles, setShowSharedFiles] = useState(true); // Keep state
   const { files, folders, isLoading, company_id, searchTerm } = useFilesContext(); // Consume context, added company_id and searchTerm
+  const searchParams = useSearchParams();
+  const isSemanticSearch = searchParams.get("query"); // Check if semantic search is active
 
   // Filter files based on the showSharedFiles state and search term (frontend filtering)
   const displayFiles = useMemo(() => {
       return files.filter(file => {
           const matchesSharedFilter = showSharedFiles || !file.isShared;
-          const matchesSearchTerm = !searchTerm || file.name.toLowerCase().includes(searchTerm.toLowerCase());
+          // Only apply name filtering if NOT using semantic search
+          const matchesSearchTerm = !searchTerm || isSemanticSearch || file.name.toLowerCase().includes(searchTerm.toLowerCase());
           return matchesSharedFilter && matchesSearchTerm;
       });
-  }, [files, showSharedFiles, searchTerm]);
+  }, [files, showSharedFiles, searchTerm, isSemanticSearch]);
 
   // Filter folders based on search term (frontend filtering)
+  // Hide folders when semantic search is active
   const displayFolders = useMemo(() => {
+      // If semantic search is active, return empty array (hide folders)
+      if (isSemanticSearch) {
+          return [];
+      }
       return folders.filter(folder => {
+          // Only apply name filtering if NOT using semantic search
           const matchesSearchTerm = !searchTerm || folder.name.toLowerCase().includes(searchTerm.toLowerCase());
           return matchesSearchTerm;
       });
-  }, [folders, searchTerm]);
+  }, [folders, searchTerm, isSemanticSearch]);
 
 
 
