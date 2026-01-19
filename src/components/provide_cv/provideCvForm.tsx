@@ -17,7 +17,7 @@ export default function ProvideCvForm() {
     const router = useRouter();
     const {data: session , update} = useSession();
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [skipToken, setSkipToken] = useLocalStorage("skip_cv_reminder", null);
+    const [skipToken, setSkipToken] = useLocalStorage<{ expiry: number } | null>("skip_cv_reminder", null);
 
     const handleSkip = () => {
         if (session?.user?.company_id) {
