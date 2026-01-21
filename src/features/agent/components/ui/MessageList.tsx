@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Bot, Wrench, RotateCcw } from 'lucide-react';
 import { TypingIndicator } from './TypingIndicator';
-import { ToolUseDisplay, ToolCall } from './ToolUseDisplay';
+import { ToolUseDisplay, ToolCall, OpenAIToolCall } from './ToolUseDisplay';
 import { ToolResultDisplay } from './ToolResultDisplay';
 import { AudioMessage } from './AudioMessage';
 import MarkdownRenderer from '../../../dashboard/command-center/component/MarkdownRenderer';
@@ -24,8 +24,32 @@ interface ParsedMessage {
   toolCall?: ToolCall;
   textAfter: string;
   rawText: string;
+  toolCalls?: OpenAIToolCall[]; // New: array of tool calls from OpenAI format
 }
 
+/**
+ * Parse tool_calls from message (new OpenAI format)
+ */
+const parseToolCallsFromMessage = (message: SessionMessage): OpenAIToolCall[] | undefined => {
+  if (!message.tool_calls) return undefined;
+  
+  // Handle string (from database JSON) or object
+  if (typeof message.tool_calls === 'string') {
+    try {
+      return JSON.parse(message.tool_calls);
+    } catch (e) {
+      console.error('Failed to parse tool_calls JSON:', e);
+      return undefined;
+    }
+  }
+  
+  return message.tool_calls as OpenAIToolCall[];
+};
+
+/**
+ * Legacy parser for ```tool_use``` blocks in message content
+ * @deprecated This is kept for backwards compatibility with old messages
+ */
 const parseMessageWithToolUse = (text: string): ParsedMessage => {
   const toolUseRegex = /```tool_use\s*([\s\S]*?)\s*```/;
   const match = text.match(toolUseRegex);
@@ -148,20 +172,50 @@ const MessageItem: React.FC<MessageItemProps> = ({
   // Memoize parsing results
   const parsedAiContent = useMemo(() => {
     if (isAi) {
+      // First check for new OpenAI tool_calls format
+      const toolCalls = parseToolCallsFromMessage(message);
+      if (toolCalls && toolCalls.length > 0) {
+        return { 
+          textBefore: message.content || '', 
+          toolCall: undefined, 
+          textAfter: '', 
+          rawText: message.content || '',
+          toolCalls 
+        };
+      }
+      // Fall back to legacy ```tool_use``` parsing for old messages
       return parseMessageWithToolUse(message.content);
     }
-    return { textBefore: "", toolCall: undefined, textAfter: '', rawText: "" };
-  }, [message.content, isAi]);
+    return { textBefore: "", toolCall: undefined, textAfter: '', rawText: "", toolCalls: undefined };
+  }, [message.content, message.tool_calls, isAi]);
 
   const parsedToolResultContent = useMemo(() => {
     if (isTool) {
+      // For new format, tool results are stored as JSON in content
+      // Check if it's already a tool result object (new format)
+      if (message.tool_call_id) {
+        try {
+          const result = typeof message.content === 'string' ? JSON.parse(message.content) : message.content;
+          return {
+            toolName: message.tool_name || 'Unknown Tool',
+            output: result.success !== false ? result : undefined,
+            error: result.success === false ? result.error : undefined,
+            rawJsonString: message.content,
+          };
+        } catch (e) {
+          // If parsing fails, fall back to old parser
+        }
+      }
+      // Fall back to legacy ```tool_result``` parsing
       return parseMessageWithToolResult(message.content);
     }
     return undefined;
-  }, [message.content, isTool]);
+  }, [message.content, message.tool_call_id, message.tool_name, isTool]);
 
   const hasActualTextBeforeAi = parsedAiContent.textBefore?.trim().length > 0;
   const hasActualTextAfterAi = parsedAiContent.textAfter?.trim().length > 0;
+  const hasToolCalls = parsedAiContent.toolCalls && parsedAiContent.toolCalls.length > 0;
+  const hasLegacyToolUse = message.content?.includes('```tool_use');
 
   // Determine avatar and styling
   const showAvatar = !isUser;
@@ -198,16 +252,28 @@ const MessageItem: React.FC<MessageItemProps> = ({
         />
       ) : (
         <>
-          {/* Render text before tool_use block if it exists and tool_use is parsed */}
-          {parsedAiContent.toolCall && hasActualTextBeforeAi && (
+          {/* Render text content if exists */}
+          {hasActualTextBeforeAi && (
             <MarkdownRenderer
               content={parsedAiContent.textBefore.trim()}
               className="mb-1"
             />
           )}
           
-          {/* Render ToolUseDisplay if a tool_use block is parsed */}
-          {message.content.includes('```tool_use') && (
+          {/* New OpenAI Tool Calls Format */}
+          {hasToolCalls && parsedAiContent.toolCalls?.map((toolCall, index) => (
+            <ToolUseDisplay
+              key={toolCall.id || index}
+              toolCall={toolCall}
+              isLast={isLast}
+              isAutoAcceptEnabled={isAutoAcceptEnabled}
+              onAccept={toolCallAction ? () => toolCallAction('accept') : undefined}
+              onReject={toolCallAction ? () => toolCallAction('reject') : undefined}
+            />
+          ))}
+          
+          {/* Legacy tool_use block format (for backwards compatibility) */}
+          {!hasToolCalls && hasLegacyToolUse && (
             <ToolUseDisplay
               toolCall={parsedAiContent.toolCall}
               isLast={isLast}
@@ -217,7 +283,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
             />
           )}
           
-          {/* Render text after tool_use block if it exists and tool_use is parsed */}
+          {/* Render text after tool_use block (legacy format) */}
           {parsedAiContent.toolCall && hasActualTextAfterAi && (
             <MarkdownRenderer
               content={parsedAiContent.textAfter.trim()}
@@ -225,8 +291,8 @@ const MessageItem: React.FC<MessageItemProps> = ({
             />
           )}
           
-          {/* If no tool_use block was intended, render raw text */}
-          {!message.content.includes('```tool_use') && (
+          {/* Pure text AI message (no tool calls) */}
+          {!hasToolCalls && !hasLegacyToolUse && (
             <MarkdownRenderer
               content={parsedAiContent.rawText}
             />

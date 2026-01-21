@@ -59,27 +59,32 @@ export const useToolCallHandler = () => {
         throw new Error(`Failed to ${action} tool call`);
       }
 
-      const { response: aiResponse, response_id, toolCallMessage, aiAudioResponse } = await response.json();
+      const { response: aiResponse, response_id, toolCallMessage, aiAudioResponse, toolCalls } = await response.json();
 
       // Parse AI response and split tool results into separate messages
-      const parsedMessages = parseAndSplitAiResponse(aiResponse, response_id, sessionId);
+      const parsedMessages = parseAndSplitAiResponse(aiResponse, response_id, sessionId, toolCalls);
 
-      // Create user action message
-      const toolActionMessage:SessionMessage = {
-        id: toolCallMessage.id,
-        session_id: sessionId,
-        sender: 'tool',
-        content: toolCallMessage.content,
-        content_type: 'text',
-        created_at: new Date().toISOString()
+      // Build new messages array
+      const newMessages: SessionMessage[] = [];
+
+      // Add tool result message if present
+      if (toolCallMessage?.id) {
+        const toolActionMessage: SessionMessage = {
+          id: toolCallMessage.id,
+          session_id: sessionId,
+          sender: 'tool',
+          content: toolCallMessage.content,
+          content_type: 'text',
+          created_at: new Date().toISOString()
+        };
+        newMessages.push(toolActionMessage);
       }
 
-      // Add user action and parsed AI response(s)
-      setMessages(prev => [
-        ...prev,
-        toolActionMessage,
-        ...parsedMessages
-      ]);
+      // Add parsed AI response(s)
+      newMessages.push(...parsedMessages);
+
+      // Add new messages to state
+      setMessages(prev => [...prev, ...newMessages]);
 
       // Play AI audio response if voice response is enabled and audio is provided
       if (isVoiceResponseEnabled && aiAudioResponse) {
@@ -128,14 +133,14 @@ export const useToolCallHandler = () => {
         throw new Error('Failed to retry message');
       }
 
-      const { response: aiResponse, response_id, error, aiAudioResponse } = await response.json();
+      const { response: aiResponse, response_id, error, aiAudioResponse, toolCalls } = await response.json();
 
       if (error) {
         throw new Error(error);
       }
 
       // Parse AI response and split tool results into separate messages
-      const parsedMessages = parseAndSplitAiResponse(aiResponse, response_id, sessionId);
+      const parsedMessages = parseAndSplitAiResponse(aiResponse, response_id, sessionId, toolCalls);
 
       // Add new AI response(s) to existing messages
       setMessages(prev => [...prev, ...parsedMessages]);

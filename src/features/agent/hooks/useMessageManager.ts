@@ -121,10 +121,10 @@ export const useMessageManager = () => {
         throw new Error('Failed to send message');
       }
 
-      const { response: aiResponse, response_id, user_message_id, aiAudioResponse } = await response.json();
+      const { response: aiResponse, response_id, user_message_id, aiAudioResponse, toolCalls } = await response.json();
 
       // Parse AI response and split tool results into separate messages
-      const parsedMessages = parseAndSplitAiResponse(aiResponse, response_id, currentSessionId);
+      const parsedMessages = parseAndSplitAiResponse(aiResponse, response_id, currentSessionId, toolCalls);
 
       // Update the user message with the actual ID from server and add parsed AI response(s)
       setMessages(prev => {

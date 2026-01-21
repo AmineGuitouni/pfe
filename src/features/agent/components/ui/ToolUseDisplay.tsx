@@ -1,20 +1,74 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Settings, Loader2, Check, X, Zap } from 'lucide-react';
 import { STYLING } from '../../lib/constants';
 
+/**
+ * Legacy ToolCall format (kept for backwards compatibility)
+ */
 export interface ToolCall {
   name: string;
   parameters: Record<string, any>;
 }
 
+/**
+ * OpenAI Tool Call format (from API response)
+ */
+export interface OpenAIToolCall {
+  id: string;
+  type: "function";
+  function: {
+    name: string;
+    arguments: string; // JSON string
+  };
+}
+
 interface ToolUseDisplayProps {
-  toolCall: ToolCall | undefined;
+  toolCall?: ToolCall | OpenAIToolCall | undefined; // Support both old and new formats
   onAccept?: () => void | Promise<void>;
   onReject?: () => void | Promise<void>;
   isLast?: boolean;
   isAutoAcceptEnabled?: boolean;
+}
+
+/**
+ * Check if toolCall is in OpenAI format
+ */
+function isOpenAIToolCall(toolCall: any): toolCall is OpenAIToolCall {
+  return toolCall && 
+    typeof toolCall.id === 'string' && 
+    toolCall.type === 'function' &&
+    typeof toolCall.function === 'object' &&
+    typeof toolCall.function.name === 'string' &&
+    typeof toolCall.function.arguments === 'string';
+}
+
+/**
+ * Normalize tool call to common display format
+ */
+function normalizeToolCall(toolCall: ToolCall | OpenAIToolCall): ToolCall | null {
+  if (!toolCall) return null;
+  
+  if (isOpenAIToolCall(toolCall)) {
+    let parsedArgs: Record<string, any> = {};
+    try {
+      parsedArgs = JSON.parse(toolCall.function.arguments);
+    } catch (e) {
+      console.error('Failed to parse tool call arguments:', e);
+      parsedArgs = { _raw: toolCall.function.arguments };
+    }
+    return {
+      name: toolCall.function.name,
+      parameters: parsedArgs
+    };
+  }
+  
+  // Legacy format
+  return {
+    name: toolCall.name,
+    parameters: toolCall.parameters || {}
+  };
 }
 
 export const ToolUseDisplay: React.FC<ToolUseDisplayProps> = ({
@@ -26,6 +80,12 @@ export const ToolUseDisplay: React.FC<ToolUseDisplayProps> = ({
 }) => {
   const [isAcceptLoading, setIsAcceptLoading] = useState(false);
   const [isRejectLoading, setIsRejectLoading] = useState(false);
+
+  // Normalize tool call to common format
+  const normalizedToolCall = useMemo(() => {
+    if (!toolCall) return null;
+    return normalizeToolCall(toolCall);
+  }, [toolCall]);
 
   const handleAccept = async () => {
     if (!onAccept || isAcceptLoading || isRejectLoading) return;
@@ -68,13 +128,13 @@ export const ToolUseDisplay: React.FC<ToolUseDisplayProps> = ({
     );
   }
 
-  // Validate toolCall structure
+  // Validate normalized toolCall structure
   if (
-    !toolCall ||
-    typeof toolCall.name !== 'string' ||
-    !toolCall.name.trim() ||
-    typeof toolCall.parameters !== 'object' ||
-    toolCall.parameters === null
+    !normalizedToolCall ||
+    typeof normalizedToolCall.name !== 'string' ||
+    !normalizedToolCall.name.trim() ||
+    typeof normalizedToolCall.parameters !== 'object' ||
+    normalizedToolCall.parameters === null
   ) {
     return (
       <div className={`mt-2 mb-1 p-3 border border-orange-400/50 rounded-lg bg-orange-400/20 text-orange-200`}>
@@ -91,15 +151,15 @@ export const ToolUseDisplay: React.FC<ToolUseDisplayProps> = ({
     <div className={`mt-2 mb-1 p-3 border ${STYLING.COLORS.BORDER} rounded-lg ${STYLING.COLORS.AI_MESSAGE} shadow-md`}>
       <div className={`flex items-center gap-2 ${STYLING.COLORS.TEXT_PRIMARY} mb-2`}>
         <Settings size={18} />
-        <h4 className="font-semibold text-sm">Tool Call: {toolCall.name}</h4>
+        <h4 className="font-semibold text-sm">Tool Call: {normalizedToolCall.name}</h4>
       </div>
       
-      {Object.keys(toolCall.parameters).length > 0 ? (
+      {Object.keys(normalizedToolCall.parameters).length > 0 ? (
         <div className="space-y-1.5 text-xs">
           <p className={STYLING.COLORS.TEXT_SECONDARY}>Parameters:</p>
           <ul className="list-disc list-inside pl-2 space-y-1">
-            {Object.keys(toolCall.parameters).map((paramName) => {
-              const paramValue = toolCall.parameters[paramName];
+            {Object.keys(normalizedToolCall.parameters).map((paramName) => {
+              const paramValue = normalizedToolCall.parameters[paramName];
               
               return (
                 <li key={paramName} className={STYLING.COLORS.TEXT_SECONDARY}>
