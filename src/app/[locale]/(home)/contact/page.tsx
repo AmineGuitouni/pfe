@@ -1,7 +1,7 @@
 import React from 'react';
 import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaGlobe } from 'react-icons/fa';
 import { useTranslations } from 'next-intl';
-import ContactForm from '@/components/contact/ContactForm';
+import ContactForm from '@/features/contact/ContactForm';
 
 export default function ContactPage() {
   const t = useTranslations('contact');

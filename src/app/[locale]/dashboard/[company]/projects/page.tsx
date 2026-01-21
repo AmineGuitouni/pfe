@@ -1,4 +1,4 @@
-import ProjectsTable from "@/components/dashboard/projects/components/table/projectsTable";
+import ProjectsTable from "@/features/dashboard/projects/components/table/projectsTable";
 
 export default function DataBasesPage({ params: { company } }: {params: {company: string}}) {
     

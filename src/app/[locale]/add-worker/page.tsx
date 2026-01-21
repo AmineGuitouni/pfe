@@ -1,6 +1,6 @@
 
-import AddUserContent from "@/components/users/addUserform/addUserContent";
-import AddUserLoading from "@/components/users/addUserform/addUserLoading";
+import AddUserContent from "@/features/users/addUserform/addUserContent";
+import AddUserLoading from "@/features/users/addUserform/addUserLoading";
 import { Suspense } from "react";
 
 export default function ResetPasswordPage({ searchParams: { token } }: { searchParams: { token?: string | null } }) {

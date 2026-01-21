@@ -1,6 +1,6 @@
 import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase";
 import { NextRequest, NextResponse } from "next/server";
-import { Column, TaskBoard, toDoProject } from "@/components/to-do/types/type";
+import { Column, TaskBoard, toDoProject } from "@/features/to-do/types/type";
 
 export async function GET(req: NextRequest, {params: {company_id}}: {params: { company_id: string}}) {
   const { searchParams } = new URL(req.url);

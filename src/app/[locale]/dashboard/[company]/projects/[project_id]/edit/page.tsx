@@ -4,11 +4,11 @@ import { Button, Spinner, useDisclosure, Tabs, Tab } from "@heroui/react";
 import { FiEdit, FiPlus, FiSave, FiArrowLeft, FiUsers, FiList } from "react-icons/fi";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import useEditProject from "@/components/dashboard/projects/hooks/useEditProject";
-import EditProjectDetailsModal from "@/components/dashboard/projects/components/modals/EditProjectDetailsModal";
-import AddTaskToProjectModal from "@/components/dashboard/projects/components/modals/AddTaskToProjectModal";
-import EditableTaskItem from "@/components/dashboard/projects/components/edit/EditableTaskItem";
-import WorkerReassignment from "@/components/dashboard/projects/components/edit/WorkerReassignment";
+import useEditProject from "@/features/dashboard/projects/hooks/useEditProject";
+import EditProjectDetailsModal from "@/features/dashboard/projects/components/modals/EditProjectDetailsModal";
+import AddTaskToProjectModal from "@/features/dashboard/projects/components/modals/AddTaskToProjectModal";
+import EditableTaskItem from "@/features/dashboard/projects/components/edit/EditableTaskItem";
+import WorkerReassignment from "@/features/dashboard/projects/components/edit/WorkerReassignment";
 import { useState, useEffect } from "react";
 
 export default function EditProjectPage() {

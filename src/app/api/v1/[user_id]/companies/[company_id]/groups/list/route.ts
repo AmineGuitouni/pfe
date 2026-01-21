@@ -1,6 +1,6 @@
 export const fetchCache = "force-no-store"
 
-import { Group } from '@/components/dashboard/groups/types/groupsTypes'
+import { Group } from '@/features/dashboard/groups/types/groupsTypes'
 import { getServerDBfromCompanyId } from '@/lib/database/externalServerSupabase'
 import { NextResponse } from 'next/server'
 

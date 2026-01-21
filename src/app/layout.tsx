@@ -4,8 +4,8 @@ import "./globals.css";
 import { Providers } from "@/providers/nextUIProvider";
 import AppSession from "@/providers/AppSession";
 import { ToastContainer } from "react-toastify";
-import { MiniAiChat } from "@/components/agent/components";
-import { ChatProvider } from "@/components/agent/contexts/ChatContext";
+import { MiniAiChat } from "@/features/agent/components";
+import { ChatProvider } from "@/features/agent/contexts/ChatContext";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",

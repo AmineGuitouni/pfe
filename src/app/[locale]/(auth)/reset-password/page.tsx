@@ -1,5 +1,5 @@
-import ResetPasswordContent from "@/components/auth/reset-password/resetContent";
-import ForgotPasswordLoading from "@/components/auth/reset-password/verificationLoading";
+import ResetPasswordContent from "@/features/auth/reset-password/resetContent";
+import ForgotPasswordLoading from "@/features/auth/reset-password/verificationLoading";
 import { Suspense } from "react";
 
 export default function ResetPasswordPage({ searchParams: { token } }: { searchParams: { token?: string | null } }) {

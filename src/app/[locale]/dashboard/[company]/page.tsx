@@ -1,5 +1,5 @@
-import CompanyOverview from "@/components/dashboard/company_overview/components/company_overview";
-import OngoingProjectTable from "@/components/dashboard/company_overview/components/onGoingProjects/onGoingProjectTable";
+import CompanyOverview from "@/features/dashboard/company_overview/components/company_overview";
+import OngoingProjectTable from "@/features/dashboard/company_overview/components/onGoingProjects/onGoingProjectTable";
 
 
 export default function CompanyPage({ params: { company} }: {params: {company: string}}) { 

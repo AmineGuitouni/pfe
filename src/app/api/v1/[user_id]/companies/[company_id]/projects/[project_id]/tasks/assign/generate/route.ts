@@ -1,6 +1,6 @@
 export const fetchCache = "force-no-store"
 
-import { AssignmentData } from "@/components/dashboard/projects/types";
+import { AssignmentData } from "@/features/dashboard/projects/types";
 import { openai, AiModelName, providerOrder } from "@/lib/ai/openai";
 import { assignUsersToTasksPrompt } from "@/lib/ai/prompts/cv_prompt";
 import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase";

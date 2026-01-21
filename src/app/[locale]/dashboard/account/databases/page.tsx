@@ -1,4 +1,4 @@
-import DataBases from "@/components/dashboard/databases/dataBases";
+import DataBases from "@/features/dashboard/databases/dataBases";
 
 export default function DataBasesPage() {
     return (

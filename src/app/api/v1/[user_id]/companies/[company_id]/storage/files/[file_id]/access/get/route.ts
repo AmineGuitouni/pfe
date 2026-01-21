@@ -1,6 +1,6 @@
 export const fetchCache = "force-no-store"
 
-import { FileUserAccessItem } from "@/components/dashboard/files/types/filesTypes";
+import { FileUserAccessItem } from "@/features/dashboard/files/types/filesTypes";
 import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase";
 import { NextResponse } from "next/server";
 

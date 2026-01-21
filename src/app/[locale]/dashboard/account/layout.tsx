@@ -1,7 +1,7 @@
-import Header from "@/components/dashboard/header";
-import CompanyProvider from "@/components/dashboard/companies/contexts/useCompanies";
-import SideBar from "@/components/dashboard/sidebar/sideBar";
-import SideBarProvider from "@/components/dashboard/sidebar/contexts/sideBarContext";
+import Header from "@/features/dashboard/header";
+import CompanyProvider from "@/features/dashboard/companies/contexts/useCompanies";
+import SideBar from "@/features/dashboard/sidebar/sideBar";
+import SideBarProvider from "@/features/dashboard/sidebar/contexts/sideBarContext";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/authOptions";
 

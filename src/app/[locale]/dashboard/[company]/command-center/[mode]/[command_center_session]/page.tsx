@@ -1,4 +1,4 @@
-import MessageList from "@/components/dashboard/command-center/component/MessageList";
+import MessageList from "@/features/dashboard/command-center/component/MessageList";
 import { ScrollShadow } from "@heroui/react";
 
 export default function CommandCenterPage() {

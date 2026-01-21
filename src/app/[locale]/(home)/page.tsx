@@ -1,6 +1,6 @@
-import Section1 from "@/components/homePage/section1";
-import Section2 from "@/components/homePage/section2";
-import WhoIsItFor from "@/components/homePage/whoIsItFor"; // Import the new component
+import Section1 from "@/features/homePage/section1";
+import Section2 from "@/features/homePage/section2";
+import WhoIsItFor from "@/features/homePage/whoIsItFor"; // Import the new component
 
 export default async function Home() {
   return (

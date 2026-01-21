@@ -1,4 +1,4 @@
-import { ToolCall } from "@/components/dashboard/command-center/component/toolUseDisplay";
+import { ToolCall } from "@/features/dashboard/command-center/component/toolUseDisplay";
 
 export const parseMessageWithToolUse = (text: string) => {
   const toolUseRegex = /```tool_use\s*([\s\S]*?)\s*```/;

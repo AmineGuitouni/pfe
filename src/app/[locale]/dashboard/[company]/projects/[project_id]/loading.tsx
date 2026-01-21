@@ -1,4 +1,4 @@
-import TaskItemSkeleton from '@/components/dashboard/projects/components/tasks/TaskItemSkeleton';
+import TaskItemSkeleton from '@/features/dashboard/projects/components/tasks/TaskItemSkeleton';
 
 export default function Loading() {
   return (

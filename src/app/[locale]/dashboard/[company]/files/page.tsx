@@ -1,5 +1,5 @@
-import FilesDashboard from '@/components/dashboard/files/FilesDashboard';
-import { FilesProvider } from '@/components/dashboard/files/contexts/FilesProvider'; // Import the provider
+import FilesDashboard from '@/features/dashboard/files/FilesDashboard';
+import { FilesProvider } from '@/features/dashboard/files/contexts/FilesProvider'; // Import the provider
 
 export default function FilesPage({ params }: { params: { company: string } }) {
     return (

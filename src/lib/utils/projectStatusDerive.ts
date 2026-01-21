@@ -1,4 +1,4 @@
-import { ProjectStatusType } from "@/components/dashboard/projects/types";
+import { ProjectStatusType } from "@/features/dashboard/projects/types";
 
 export const deriveProjectStatus = (tasks: {task_status: string}[], deadline: string | null): ProjectStatusType => {
     if (deadline === null) {

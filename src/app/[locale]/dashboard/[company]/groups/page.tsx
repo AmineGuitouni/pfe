@@ -1,6 +1,6 @@
-import GroupCardContainer from "@/components/dashboard/groups/components/groupCardContainer";
-import GroupsDetailsContainer from "@/components/dashboard/groups/components/groupsDetailsContainer";
-import GroupsContextProvider from "@/components/dashboard/groups/contexts/groupsProvider";
+import GroupCardContainer from "@/features/dashboard/groups/components/groupCardContainer";
+import GroupsDetailsContainer from "@/features/dashboard/groups/components/groupsDetailsContainer";
+import GroupsContextProvider from "@/features/dashboard/groups/contexts/groupsProvider";
 
 export default function DataBasesPage({ params: { company } }: {params: {company: string}}) {
     return (

@@ -1,6 +1,6 @@
-import ProjectTaskList from "@/components/dashboard/projects/components/assignement/projectTaskList";
-import UserCardContainer from "@/components/dashboard/projects/components/assignement/userCardContainer";
-import TaskUserAssgnementProvider from "@/components/dashboard/projects/context/taskUserAssgnementContext";
+import ProjectTaskList from "@/features/dashboard/projects/components/assignement/projectTaskList";
+import UserCardContainer from "@/features/dashboard/projects/components/assignement/userCardContainer";
+import TaskUserAssgnementProvider from "@/features/dashboard/projects/context/taskUserAssgnementContext";
 
 interface Params { company: string, project_id: string }
 export default function AssignWorkersPage ({params: {company, project_id}}: {params: Params}) {

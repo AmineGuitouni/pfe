@@ -1,5 +1,5 @@
-import ChangePasswordContent from "@/components/dashboard/preferences/change-password/changePasswordContent";
-import ChangePasswordLoading from "@/components/dashboard/preferences/change-password/changePasswordLoading";
+import ChangePasswordContent from "@/features/dashboard/preferences/change-password/changePasswordContent";
+import ChangePasswordLoading from "@/features/dashboard/preferences/change-password/changePasswordLoading";
 import { Suspense } from "react";
 
 export default function ResetPasswordPage({ searchParams: { token } }: { searchParams: { token?: string | null } }) {

@@ -1,5 +1,5 @@
-import LoginFormAdmin from "@/components/auth/login/loginFormAdmin";
-import LoginFormWorker from "@/components/auth/login/loginFormWorker";
+import LoginFormAdmin from "@/features/auth/login/loginFormAdmin";
+import LoginFormWorker from "@/features/auth/login/loginFormWorker";
 
 export default async function page({ searchParams }: { searchParams: any }) {
     

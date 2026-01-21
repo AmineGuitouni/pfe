@@ -1,6 +1,6 @@
 
-import ResetMailContent from "@/components/dashboard/preferences/change_mail/resetMailContent";
-import ResetMailLoading from "@/components/dashboard/preferences/change_mail/resetMailLoading";
+import ResetMailContent from "@/features/dashboard/preferences/change_mail/resetMailContent";
+import ResetMailLoading from "@/features/dashboard/preferences/change_mail/resetMailLoading";
 import { Suspense } from "react";
 
 export default function ResetPasswordPage({ searchParams: { token } }: { searchParams: { token?: string | null } }) {

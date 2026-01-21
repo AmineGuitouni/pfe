@@ -1,4 +1,4 @@
-import { GeneratedTask } from "@/components/dashboard/projects/types";
+import { GeneratedTask } from "@/features/dashboard/projects/types";
 import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase";
 import { NextResponse } from "next/server";
 

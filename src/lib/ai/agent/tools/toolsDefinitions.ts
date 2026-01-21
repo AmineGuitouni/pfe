@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
-import { GeneratedTask } from "../../../../components/dashboard/projects/types";
+import { GeneratedTask } from "../../../../features/dashboard/projects/types";
 import { serverGet, serverPost, serverPut, serverDelete } from "../../../utils/serverFetch";
 import { resend } from "../../../resend";
 import { GeneralEmailTemplate } from "../../../emailtemplets";

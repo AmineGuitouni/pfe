@@ -4,8 +4,8 @@ import { agentResponseGeneration } from "@/lib/ai/agent/helper/agentGeneration";
 import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase";
 import { NextRequest, NextResponse } from "next/server";
 import { generateAIAudio } from "@/lib/ai/agent/helper/generateAIAudio";
-import { parseCommandToJson } from "@/components/dashboard/command-center/utils";
-import { predefinedCommands } from "@/components/dashboard/command-center/constants/commandsFunctions";
+import { parseCommandToJson } from "@/features/dashboard/command-center/utils";
+import { predefinedCommands } from "@/features/dashboard/command-center/constants/commandsFunctions";
 
 interface Params {
     user_id: string;

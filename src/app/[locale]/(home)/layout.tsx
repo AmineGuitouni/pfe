@@ -1,9 +1,9 @@
 
-import Nav from "@/components/navbar/navbar";
+import Nav from "@/features/navbar/navbar";
 import Footer from "@/components/footer";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/authOptions";
-import Background from "@/components/homePage/background";
+import Background from "@/features/homePage/background";
 
 
 export default async function RootLayout({

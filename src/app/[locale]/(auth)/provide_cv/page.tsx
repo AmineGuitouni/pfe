@@ -1,4 +1,4 @@
-import ProvideCvForm from "@/components/provide_cv/provideCvForm";
+import ProvideCvForm from "@/features/provide_cv/provideCvForm";
 
 export default function ProvideCvPage() {
     return (

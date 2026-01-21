@@ -1,5 +1,5 @@
-import AccountInformation from "@/components/dashboard/preferences/accountInformation";
-import ProfileInformation from "@/components/dashboard/preferences/profileInformation";
+import AccountInformation from "@/features/dashboard/preferences/accountInformation";
+import ProfileInformation from "@/features/dashboard/preferences/profileInformation";
 
 export default function PreferencesPage() {
     return (

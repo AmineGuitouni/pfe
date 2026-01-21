@@ -1,4 +1,4 @@
-import Companies from "@/components/dashboard/companies/companies";
+import Companies from "@/features/dashboard/companies/companies";
 
 
 export default function Page() {

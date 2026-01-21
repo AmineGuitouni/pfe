@@ -1,5 +1,5 @@
 import Footer from "@/components/footer";
-import Background from "@/components/homePage/background";
+import Background from "@/features/homePage/background";
 import Link from "next/link";
 
 export default async function RootLayout({

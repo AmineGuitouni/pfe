@@ -1,4 +1,4 @@
-import { AccessLevel } from "@/components/dashboard/files/types/filesTypes";
+import { AccessLevel } from "@/features/dashboard/files/types/filesTypes";
 import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase";
 import { NextResponse } from "next/server";
 

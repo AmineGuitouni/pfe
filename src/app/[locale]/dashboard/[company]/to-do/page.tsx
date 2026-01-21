@@ -1,5 +1,5 @@
-import ToDoContainer from "@/components/to-do/components/toDoContainer";
-import ColumnsProvider from "@/components/to-do/context/columnsContext";
+import ToDoContainer from "@/features/to-do/components/toDoContainer";
+import ColumnsProvider from "@/features/to-do/context/columnsContext";
 
 export default function ToDoPage({params: {company}}: {params: {company: string}}) {    
     return (

@@ -1,5 +1,5 @@
 import React from 'react';
-import TaskList from '@/components/dashboard/projects/components/tasks/TaskList';
+import TaskList from '@/features/dashboard/projects/components/tasks/TaskList';
 
 export default async function NewProjectPage ({params:{company}, searchParams:{projectName, projectDescription}}:{params:{company: string}, searchParams:{projectName: string, projectDescription: string}}) {
 

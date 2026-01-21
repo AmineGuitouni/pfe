@@ -1,4 +1,4 @@
-import MainAnalyticsComponent from "@/components/dashboard/analytics/components/mainAnalyticsComponent";
+import MainAnalyticsComponent from "@/features/dashboard/analytics/components/mainAnalyticsComponent";
 
 export default function AnalyticsPage({ params: { company} }: {params: {company: string}}) {
     return (

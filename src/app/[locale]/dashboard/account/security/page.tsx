@@ -1,5 +1,5 @@
-import ChangePassword from "@/components/dashboard/preferences/changePassword";
-import DeleteAccountButton from "@/components/dashboard/security/deleteAccountButton";
+import ChangePassword from "@/features/dashboard/preferences/changePassword";
+import DeleteAccountButton from "@/features/dashboard/security/deleteAccountButton";
 import { BiSolidErrorAlt } from "react-icons/bi";
 
 export default function SecurityPage() {

@@ -1,8 +1,8 @@
-import CommandInput from "@/components/dashboard/command-center/component/autoCompleate";
-import HistoryModal from "@/components/dashboard/command-center/component/modals/HistoryModal";
-import SwitchesButtons from "@/components/dashboard/command-center/component/switchesButtons";
-import AutoAcceptToggle from "@/components/dashboard/command-center/component/AutoAcceptToggle";
-import { CommandCenterProvider } from "@/components/dashboard/command-center/context/CommandCenterContext";
+import CommandInput from "@/features/dashboard/command-center/component/autoCompleate";
+import HistoryModal from "@/features/dashboard/command-center/component/modals/HistoryModal";
+import SwitchesButtons from "@/features/dashboard/command-center/component/switchesButtons";
+import AutoAcceptToggle from "@/features/dashboard/command-center/component/AutoAcceptToggle";
+import { CommandCenterProvider } from "@/features/dashboard/command-center/context/CommandCenterContext";
 
 
 interface Params {

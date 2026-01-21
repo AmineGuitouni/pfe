@@ -1,6 +1,6 @@
-import AccountInformation from "@/components/dashboard/preferences/accountInformation";
-import CvEditSection from "@/components/dashboard/preferences/change_cv/components/cvEditSection";
-import ProfileInformation from "@/components/dashboard/preferences/profileInformation";
+import AccountInformation from "@/features/dashboard/preferences/accountInformation";
+import CvEditSection from "@/features/dashboard/preferences/change_cv/components/cvEditSection";
+import ProfileInformation from "@/features/dashboard/preferences/profileInformation";
 
 export default function PreferencesPage() {
     return (

@@ -1,7 +1,7 @@
 export const fetchCache = "force-no-store";
 import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase";
 import { NextResponse } from "next/server";
-import { TaskStatusType } from "@/components/dashboard/projects/types"; 
+import { TaskStatusType } from "@/features/dashboard/projects/types"; 
 
 interface params {
     user_id: string;

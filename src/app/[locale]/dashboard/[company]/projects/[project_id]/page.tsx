@@ -1,5 +1,5 @@
-import TaskItem from '@/components/dashboard/projects/components/assignement/showTaskItem';
-import { Task, ProjectStatusType, User } from '@/components/dashboard/projects/types';
+import TaskItem from '@/features/dashboard/projects/components/assignement/showTaskItem';
+import { Task, ProjectStatusType, User } from '@/features/dashboard/projects/types';
 import { FaCalendarAlt, FaUsers, FaUser } from 'react-icons/fa';
 import { FiEdit } from 'react-icons/fi';
 import { Avatar } from '@heroui/react';
@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth/authOptions';
 import { notFound } from 'next/navigation';
-import ShowDiff from '@/components/dashboard/projects/components/assignement/showDiff';
+import ShowDiff from '@/features/dashboard/projects/components/assignement/showDiff';
 import { serverGet } from '@/lib/utils/serverFetch';
 
 interface Params {

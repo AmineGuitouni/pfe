@@ -1,8 +1,8 @@
 import { GetDatabaseResponse } from "@/app/api/v1/[user_id]/databases/[database_id]/get/route";
-import PerformanceTab from "@/components/dashboard/databases/database-analytics/PerformanceTab";
-import SizePieChart from "@/components/dashboard/databases/database-analytics/SizePieChart";
-import StorageTab from "@/components/dashboard/databases/database-analytics/StorageTab";
-import TablesTab from "@/components/dashboard/databases/database-analytics/TablesTab";
+import PerformanceTab from "@/features/dashboard/databases/database-analytics/PerformanceTab";
+import SizePieChart from "@/features/dashboard/databases/database-analytics/SizePieChart";
+import StorageTab from "@/features/dashboard/databases/database-analytics/StorageTab";
+import TablesTab from "@/features/dashboard/databases/database-analytics/TablesTab";
 import { authOptions } from "@/lib/auth/authOptions";
 import { formatBytes } from "@/lib/utils/formatBytes";
 import { serverGet } from "@/lib/utils/serverFetch";

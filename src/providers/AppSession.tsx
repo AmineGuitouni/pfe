@@ -1,6 +1,6 @@
 "use client"
 import { SessionProvider } from "next-auth/react"
-import CvGateKeeper from "@/components/provide_cv/CvGateKeeper";
+import CvGateKeeper from "@/features/provide_cv/CvGateKeeper";
 
 export default function AppSession({
     children,

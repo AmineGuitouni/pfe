@@ -1,4 +1,4 @@
-import AuditLogsTable from "@/components/dashboard/company_audit_logs/components/auditLogsTable";
+import AuditLogsTable from "@/features/dashboard/company_audit_logs/components/auditLogsTable";
 
 export default function AuditLogsPage({ params :{ company } }: { params: { company: string } }){
     return(

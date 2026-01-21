@@ -1,4 +1,4 @@
-import UsersTable from "@/components/users/usersTable";
+import UsersTable from "@/features/users/usersTable";
 
 export default function UsersPage({ params: { company } }: {params: {company: string}}) {
 

@@ -1,4 +1,4 @@
-import AuditLogsTable from "@/components/dashboard/audit-logs/auditLogsTable";
+import AuditLogsTable from "@/features/dashboard/audit-logs/auditLogsTable";
 
 export default function AuditLogsPage() {
     return (

@@ -1,4 +1,4 @@
-import { Task } from "@/components/dashboard/projects/types";
+import { Task } from "@/features/dashboard/projects/types";
 import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase";
 import { NextResponse } from "next/server";
 

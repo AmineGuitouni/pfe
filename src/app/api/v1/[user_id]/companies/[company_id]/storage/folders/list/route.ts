@@ -1,4 +1,4 @@
-import { FolderItem } from "@/components/dashboard/files/types/filesTypes";
+import { FolderItem } from "@/features/dashboard/files/types/filesTypes";
 import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase";
 import { NextResponse } from "next/server";
 

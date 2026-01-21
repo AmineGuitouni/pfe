@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
-import VerificationLoading from '@/components/verification/verificationLoading';
-import VerificationContent from '@/components/verification/verificationContent';
+import VerificationLoading from '@/features/verification/verificationLoading';
+import VerificationContent from '@/features/verification/verificationContent';
 
 export default function VerifyPage({ 
   searchParams: { token } 
