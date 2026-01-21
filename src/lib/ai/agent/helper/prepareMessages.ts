@@ -72,7 +72,7 @@ export async function prepareAgentMessages({supabase, chat_session, userPrompt, 
         error = resultWithNewCols.error;
     }
 
-    if (error) {
+    if (error || !data) {
         console.error("Error fetching messages:", error);
         console.log("About to throw error: Failed to fetch messages");
         throw new Error("Failed to fetch messages");

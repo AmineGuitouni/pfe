@@ -257,7 +257,7 @@ export const useCommandCenter = () => {
           content: aiResponse || '',
           content_type: 'text',
           created_at: new Date().toISOString(),
-          tool_calls: toolCalls || null
+          ...(toolCalls && { tool_calls: toolCalls })
         });
       }
 
