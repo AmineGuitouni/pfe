@@ -8,6 +8,10 @@ export interface SessionMessage {
   content: string;
   content_type: 'text' | 'audio';
   created_at: string;
+  // New fields for OpenAI tool calling
+  tool_calls?: string | any[]; // JSON string or parsed array of tool calls (for AI messages)
+  tool_call_id?: string; // ID of the tool call this message is responding to (for tool messages)
+  tool_name?: string; // Name of the tool (for tool messages)
 }
 
 export type ChatState = 'icon' | 'hovered' | 'expanded';

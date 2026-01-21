@@ -1,44 +1,9 @@
-interface RawToolUse {
-  name: string;
-  parameters: {
-    [key: string]: any;
-  };
-}
+/**
+ * @deprecated This file is deprecated. Tool calls are now handled via OpenAI's native tool calling feature.
+ * Tool extraction from JSON strings is no longer needed.
+ * See: src/lib/ai/agent/tools/toolSchema.ts for the new parseToolCalls function.
+ */
 
-interface ExtractedToolCall {
-  tool_name: string;
-  parameters: {
-    [key: string]: any;
-  };
-}
+// This file is kept for backwards compatibility but is no longer used.
 
-export function extractToolUse(jsonString: string): ExtractedToolCall | null {
-  const toolUseJsonString = jsonString.trim();
-
-  try {
-    const rawToolUse: RawToolUse = JSON.parse(toolUseJsonString);
-
-    const transformedParameters: { [key: string]: any } = {};
-    if (rawToolUse.parameters) {
-      for (const key in rawToolUse.parameters) {
-        if (Object.prototype.hasOwnProperty.call(rawToolUse.parameters, key)) {
-          if (rawToolUse.parameters[key] && typeof rawToolUse.parameters[key].value !== 'undefined') {
-            transformedParameters[key] = rawToolUse.parameters[key].value;
-          } else {
-            transformedParameters[key] = rawToolUse.parameters[key];
-          }
-        }
-      }
-    }
-
-    const extractedCall: ExtractedToolCall = {
-      tool_name: rawToolUse.name,
-      parameters: transformedParameters,
-    };
-
-    return extractedCall;
-  } catch (error) {
-    console.error('Error parsing tool use JSON:', error);
-    return null;
-  }
-}
+export {};

@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import { SessionMessage } from '../hooks/useCommandCenter';
-import { User, Bot, Wrench, RotateCcw } from 'lucide-react'; // Added Wrench for tool results and RotateCcw for retry
-import ToolUseDisplay, { ToolCall } from './toolUseDisplay';
-import ToolResultDisplay from './toolResultDisplay'; // Import the new component
-import MarkdownRenderer from './MarkdownRenderer'; // Import the new markdown renderer
-import AudioMessage from './AudioMessage'; // Import the audio message component
+import { User, Bot, Wrench, RotateCcw } from 'lucide-react';
+import ToolUseDisplay, { ToolCall, OpenAIToolCall } from './toolUseDisplay';
+import ToolResultDisplay from './toolResultDisplay';
+import MarkdownRenderer from './MarkdownRenderer';
+import AudioMessage from './AudioMessage';
 import { useCommandCenterContext } from '../context/CommandCenterContext';
 
 interface ParsedMessage {
@@ -12,8 +12,13 @@ interface ParsedMessage {
   toolCall?: ToolCall;
   textAfter: string;
   rawText: string;
+  toolCalls?: OpenAIToolCall[]; // New: array of tool calls from OpenAI format
 }
 
+/**
+ * Legacy parser for ```tool_use``` blocks in message content
+ * @deprecated This is kept for backwards compatibility with old messages
+ */
 const parseMessageWithToolUse = (text: string): ParsedMessage => {
   const toolUseRegex = /```tool_use\s*([\s\S]*?)\s*```/;
   const match = text.match(toolUseRegex);
@@ -29,7 +34,7 @@ const parseMessageWithToolUse = (text: string): ParsedMessage => {
         typeof parsedJson !== 'object' ||
         parsedJson === null ||
         typeof parsedJson.name !== 'string' ||
-        typeof parsedJson.parameters !== 'object' || // parameters can be an empty object
+        typeof parsedJson.parameters !== 'object' ||
         parsedJson.parameters === null
       ) {
         console.warn("Parsed tool_use JSON has an unexpected structure:", parsedJson);
@@ -46,14 +51,34 @@ const parseMessageWithToolUse = (text: string): ParsedMessage => {
         "\nJSON string was:", toolCallJsonString,
         "\nOriginal text:", text
       );
-      // On error, return the full text as 'textBefore' to display it, and no toolCall.
-      // ToolUseDisplay will handle toolCall: undefined as a loading/error state.
       return { textBefore: text, toolCall: undefined, textAfter: '', rawText: text };
     }
   }
   
-  const boforIndex = text.indexOf('```tool_use');
-  return { textBefore: text.slice(0, boforIndex), toolCall: undefined, textAfter: '', rawText: text };
+  const beforeIndex = text.indexOf('```tool_use');
+  if (beforeIndex >= 0) {
+    return { textBefore: text.slice(0, beforeIndex), toolCall: undefined, textAfter: '', rawText: text };
+  }
+  return { textBefore: text, toolCall: undefined, textAfter: '', rawText: text };
+};
+
+/**
+ * Parse tool_calls from message (new OpenAI format)
+ */
+const parseToolCallsFromMessage = (message: SessionMessage): OpenAIToolCall[] | undefined => {
+  if (!message.tool_calls) return undefined;
+  
+  // Handle string (from database JSON) or object
+  if (typeof message.tool_calls === 'string') {
+    try {
+      return JSON.parse(message.tool_calls);
+    } catch (e) {
+      console.error('Failed to parse tool_calls JSON:', e);
+      return undefined;
+    }
+  }
+  
+  return message.tool_calls as OpenAIToolCall[];
 };
 
 interface ParsedToolResult {
@@ -134,22 +159,51 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, isLast, showRetryBut
 
   // Memoize parsing results
   const parsedAiContent = useMemo(() => {
-    if (isAi) { // Always parse AI messages in case they contain tool_use or just text
+    if (isAi) {
+      // First check for new OpenAI tool_calls format
+      const toolCalls = parseToolCallsFromMessage(message);
+      if (toolCalls && toolCalls.length > 0) {
+        return { 
+          textBefore: message.content || '', 
+          toolCall: undefined, 
+          textAfter: '', 
+          rawText: message.content || '',
+          toolCalls 
+        };
+      }
+      // Fall back to legacy ```tool_use``` parsing for old messages
       return parseMessageWithToolUse(message.content);
     }
-    // Return a default structure if not AI, ensuring properties exist
-    return { textBefore: "", toolCall: undefined, textAfter: '', rawText: "" };
-  }, [message.content, isAi]);
+    return { textBefore: "", toolCall: undefined, textAfter: '', rawText: "", toolCalls: undefined };
+  }, [message.content, message.tool_calls, isAi]);
 
   const parsedToolResultContent = useMemo(() => {
     if (isTool) {
+      // For new format, tool results are stored as JSON in content
+      // Check if it's already a tool result object (new format)
+      if (message.tool_call_id) {
+        try {
+          const result = typeof message.content === 'string' ? JSON.parse(message.content) : message.content;
+          return {
+            toolName: message.tool_name || 'Unknown Tool',
+            output: result.success !== false ? result : undefined,
+            error: result.success === false ? result.error : undefined,
+            rawJsonString: message.content,
+          };
+        } catch (e) {
+          // If parsing fails, fall back to old parser
+        }
+      }
+      // Fall back to legacy ```tool_result``` parsing
       return parseMessageWithToolResult(message.content);
     }
     return undefined;
-  }, [message.content, isTool]);
+  }, [message.content, message.tool_call_id, message.tool_name, isTool]);
 
   const hasActualTextBeforeAi = parsedAiContent.textBefore?.trim().length > 0;
   const hasActualTextAfterAi = parsedAiContent.textAfter?.trim().length > 0;
+  const hasToolCalls = parsedAiContent.toolCalls && parsedAiContent.toolCalls.length > 0;
+  const hasLegacyToolUse = message.content?.includes('```tool_use');
 
   // Determine avatar and alignment
   const showAvatar = !isUser; // User messages don't have an avatar on the left
@@ -201,40 +255,56 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, isLast, showRetryBut
               />
             ) : (
               <>
-                {/* Render text before tool_use block if it exists and tool_use is parsed */}
-                {parsedAiContent.toolCall && hasActualTextBeforeAi && (
+                {/* Render text content if exists */}
+                {hasActualTextBeforeAi && (
                   <MarkdownRenderer
                     content={parsedAiContent.textBefore.trim()}
                     className="mb-1"
                   />
                 )}
-                {/* Render ToolUseDisplay if a tool_use block is parsed (valid or not, ToolUseDisplay handles undefined) */}
-                {/* ToolUseDisplay will show loading/error if toolCall is undefined due to parsing error */}
-                {message.content.includes('```tool_use') && (
-                     <ToolUseDisplay
-                       toolCall={parsedAiContent.toolCall}
-                       onAccept={async ()=>{
-                         await toolCallAction('accept');
-                       }}
-                       onReject={async ()=>{
-                         await toolCallAction('reject');
-                       }}
-                       isLast={isLast}
-                     />
+                
+                {/* New OpenAI Tool Calls Format */}
+                {hasToolCalls && parsedAiContent.toolCalls?.map((toolCall, index) => (
+                  <ToolUseDisplay
+                    key={toolCall.id || index}
+                    toolCall={toolCall}
+                    onAccept={async () => {
+                      await toolCallAction('accept');
+                    }}
+                    onReject={async () => {
+                      await toolCallAction('reject');
+                    }}
+                    isLast={isLast}
+                  />
+                ))}
+                
+                {/* Legacy tool_use block format (for backwards compatibility) */}
+                {!hasToolCalls && hasLegacyToolUse && (
+                  <ToolUseDisplay
+                    toolCall={parsedAiContent.toolCall}
+                    onAccept={async () => {
+                      await toolCallAction('accept');
+                    }}
+                    onReject={async () => {
+                      await toolCallAction('reject');
+                    }}
+                    isLast={isLast}
+                  />
                 )}
-                {/* Render text after tool_use block if it exists and tool_use is parsed */}
+                
+                {/* Render text after tool_use block (legacy format) */}
                 {parsedAiContent.toolCall && hasActualTextAfterAi && (
                   <MarkdownRenderer
                     content={parsedAiContent.textAfter.trim()}
                     className="mt-1"
                   />
                 )}
-                {/* If no tool_use block was intended or if it was completely unparsable leading to no toolCall, render raw text */}
-                {/* This also covers AI messages that are purely text */}
-                {!message.content.includes('```tool_use') && (
-                     <MarkdownRenderer
-                       content={parsedAiContent.rawText}
-                     />
+                
+                {/* Pure text AI message (no tool calls) */}
+                {!hasToolCalls && !hasLegacyToolUse && (
+                  <MarkdownRenderer
+                    content={parsedAiContent.rawText}
+                  />
                 )}
               </>
             )}

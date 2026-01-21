@@ -57,12 +57,28 @@ export const CommandCenterProvider: React.FC<{ children: ReactNode }> = ({ child
         });
     };
 
-    // Auto accept logic - trigger when new AI message with tool_use appears
+    // Helper function to check if message has pending tool calls
+    const hasPendingToolCalls = (message: typeof messages[0]) => {
+        if (!message || message.sender !== 'ai') return false;
+        
+        // New format: check tool_calls field
+        if (message.tool_calls) {
+            const toolCalls = typeof message.tool_calls === 'string' 
+                ? JSON.parse(message.tool_calls) 
+                : message.tool_calls;
+            return Array.isArray(toolCalls) && toolCalls.length > 0;
+        }
+        
+        // Legacy format: check for ```tool_use``` in content
+        return message.content?.includes('```tool_use');
+    };
+
+    // Auto accept logic - trigger when new AI message with tool calls appears
     useEffect(() => {
         if (!isAutoAcceptEnabled || sendingMessage) return;
 
         const lastMessage = messages[messages.length - 1];
-        if (lastMessage?.sender === 'ai' && lastMessage.content.includes('```tool_use')) {
+        if (hasPendingToolCalls(lastMessage)) {
             // Small delay to ensure UI is ready
             const timeoutId = setTimeout(() => {
                 toolCallAction('accept');

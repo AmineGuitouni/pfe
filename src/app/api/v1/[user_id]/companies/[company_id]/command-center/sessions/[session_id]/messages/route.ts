@@ -17,6 +17,9 @@ export interface MessagesRouteResponse {
         content: string;
         created_at: string;
         type: 'text' | 'audio';
+        tool_calls?: any[];
+        tool_call_id?: string;
+        tool_name?: string;
     }[];
     error?: string;
 }
@@ -30,11 +33,29 @@ export async function GET(req: Request, { params }: { params: Params }) {
             return NextResponse.json({ error: 'Invalid company ID' }, { status: 400 });
         }
 
-        const { data, error } = await supabase
+        // Try to select with new columns first, fall back if they don't exist
+        let data: any[] | null = null;
+        let error: any = null;
+
+        const resultWithNewCols = await supabase
             .from('command_center_sessions_messages')
-            .select('id, session_id, sender, content, created_at, content_type')
+            .select('id, session_id, sender, content, created_at, content_type, tool_calls, tool_call_id, tool_name')
             .eq('session_id', session_id)
             .order('created_at', { ascending: true });
+
+        if (resultWithNewCols.error?.code === '42703') {
+            // Column doesn't exist, fall back to old columns
+            const resultOldCols = await supabase
+                .from('command_center_sessions_messages')
+                .select('id, session_id, sender, content, created_at, content_type')
+                .eq('session_id', session_id)
+                .order('created_at', { ascending: true });
+            data = resultOldCols.data;
+            error = resultOldCols.error;
+        } else {
+            data = resultWithNewCols.data;
+            error = resultWithNewCols.error;
+        }
         
         if (error) {
             console.error('Error fetching messages:', error);
@@ -46,14 +67,29 @@ export async function GET(req: Request, { params }: { params: Params }) {
         }
         
         return NextResponse.json({
-            data: data.map((message:any) => ({
-                id: message.id,
-                session_id: message.session_id,
-                sender: message.sender,
-                content: message.content,
-                created_at: message.created_at,
-                type: message.content_type || 'text'
-            }))
+            data: data.map((message:any) => {
+                // Parse tool_calls if it's a string
+                let toolCalls = message.tool_calls;
+                if (typeof toolCalls === 'string') {
+                    try {
+                        toolCalls = JSON.parse(toolCalls);
+                    } catch (e) {
+                        toolCalls = null;
+                    }
+                }
+
+                return {
+                    id: message.id,
+                    session_id: message.session_id,
+                    sender: message.sender,
+                    content: message.content,
+                    created_at: message.created_at,
+                    type: message.content_type || 'text',
+                    tool_calls: toolCalls || undefined,
+                    tool_call_id: message.tool_call_id || undefined,
+                    tool_name: message.tool_name || undefined
+                };
+            })
         }, { status: 200 });
     }
     catch (error) {

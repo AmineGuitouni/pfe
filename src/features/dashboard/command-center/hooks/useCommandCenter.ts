@@ -21,6 +21,10 @@ export interface SessionMessage {
     content: string;
     content_type: 'text' | 'audio';
     created_at: string;
+    // New fields for OpenAI tool calling
+    tool_calls?: string | any[]; // JSON string or parsed array of tool calls (for AI messages)
+    tool_call_id?: string; // ID of the tool call this message is responding to (for tool messages)
+    tool_name?: string; // Name of the tool (for tool messages)
 }
 
 export const useCommandCenter = () => {
@@ -167,8 +171,9 @@ export const useCommandCenter = () => {
         }
       }
 
-      const { response: aiResponse, response_id, user_message_id } = await response.json();
+      const { response: aiResponse, response_id, user_message_id, toolCalls } = await response.json();
       console.log('AI Response:', aiResponse);
+      console.log('Tool Calls:', toolCalls);
 
       // Update the user message with the actual ID from server and add AI response
       setMessages(prev => {
@@ -176,14 +181,15 @@ export const useCommandCenter = () => {
           msg.id === placeholderId ? { ...msg, id: user_message_id } : msg
         );
         
-        // Add AI response to the updated messages
+        // Add AI response to the updated messages (include tool_calls if present)
         return [...updatedMessages, {
           id: response_id,
           session_id: currentSessionId,
           sender: 'ai',
-          content: aiResponse,
+          content: aiResponse || '',
           content_type: 'text',
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
+          tool_calls: toolCalls || null
         }];
       });
       
@@ -221,28 +227,43 @@ export const useCommandCenter = () => {
         throw new Error('Failed to process tool call');
       }
 
-      const { response: aiResponse, error, toolCallMessage, response_id }: { response: string; error?: string, toolCallMessage:{id:string, content:string}, response_id:string } = await response.json();
+      const { response: aiResponse, error, toolCallMessage, response_id, toolCalls }: { response: string; error?: string, toolCallMessage?:{id:string, content:string}, response_id:string, toolCalls?: any[] } = await response.json();
 
       if (error) {
         throw new Error(error);
       }
 
-      // Add tool call message and AI response to existing messages
-      setMessages(prev => [...prev, {
-        id: toolCallMessage.id,
-        session_id: command_center_session,
-        sender: 'tool',
-        content: toolCallMessage.content,
-        content_type: 'text',
-        created_at: new Date().toISOString()
-      }, {
-        id: response_id,
-        session_id: command_center_session,
-        sender: 'ai',
-        content: aiResponse,
-        content_type: 'text',
-        created_at: new Date().toISOString()
-      }]);
+      // Build new messages array
+      const newMessages: SessionMessage[] = [];
+
+      // Add tool result message if present
+      if (toolCallMessage?.id) {
+        newMessages.push({
+          id: toolCallMessage.id,
+          session_id: command_center_session,
+          sender: 'tool',
+          content: toolCallMessage.content,
+          content_type: 'text',
+          created_at: new Date().toISOString()
+        });
+      }
+
+      // Add AI response message
+      if (response_id) {
+        newMessages.push({
+          id: response_id,
+          session_id: command_center_session,
+          sender: 'ai',
+          content: aiResponse || '',
+          content_type: 'text',
+          created_at: new Date().toISOString(),
+          tool_calls: toolCalls || null
+        });
+      }
+
+      if (newMessages.length > 0) {
+        setMessages(prev => [...prev, ...newMessages]);
+      }
 
     } catch (error) {
       console.error('Error processing tool call:', error);
@@ -337,7 +358,10 @@ export const useCommandCenter = () => {
         sender: message.sender,
         content: message.content,
         content_type: message.type,
-        created_at: message.created_at
+        created_at: message.created_at,
+        tool_calls: message.tool_calls,
+        tool_call_id: message.tool_call_id,
+        tool_name: message.tool_name
       }));
       
       if (process.env.NODE_ENV === 'development') {
@@ -359,8 +383,11 @@ export const useCommandCenter = () => {
     // Skip if currently sending a message to avoid unnecessary fetches
     if (sendingMessage) return;
     
+    // Skip if required data is not available yet
+    if (!command_center_session || !userSession?.user?.id || !company_id) return;
+    
     // Only fetch if this is a new session or initial load
-    if (command_center_session && initialLoadRef.current !== command_center_session) {
+    if (initialLoadRef.current !== command_center_session) {
       if (process.env.NODE_ENV === 'development') {
         console.log('🎯 Triggering fetchMessages for new session:', command_center_session);
       }
@@ -368,7 +395,7 @@ export const useCommandCenter = () => {
       initialLoadRef.current = command_center_session;
       fetchMessages();
     }
-  }, [command_center_session, fetchMessages, sendingMessage]);
+  }, [command_center_session, fetchMessages, sendingMessage, userSession?.user?.id, company_id]);
 
   // Clear messages when session changes to prevent showing old messages
   useEffect(() => {

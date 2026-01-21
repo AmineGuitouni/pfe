@@ -1,11 +1,12 @@
 export const fetchCache = "force-no-store"
-import { prepareAgentMessages } from "@/lib/ai/agent/helper/prepareMessages";
-import { agentResponseGeneration } from "@/lib/ai/agent/helper/agentGeneration";
+import { prepareAgentMessages, SaveMessage } from "@/lib/ai/agent/helper/prepareMessages";
+import { agentResponseGeneration, AgentGenerationResult } from "@/lib/ai/agent/helper/agentGeneration";
 import { getServerDBfromCompanyId } from "@/lib/database/externalServerSupabase";
 import { NextRequest, NextResponse } from "next/server";
 import { generateAIAudio } from "@/lib/ai/agent/helper/generateAIAudio";
 import { parseCommandToJson } from "@/features/dashboard/command-center/utils";
 import { predefinedCommands } from "@/features/dashboard/command-center/constants/commandsFunctions";
+import { OpenAIToolCall } from "@/lib/ai/agent/tools/toolSchema";
 
 interface Params {
     user_id: string;
@@ -188,9 +189,9 @@ export async function POST(req: NextRequest, { params }: { params: Params }) {
                 }
                 
                 // Generate AI response with enhanced error handling
-                let response;
+                let aiResult: AgentGenerationResult;
                 try {
-                    response = await agentResponseGeneration({
+                    aiResult = await agentResponseGeneration({
                         messages
                     });
                 } catch (generationError) {
@@ -224,21 +225,24 @@ export async function POST(req: NextRequest, { params }: { params: Params }) {
                     }, { status: 500 });
                 }
 
-                // Validate AI response
-                if (!response || (typeof response !== 'string' && typeof response !== 'object')) {
-                    console.error('Invalid AI response received:', { response, session_id });
+                const { content: response, toolCalls } = aiResult;
+
+                // Validate AI response - must have either content or tool calls
+                if (!response && (!toolCalls || toolCalls.length === 0)) {
+                    console.error('Invalid AI response received:', { response, toolCalls, session_id });
                     return NextResponse.json({ error: "Invalid AI response generated" }, { status: 500 });
                 }
 
                 // Save the complete AI message to the database with error handling
                 let savedAiMessage;
                 try {
+                    // First try without tool_calls column (for backwards compatibility)
                     const { data, error: saveError } = await supabase
                         .from('command_center_sessions_messages')
                         .insert({
                             session_id: session_id,
                             sender: 'ai',
-                            content: response,
+                            content: response || '',
                             created_at: new Date().toISOString()
                         })
                         .select('id')
@@ -255,12 +259,26 @@ export async function POST(req: NextRequest, { params }: { params: Params }) {
                     }
 
                     savedAiMessage = data;
+
+                    // Try to update with tool_calls if we have them (column may not exist)
+                    if (toolCalls && toolCalls.length > 0 && savedAiMessage?.id) {
+                        try {
+                            await supabase
+                                .from('command_center_sessions_messages')
+                                .update({ tool_calls: JSON.stringify(toolCalls) })
+                                .eq('id', savedAiMessage.id);
+                        } catch (e) {
+                            // Column might not exist yet, store tool calls in content as fallback
+                            console.log('Could not save tool_calls column, using fallback in content');
+                        }
+                    }
                 } catch (saveError) {
                     console.error('Failed to save AI message:', saveError);
                     
                     // Return the AI response even if saving fails, but log the error
                     return NextResponse.json({
                         response,
+                        toolCalls,
                         warning: "Response generated successfully but failed to save to database",
                         ...(savedMessage ? {
                             user_message_id: savedMessage.sender === 'user' ? savedMessage.id : null,
@@ -277,6 +295,7 @@ export async function POST(req: NextRequest, { params }: { params: Params }) {
                     console.error('AI message saved but no ID returned:', savedAiMessage);
                     return NextResponse.json({
                         response,
+                        toolCalls,
                         warning: "Response generated but message ID not available",
                         ...(savedMessage ? {
                             user_message_id: savedMessage.sender === 'user' ? savedMessage.id : null,
@@ -290,7 +309,7 @@ export async function POST(req: NextRequest, { params }: { params: Params }) {
 
                 let aiAudioResponse:string|undefined = undefined
                 const {audioResponse} = body;
-                if(audioResponse && typeof audioResponse === 'boolean' && audioResponse) {
+                if(audioResponse && typeof audioResponse === 'boolean' && audioResponse && response) {
                     aiAudioResponse = await generateAIAudio({
                         text: response,
                         baseUrl: "http://localhost:8000",
@@ -302,6 +321,7 @@ export async function POST(req: NextRequest, { params }: { params: Params }) {
                 
                 return NextResponse.json({
                     response,
+                    toolCalls,
                     response_id: savedAiMessage.id,
                     aiAudioResponse,
                     ...(savedMessage ? {

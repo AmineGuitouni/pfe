@@ -2,7 +2,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { ChatCompletionContentPart, ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import { getPrompt } from "../prompt";
 import { tools } from "../tools/toolsDefinitions";
-import { parseMessageWithToolUse } from "./parseToolFromAiRes";
+import { OpenAIToolCall, parseToolCalls } from "../tools/toolSchema";
 import { getBase64Audio, saveBase64Audio } from "@/lib/utils/saveBase64Audio";
 
 interface PrepareAgentMessagesParams {
@@ -14,6 +14,7 @@ interface PrepareAgentMessagesParams {
     userAudioPrompt?: string; // Base64 audio data
     userId?: string;
     companyId?: string;
+    pendingToolCalls?: OpenAIToolCall[]; // Tool calls from the last AI response that need to be executed
 }
 
 /**
@@ -43,12 +44,33 @@ function validateAudioData(audioBase64: string) {
     return { format, base64Data };
 }
 
-export async function prepareAgentMessages({supabase, chat_session, userPrompt, userAudioPrompt, rejectToolCall, acceptToolCall, companyId, userId}:PrepareAgentMessagesParams){
-    const {data, error} = await supabase
-    .from('command_center_sessions_messages')
-    .select('id, session_id, sender, content, created_at, content_type, storage_path')
-    .eq('session_id', chat_session)
-    .order('created_at', { ascending: true });
+export async function prepareAgentMessages({supabase, chat_session, userPrompt, userAudioPrompt, rejectToolCall, acceptToolCall, companyId, userId, pendingToolCalls}:PrepareAgentMessagesParams){
+    // First try with new columns, fall back to old columns if they don't exist
+    let data: any[] | null = null;
+    let error: any = null;
+
+    // Try fetching with new tool-related columns
+    const resultWithNewCols = await supabase
+        .from('command_center_sessions_messages')
+        .select('id, session_id, sender, content, created_at, content_type, storage_path, tool_calls, tool_call_id, tool_name')
+        .eq('session_id', chat_session)
+        .order('created_at', { ascending: true });
+
+    if (resultWithNewCols.error?.code === '42703') {
+        // Column doesn't exist - fall back to old schema
+        console.log('New tool columns not found, using legacy schema');
+        const resultLegacy = await supabase
+            .from('command_center_sessions_messages')
+            .select('id, session_id, sender, content, created_at, content_type, storage_path')
+            .eq('session_id', chat_session)
+            .order('created_at', { ascending: true });
+        
+        data = resultLegacy.data;
+        error = resultLegacy.error;
+    } else {
+        data = resultWithNewCols.data;
+        error = resultWithNewCols.error;
+    }
 
     if (error) {
         console.error("Error fetching messages:", error);
@@ -57,7 +79,16 @@ export async function prepareAgentMessages({supabase, chat_session, userPrompt, 
     }
 
     const messagePromises = data.map(async (message: any) => {
-        const role = message.sender === 'ai' ? 'assistant' : 'user'
+        // Determine the role based on sender
+        let role: 'assistant' | 'user' | 'tool';
+        if (message.sender === 'ai') {
+            role = 'assistant';
+        } else if (message.sender === 'tool') {
+            role = 'tool';
+        } else {
+            role = 'user';
+        }
+        
         let content: ChatCompletionContentPart | string;
         
         if(message.content_type === 'text'){
@@ -78,6 +109,29 @@ export async function prepareAgentMessages({supabase, chat_session, userPrompt, 
                 text: "Unsupported content type received."
             };
         }
+
+        // Handle assistant messages with tool_calls
+        if (role === 'assistant' && message.tool_calls) {
+            const toolCallsData = typeof message.tool_calls === 'string' 
+                ? JSON.parse(message.tool_calls) 
+                : message.tool_calls;
+            
+            return {
+                role,
+                content: content instanceof Object ? null : (content || null),
+                tool_calls: toolCallsData,
+            };
+        }
+
+        // Handle tool result messages
+        if (role === 'tool' && message.tool_call_id) {
+            return {
+                role,
+                tool_call_id: message.tool_call_id,
+                content: content instanceof Object ? JSON.stringify(content) : content,
+            };
+        }
+
         return {
             role,
             content: content instanceof Object ? [content] : content,
@@ -123,71 +177,77 @@ export async function prepareAgentMessages({supabase, chat_session, userPrompt, 
             }
         }
         
-        const lastContent = lastMessage.content as string
-        const tool = parseMessageWithToolUse(lastContent);
-        if(!tool){
-            console.log("About to throw error: No tool call found in the last assistant message.");
-            throw new Error("No tool call found in the last assistant message.");
+        // Check if the last assistant message has tool_calls (from OpenAI tool calling)
+        const lastAssistantMsg = lastMessage as any;
+        if (!lastAssistantMsg.tool_calls || lastAssistantMsg.tool_calls.length === 0) {
+            // No tool calls pending - this is a normal message, continue conversation
+            return {messagesHistory, savedMessage: null};
         }
+
+        const toolCalls = lastAssistantMsg.tool_calls as OpenAIToolCall[];
         
         if(rejectToolCall){
-            const content = "```tool_result\n" + JSON.stringify({
-                    name: tool.name,
-                    output: "Tool call rejected by user. Continue conversation without using tools.",
-                }) + "\n```"
-            messagesHistory.push({
-                role: "user",
-                content: content
-            });
-
-            const savedMessage = await SaveMessage(supabase, chat_session, 'tool', content);
-            return {messagesHistory, savedMessage};
+            // Add rejection messages for all tool calls using OpenAI tool message format
+            const toolResultMessages: ChatCompletionMessageParam[] = [];
+            for (const toolCall of toolCalls) {
+                const rejectMessage: ChatCompletionMessageParam = {
+                    role: "tool",
+                    tool_call_id: toolCall.id,
+                    content: JSON.stringify({
+                        success: false,
+                        error: "Tool call rejected by user. Continue conversation without using tools."
+                    })
+                };
+                toolResultMessages.push(rejectMessage);
+                await SaveToolResultMessage(supabase, chat_session, toolCall.id, toolCall.function.name, {
+                    success: false,
+                    error: "Tool call rejected by user"
+                });
+            }
+            messagesHistory.push(...toolResultMessages);
+            return {messagesHistory, savedMessage: null};
         }
 
         if(acceptToolCall){
-            const toolToCall = tools[tool.name];
-            if(!toolToCall){
-                const content = "```tool_result\n" + JSON.stringify({
-                    name: tool.name,
-                    output: `The tool ${tool.name} is not available. Please use a different tool or continue the conversation without using any tools.`,
-                }) + "\n```"
-                messagesHistory.push({
-                    role: "user",
-                    content: content
-                });
+            // Execute all tool calls and add results using OpenAI tool message format
+            const toolResultMessages: ChatCompletionMessageParam[] = [];
+            const parsedToolCalls = parseToolCalls(toolCalls);
+
+            for (const parsedCall of parsedToolCalls) {
+                const toolToCall = tools[parsedCall.name];
                 
-                const savedMessage = await SaveMessage(supabase, chat_session, 'tool', content);
-                return {messagesHistory, savedMessage};
-            }
-
-            // Extract parameter values from the nested structure
-            const extractedParams: Record<string, any> = {};
-            if (tool.parameters) {
-                for (const [key, param] of Object.entries(tool.parameters)) {
-                    if (typeof param === 'object' && param !== null && 'value' in param) {
-                        extractedParams[key] = param.value;
-                    } else {
-                        extractedParams[key] = param;
-                    }
+                if(!toolToCall){
+                    const errorResult = {
+                        success: false,
+                        error: `The tool ${parsedCall.name} is not available. Please use a different tool or continue the conversation without using any tools.`
+                    };
+                    const errorMessage: ChatCompletionMessageParam = {
+                        role: "tool",
+                        tool_call_id: parsedCall.id,
+                        content: JSON.stringify(errorResult)
+                    };
+                    toolResultMessages.push(errorMessage);
+                    await SaveToolResultMessage(supabase, chat_session, parsedCall.id, parsedCall.name, errorResult);
+                    continue;
                 }
+
+                // Execute the tool with parsed arguments
+                const toolCallOutput = await toolToCall(parsedCall.arguments);
+                const resultMessage: ChatCompletionMessageParam = {
+                    role: "tool",
+                    tool_call_id: parsedCall.id,
+                    content: JSON.stringify(toolCallOutput)
+                };
+                toolResultMessages.push(resultMessage);
+                await SaveToolResultMessage(supabase, chat_session, parsedCall.id, parsedCall.name, toolCallOutput);
             }
 
-            const toolCallOutput = await toolToCall(extractedParams);
-            const content = "```tool_result\n" + JSON.stringify({
-                name: tool.name,
-                output: toolCallOutput,
-            }) + "\n```"
-            messagesHistory.push({
-                role: "user",
-                content: content
-            });
-
-            const savedMessage = await SaveMessage(supabase, chat_session, 'tool', content);
-            return {messagesHistory, savedMessage};
+            messagesHistory.push(...toolResultMessages);
+            return {messagesHistory, savedMessage: null};
         }
         
-        console.log("About to throw error: No acceptToolCall or rejectToolCall flag provided for the last assistant message.");
-        throw new Error("No acceptToolCall or rejectToolCall flag provided for the last assistant message.");
+        console.log("About to throw error: No acceptToolCall or rejectToolCall flag provided for pending tool calls.");
+        throw new Error("No acceptToolCall or rejectToolCall flag provided for pending tool calls.");
     }
     
     return {messagesHistory, savedMessage: null}
@@ -199,7 +259,8 @@ export async function SaveMessage(
     sender: 'user' | 'ai' | 'tool',
     message: string,
     contentType: 'text' | 'audio' = 'text',
-    base64AudioData?: string
+    base64AudioData?: string,
+    toolCalls?: OpenAIToolCall[]
 ){
     let content = message;
     let storagePath: string | null = null;
@@ -239,6 +300,19 @@ export async function SaveMessage(
         .select('id')
         .single();
 
+    // If new columns exist and we have tool calls, update the message with tool_calls
+    if (!messageError && toolCalls && toolCalls.length > 0) {
+        try {
+            await supabase
+                .from('command_center_sessions_messages')
+                .update({ tool_calls: JSON.stringify(toolCalls) })
+                .eq('id', savedMessage.id);
+        } catch (e) {
+            // Column might not exist yet, ignore silently
+            console.log('Could not save tool_calls (column may not exist):', e);
+        }
+    }
+
     if (messageError) {
         console.error('Error saving last message:', messageError);
         console.log("About to throw messageError:", messageError);
@@ -252,8 +326,73 @@ export async function SaveMessage(
         content: content,
         content_type: contentType,
         storage_path: storagePath,
+        tool_calls: toolCalls || null,
         created_at: new Date().toISOString()
     }
+}
+
+/**
+ * Save a tool result message to the database (for OpenAI tool calling format)
+ * Falls back to legacy format if new columns don't exist
+ */
+export async function SaveToolResultMessage(
+    supabase: SupabaseClient<any, "public", any>,
+    session_id: string,
+    tool_call_id: string,
+    tool_name: string,
+    result: any
+) {
+    // First try to insert with new columns
+    let savedMessage: any = null;
+    let messageError: any = null;
+
+    const resultWithNewCols = await supabase
+        .from('command_center_sessions_messages')
+        .insert({
+            session_id: session_id,
+            sender: 'tool',
+            content: JSON.stringify(result),
+            content_type: 'text',
+            tool_call_id: tool_call_id,
+            tool_name: tool_name,
+            created_at: new Date().toISOString()
+        })
+        .select('id')
+        .single();
+
+    if (resultWithNewCols.error?.code === '42703') {
+        // Column doesn't exist - fall back to legacy format
+        console.log('New tool columns not found for insert, using legacy format');
+        const legacyContent = "```tool_result\n" + JSON.stringify({
+            name: tool_name,
+            output: result,
+        }) + "\n```";
+        
+        const resultLegacy = await supabase
+            .from('command_center_sessions_messages')
+            .insert({
+                session_id: session_id,
+                sender: 'tool',
+                content: legacyContent,
+                content_type: 'text',
+                created_at: new Date().toISOString()
+            })
+            .select('id')
+            .single();
+        
+        savedMessage = resultLegacy.data;
+        messageError = resultLegacy.error;
+    } else {
+        savedMessage = resultWithNewCols.data;
+        messageError = resultWithNewCols.error;
+    }
+
+    if (messageError) {
+        console.error('Error saving tool result message:', messageError);
+        throw messageError;
+    }
+
+    return savedMessage;
 }
 
 /**
